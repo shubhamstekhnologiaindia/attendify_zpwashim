@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -43,6 +44,9 @@ export const userController = {
             res.status(500).json({ message: "Error registering user", error: err.message });
         }
     },
+
+
+
 
     login: async (req, res) => {
         try {

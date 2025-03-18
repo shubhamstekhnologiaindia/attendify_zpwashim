@@ -1,6 +1,7 @@
 import express from "express";
 import db from "./utils/database.js";
 import userRoute from "./src/modules/Users/routes/userRoute.js"; 
+import dotenv from "dotenv";
 
 const app = express();
 app.use(express.json());
