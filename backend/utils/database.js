@@ -1,22 +1,69 @@
-import { Sequelize } from "sequelize";
-import dotenv from "dotenv";
+import mysql from 'mysql2/promise';
 
-dotenv.config(); // Load environment variables
+import dotenv from 'dotenv';
+ 
+dotenv.config();
+ 
+// Create a connection pool for the database
 
-const db = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASS, {
-    host: process.env.DB_HOST,
-    dialect: "mysql",
-    logging: false, // Set to `console.log` to debug queries
+const pool = mysql.createPool({
+
+    host: 'localhost',
+
+    user:  'root',
+
+    password:  'Password@0157',
+
+    database: 'attendify_zp_washim',
+
+    waitForConnections: true,
+
+    connectionLimit: 10,
+
+    queueLimit: 0,
+
 });
+ 
+// Test the database connection
 
-// ✅ Check if Database is Connected
 (async () => {
-    try {
-        await db.authenticate();
-        console.log("✅ Database is connected successfully!");
-    } catch (error) {
-        console.error("❌ Database connection failed:", error);
-    }
-})();
 
-export default db;
+    try {
+
+        const connection = await pool.getConnection();
+
+        console.log('Connected to the database');
+
+        connection.release(); // Release the connection back to the pool
+
+    } catch (err) {
+
+        console.error('Database connection failed:', err.message);
+
+        process.exit(1); // Exit the process if connection fails
+
+    }
+
+})();
+ 
+const query = async (sql, values = []) => {
+
+    try {
+
+        const [results] = await pool.query(sql, values);
+
+        return results;
+
+    } catch (err) {
+
+        console.error('Error executing query:', err.message);
+
+        throw err;
+
+    }
+
+};
+ 
+export { query };
+
+ 
