@@ -3,7 +3,7 @@ import cors from 'cors';
  
 // import {route} from './modules/Users/Routes/userRoute.js';
 
-import Route from "./src/modules/Users/routes/userRoute.js";
+import Route from "./src/modules/Auth/routes/AuthRoute.js";
 
 
 // import route from './..Routes/route.js';
