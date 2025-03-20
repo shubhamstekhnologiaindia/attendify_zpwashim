@@ -1,18 +1,18 @@
 import mysql from 'mysql2/promise';
 
 import dotenv from 'dotenv';
- 
+
 dotenv.config();
- 
+
 // Create a connection pool for the database
 
 const pool = mysql.createPool({
 
     host: 'localhost',
 
-    user:  'root',
+    user: 'root',
 
-    password:  'Password@0157',
+    password: 'Password@0157',
 
     database: 'attendify_zp_washim',
 
@@ -23,8 +23,8 @@ const pool = mysql.createPool({
     queueLimit: 0,
 
 });
- 
-// Test the database connection
+
+
 
 (async () => {
 
@@ -45,7 +45,7 @@ const pool = mysql.createPool({
     }
 
 })();
- 
+
 const query = async (sql, values = []) => {
 
     try {
@@ -63,7 +63,7 @@ const query = async (sql, values = []) => {
     }
 
 };
- 
+
 export { query };
 
- 
+
