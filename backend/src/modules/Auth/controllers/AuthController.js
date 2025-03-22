@@ -88,12 +88,12 @@ export const AuthController  = {
 
             // Generate JWT Token
             const token = jwt.sign(
-                { id: user.id, mob_no: user.mob_no },
+                { id: user.id, role_id:user.role_id },
                 process.env.JWT_SECRET,
                 { algorithm: "HS256", expiresIn: "1h" }
             );
 
-            res.json({ message: "Login successful", token, user });
+            res.json({ message: "Login successful", token });
         } catch (err) {
             res.status(500).json({ message: "Error logging in", error: err.message });
         }
@@ -112,11 +112,12 @@ export const AuthController  = {
                 taluka_id, 
                 sanstha_id, 
                 village_id, 
+                device_id, 
                 cader_id 
             } = req.body;
     
             // Validate required fields
-            if (!name || !email || !password || !mob_no || !role_id || !department_id || !district_id || !taluka_id || !sanstha_id || !village_id || !cader_id) {
+            if (!name || !email || !password || !mob_no || !role_id || !department_id || !district_id || !taluka_id || !sanstha_id || !village_id || !cader_id || !device_id) {
                 return res.status(400).json({ message: "All fields are required" });
             }
     
@@ -128,8 +129,8 @@ export const AuthController  = {
     
             // Call the stored procedure
             const result = await query(
-                "CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                [name, email, hashedPassword, mob_no, role_id, department_id, district_id, taluka_id, sanstha_id, village_id, cader_id, createdAt]
+                "CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?)",
+                [name, email, hashedPassword, mob_no, role_id, department_id, district_id, taluka_id, sanstha_id, village_id, cader_id, createdAt, device_id]
             );
     
             // Log the result to debug
