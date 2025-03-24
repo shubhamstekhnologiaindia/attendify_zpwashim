@@ -5,7 +5,7 @@ dotenv.config();
 const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
-    password: 'Password@0157',
+    password: '',
     database: 'attendify_zp_washim',
     waitForConnections: true,
     connectionLimit: 10,
