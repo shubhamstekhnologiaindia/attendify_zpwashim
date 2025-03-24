@@ -20,6 +20,37 @@ export const validateLogin = [
         .notEmpty().withMessage("Password is required")
         .isLength({ min: 6 }).withMessage("Password must be at least 6 characters long"),
 ];
+export const validateRegister = [
+    check("first_name")
+        .trim()
+        .notEmpty().withMessage("First name is required")
+        .matches(/^[A-Za-z]+$/).withMessage("First name must contain only letters, no spaces or special characters"),
+
+    check("middle_name")
+        .trim()
+        .notEmpty().withMessage("Middle name is required")
+        .matches(/^[A-Za-z]+$/).withMessage("Middle name must contain only letters, no spaces or special characters"),
+
+    check("last_name")
+        .trim()
+        .notEmpty().withMessage("Last name is required")
+        .matches(/^[A-Za-z]+$/).withMessage("Last name must contain only letters, no spaces or special characters"),
+
+    check("mob_no")
+        .trim()
+        .notEmpty().withMessage("Mobile number is required")
+        .isNumeric().withMessage("Mobile number must be numeric")
+        .isLength({ min: 10, max: 10 }).withMessage("Mobile number must be exactly 10 digits"),
+
+    check("password")
+        .notEmpty().withMessage("Password is required")
+        .isLength({ min: 6 }).withMessage("Password must be at least 6 characters long")
+        .matches(/[A-Z]/).withMessage("Password must contain at least one uppercase letter")
+        .matches(/[a-z]/).withMessage("Password must contain at least one lowercase letter")
+        .matches(/\d/).withMessage("Password must contain at least one number")
+        .matches(/[\W_]/).withMessage("Password must contain at least one special character")
+        .not().matches(/\s/).withMessage("Password must not contain spaces"),
+];
 
 export const AuthController  = {
     // login: async (req, res) => {
@@ -99,60 +130,114 @@ export const AuthController  = {
         }
     },
            
-    register: async (req, res) => {
-        try {
-            const { 
-                name, 
-                email, 
-                password, 
-                mob_no, 
-                role_id, 
-                department_id, 
-                district_id, 
-                taluka_id, 
-                sanstha_id, 
-                village_id, 
-                device_id, 
-                cader_id 
-            } = req.body;
-    
-            // Validate required fields
-            if (!name || !email || !password || !mob_no || !role_id || !department_id || !district_id || !taluka_id || !sanstha_id || !village_id || !cader_id || !device_id) {
-                return res.status(400).json({ message: "All fields are required" });
-            }
-    
-            // Hash the password before storing
-            const hashedPassword = await bcrypt.hash(password, 8);
-    
-            // Get epoch timestamp
-            const createdAt = Math.floor(Date.now() / 1000);
-    
-            // Call the stored procedure
-            const result = await query(
-                "CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?)",
-                [name, email, hashedPassword, mob_no, role_id, department_id, district_id, taluka_id, sanstha_id, village_id, cader_id, createdAt, device_id]
-            );
-    
-            // Log the result to debug
-            console.log(result);
-    
-            // Check if the user was inserted successfully
-            if (result && result.affectedRows > 0) {
-                return res.status(201).json({ message: "User registered successfully" });
-            } else {
-                return res.status(400).json({ message: "Failed to register user" });
-            }
-    
-        } catch (err) {
-            // Handle specific error for duplicate email
-            if (err.message.includes("Email already in use")) {
-                return res.status(400).json({ message: "Email already in use" });
-            }
-            // Handle other errors
-            res.status(500).json({ message: "Error registering user", error: err.message });
-        }
-    }
+        // register: async (req, res) => {
+        //     try {
+        //         const { 
+        //             first_name, middle_name, last_name, mob_no, email, 
+        //             department_id, office_location_id, taluka_id, village_id, 
+        //             cader_id, password, role_id, device_id 
+        //         } = req.body;
+        
+        //         // Validate required fields (email is optional)
+        //         if (!first_name || !middle_name || !last_name || !mob_no || 
+        //             !department_id || !office_location_id || !taluka_id || !village_id || 
+        //             !cader_id || !password || !role_id || !device_id) {
+        //             return res.status(400).json({ message: "All required fields must be provided" });
+        //         }
+        
+        //         // Hash the password before storing
+        //         const hashedPassword = await bcrypt.hash(password, 8);
+        
+        //         // Get current timestamp
+        //         const createdAt = new Date();
+        
+        //         // Call the stored procedure
+        //         const result = await query(
+        //             "CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        //             [
+        //                 first_name, middle_name, last_name, mob_no, email || null, // Store email if provided, otherwise NULL
+        //                 department_id, office_location_id, taluka_id, village_id,
+        //                 cader_id, hashedPassword, role_id, device_id, createdAt
+        //             ]
+        //         );
+        
+        //         // Log result for debugging
+        //         console.log(result);
+        
+        //         // Check if user was inserted successfully
+        //         if (result.affectedRows > 0) {
+        //             return res.status(201).json({ message: "User registered successfully" });
+        //         } else {
+        //             return res.status(400).json({ message: "Failed to register user" });
+        //         }
+        
+        //     } catch (err) {
+        //         // Handle duplicate email error
+        //         if (err.message.includes("Duplicate entry")) {
+        //             return res.status(400).json({error: err.message });
+        //         }
+        //         // Handle other errors
+        //         res.status(500).json({ message: "Error registering user", error: err.message });
+        //     }
+        // }
 
+        register: async (req, res) => {
+            try {
+                // Check for validation errors
+                const errors = validationResult(req);
+                if (!errors.isEmpty()) {
+                    return res.status(400).json({ errors: errors.array() });
+                }
+        
+                const { 
+                    first_name, middle_name, last_name, mob_no, email, 
+                    department_id, office_location_id, taluka_id, village_id, 
+                    cader_id, password, role_id, device_id 
+                } = req.body;
+        
+                // Validate required fields (email is optional)
+                if (!first_name || !middle_name || !last_name || !mob_no || 
+                    !department_id || !office_location_id || !taluka_id || !village_id || 
+                    !cader_id || !password || !role_id || !device_id) {
+                    return res.status(400).json({ message: "All required fields must be provided" });
+                }
+        
+                // Hash the password before storing
+                const hashedPassword = await bcrypt.hash(password, 8);
+        
+                // Get current timestamp
+                const createdAt = new Date();
+        
+                // Call the stored procedure
+                const result = await query(
+                    "CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    [
+                        first_name, middle_name, last_name, mob_no, email || null, // Store email if provided, otherwise NULL
+                        department_id, office_location_id, taluka_id, village_id,
+                        cader_id, hashedPassword, role_id, device_id, createdAt
+                    ]
+                );
+        
+                // Log result for debugging
+                console.log(result);
+        
+                // Check if user was inserted successfully
+                if (result.affectedRows > 0) {
+                    return res.status(201).json({ message: "User registered successfully" });
+                } else {
+                    return res.status(400).json({ message: "Failed to register user" });
+                }
+        
+            } catch (err) {
+                // Handle duplicate email error
+                if (err.message.includes("Duplicate entry")) {
+                    return res.status(400).json({error: err.message });
+                }
+                // Handle other errors
+                res.status(500).json({ message: "Error registering user", error: err.message });
+            }
+        }
+        
 };
 
 
