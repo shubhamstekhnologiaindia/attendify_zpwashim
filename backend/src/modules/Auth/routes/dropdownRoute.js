@@ -5,5 +5,6 @@ const router = express.Router();
 
 
 router.get("/show/departments", authMiddleware,MasterDropdown.getDepartments);
-
+router.get("/office-locations/:departmentId", authMiddleware,MasterDropdown.getOfficeLocationsByDepartmentId);
+router.get("/show-cadres/:officeLocationId",authMiddleware,MasterDropdown.getCadresByOfficeLocationId);
 export default router;
