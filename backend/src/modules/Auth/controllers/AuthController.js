@@ -42,8 +42,7 @@ export const AuthController = {
         }
     },
 
-           
-   
+    
     register: async (req, res) => {
         try {
             const { 
