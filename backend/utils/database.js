@@ -1,7 +1,6 @@
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 dotenv.config();
-// Create a connection pool for the database
 
 const pool = mysql.createPool({
     host: 'localhost',
@@ -17,10 +16,10 @@ const pool = mysql.createPool({
     try {
         const connection = await pool.getConnection();
         console.log('Connected to the database');
-        connection.release(); // Release the connection back to the pool
+        connection.release(); 
     } catch (err) {
         console.error('Database connection failed:', err.message);
-        process.exit(1); // Exit the process if connection fails
+        process.exit(1); 
     }
 })();
 
