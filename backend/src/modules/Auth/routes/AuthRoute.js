@@ -1,22 +1,16 @@
 import express from "express";
-// import  {authMiddleware }  from "../../../Middleware/authMiddleware.js";
-
-
-import {authMiddleware} from "../../../Middleware/authMiddleware.js";
-import { AuthController } from "../controllers/AuthController.js";
-
+// import {authMiddleware} from "../../../Middleware/authMiddleware.js";
+import { AuthController,validateLogin } from "../controllers/AuthController.js";
 
 const router = express.Router();
 
 
-router.post("/login", AuthController.login);
+router.post("/login", validateLogin,AuthController .login);
 
-
-
-
-// User routes
 router.post("/register", AuthController.register);
 
 
 
-export default router; // ✅ Ensure this line exists
+export default router; 
+
+

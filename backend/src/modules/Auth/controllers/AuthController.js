@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { check, validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import mysql from "mysql2/promise";
 import {query} from "../../../../utils/database.js";
@@ -8,9 +9,66 @@ import dotenv from "dotenv";
 dotenv.config();
 
 
-export const AuthController = {
+// Validation Middleware
+export const validateLogin = [
+    check("mob_no")
+        .trim()
+        .notEmpty().withMessage("Mobile number is required")
+        .isNumeric().withMessage("Mobile number must be numeric")
+        .isLength({ min: 10, max: 10 }).withMessage("Mobile number must be 10 digits"),
+    check("password")
+        .notEmpty().withMessage("Password is required")
+        .isLength({ min: 6 }).withMessage("Password must be at least 6 characters long"),
+];
+
+export const AuthController  = {
+    // login: async (req, res) => {
+    //     try {
+    //         const { mob_no, password } = req.body;
+
+    //         // Check if user exists
+    //         const users = await query("SELECT * FROM users WHERE mob_no = ?", [mob_no]);
+
+    //         if (users.length === 0) {
+    //             return res.status(404).json({ message: "User not found" });
+    //         }
+
+    //         const user = users[0];
+
+    //         // Verify the password
+    //         const isMatch = await bcrypt.compare(password, user.password);
+    //         if (!isMatch) {
+    //             return res.status(401).json({ message: "Invalid credentials" });
+    //         }
+
+    //         // Generate JWT Token
+    //         // const token = jwt.sign(
+    //         //     { id: user.id, mob_no: user.mob_no },
+    //         //     process.env.JWT_SECRET,
+    //         //     { expiresIn: "1h" }
+    //         // );
+
+    //         const token = jwt.sign(
+    //             { id: user.id, mob_no: user.mob_no },
+    //             process.env.JWT_SECRET,
+    //             { algorithm: "HS256", expiresIn: "1h" }
+    //         );
+            
+
+    //         res.json({ message: "Login successful", token, user });
+    //     } catch (err) {
+    //         res.status(500).json({ message: "Error logging in", error: err.message });
+
+    //     }
+    // },
     login: async (req, res) => {
         try {
+            // Validate Request
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+
             const { mob_no, password } = req.body;
 
             // Check if user exists
@@ -27,22 +85,20 @@ export const AuthController = {
             if (!isMatch) {
                 return res.status(401).json({ message: "Invalid credentials" });
             }
-            
+
+            // Generate JWT Token
             const token = jwt.sign(
                 { id: user.id, role_id:user.role_id },
                 process.env.JWT_SECRET,
                 { algorithm: "HS256", expiresIn: "1h" }
             );
-            
 
             res.json({ message: "Login successful", token });
         } catch (err) {
             res.status(500).json({ message: "Error logging in", error: err.message });
-
         }
     },
-
-    
+           
     register: async (req, res) => {
         try {
             const { 
@@ -96,6 +152,7 @@ export const AuthController = {
             res.status(500).json({ message: "Error registering user", error: err.message });
         }
     }
+
 };
 
 
