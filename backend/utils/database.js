@@ -1,17 +1,20 @@
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
+// Create a connection pool for the database
 const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'attendify_zp_washim',
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'attendify_zp_washim',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
 });
 
+// Test the database connection
 (async () => {
     try {
         const connection = await pool.getConnection();
@@ -23,6 +26,7 @@ const pool = mysql.createPool({
     }
 })();
 
+// Define a generic query function
 const query = async (sql, values = []) => {
     try {
         const [results] = await pool.query(sql, values);
@@ -33,6 +37,4 @@ const query = async (sql, values = []) => {
     }
 };
 
-export { query };
-
-
+export { pool, query };

@@ -1,8 +1,7 @@
-import { query } from "../../../../utils/database.js"; // Import query function
+import { query } from "../../../../utils/database.js"; 
 
 export const recordAttendance = async (user_id, in_time, out_time, out_reason) => {
     try {
-        // Execute the stored procedure
         await query("CALL record_attendance(?, ?, ?, ?)", [user_id, in_time, out_time, out_reason]);
 
         return {
