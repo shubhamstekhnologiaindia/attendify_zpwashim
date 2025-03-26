@@ -19,7 +19,7 @@ app.use('/api/auth', AuthRoute);
 app.use('/api', dropdownRoute);
 app.use('/api/attendance', attendanceRoutes);
  
-const PORT = process.env.PORT || 3008;
+const PORT = process.env.PORT || 3004
  
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

@@ -18,7 +18,6 @@ export const MasterDropdown = {
         }
     },
 
-
     getOfficeLocationsByDepartmentId: async (req, res) => {
         try {
             const { departmentId } = req.params;
@@ -30,8 +29,7 @@ export const MasterDropdown = {
                 });
             }
 
-            const locations = await masterDropdownService.getOfficeLocationsByDepartmentId(departmentId);
-
+            const locations = await masterDropdownService.getOfficeLocationsByDepartmentId(departmentId)
             res.status(200).json({
                 success: true,
                 data: locations
@@ -84,6 +82,7 @@ export const MasterDropdown = {
     getVillagesByTalukaId: async (req, res) => {
         try {
             const { talukaId } = req.params;
+            
 
             if (!talukaId) {
                 return res.status(400).json({ success: false, message: "Taluka ID is required" });
