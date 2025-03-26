@@ -2,8 +2,6 @@ import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
-// Create a connection pool for the database
 const pool = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
@@ -13,8 +11,6 @@ const pool = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0,
 });
-
-// Test the database connection
 (async () => {
     try {
         const connection = await pool.getConnection();
@@ -25,8 +21,6 @@ const pool = mysql.createPool({
         process.exit(1); 
     }
 })();
-
-// Define a generic query function
 const query = async (sql, values = []) => {
     try {
         const [results] = await pool.query(sql, values);
