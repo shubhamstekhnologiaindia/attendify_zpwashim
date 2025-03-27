@@ -4,9 +4,10 @@ import {MasterDropdown} from "../controllers/masterDropdownController.js";
 const router = express.Router();
 
 
-router.get("/show/departments", authMiddleware,MasterDropdown.getDepartments);
-router.get("/office-locations/:departmentId", authMiddleware,MasterDropdown.getOfficeLocationsByDepartmentId);
-router.get("/show-cadres/:officeLocationId",authMiddleware,MasterDropdown.getCadresByOfficeLocationId);router.get('/show/talukas',authMiddleware, MasterDropdown.getTalukas);
-router.get("/show/villages/:talukaId", authMiddleware, MasterDropdown.getVillagesByTalukaId);
+router.get("/show/departments",MasterDropdown.getDepartments);
+router.get("/office-locations/:departmentId", MasterDropdown.getOfficeLocationsByDepartmentId);
+router.get("/show-cadres/:officeLocationId",MasterDropdown.getCadresByOfficeLocationId);
+router.get('/show/talukas', MasterDropdown.getTalukas);
+router.get("/show/villages/:talukaId",  MasterDropdown.getVillagesByTalukaId);
 
 export default router;

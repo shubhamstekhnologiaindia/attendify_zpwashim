@@ -1,132 +1,14 @@
 import bcrypt from "bcryptjs";
-import { check, validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
-import mysql from "mysql2/promise";
 import { query } from "../../../../utils/database.js";
 import dotenv from "dotenv";
+import { encrypt, decrypt } from '../../../../utils/crypto.js';
 
 dotenv.config();
 
-// Validation Middleware
-export const validateLogin = [
-  check("mob_no")
-    .trim()
-    .notEmpty()
-    .withMessage("Mobile number is required")
-    .isNumeric()
-    .withMessage("Mobile number must be numeric")
-    .isLength({ min: 10, max: 10 })
-    .withMessage("Mobile number must be 10 digits"),
-  check("password")
-    .notEmpty()
-    .withMessage("Password is required")
-    .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters long"),
-];
-export const validateRegister = [
-  check("first_name")
-    .trim()
-    .notEmpty()
-    .withMessage("First name is required")
-    .matches(/^[A-Za-z]+$/)
-    .withMessage(
-      "First name must contain only letters, no spaces or special characters"
-    ),
-
-  check("middle_name")
-    .trim()
-    .notEmpty()
-    .withMessage("Middle name is required")
-    .matches(/^[A-Za-z]+$/)
-    .withMessage(
-      "Middle name must contain only letters, no spaces or special characters"
-    ),
-
-  check("last_name")
-    .trim()
-    .notEmpty()
-    .withMessage("Last name is required")
-    .matches(/^[A-Za-z]+$/)
-    .withMessage(
-      "Last name must contain only letters, no spaces or special characters"
-    ),
-
-  check("mob_no")
-    .trim()
-    .notEmpty()
-    .withMessage("Mobile number is required")
-    .isNumeric()
-    .withMessage("Mobile number must be numeric")
-    .isLength({ min: 10, max: 10 })
-    .withMessage("Mobile number must be exactly 10 digits"),
-
-  check("password")
-    .notEmpty()
-    .withMessage("Password is required")
-    .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters long")
-    .matches(/[A-Z]/)
-    .withMessage("Password must contain at least one uppercase letter")
-    .matches(/[a-z]/)
-    .withMessage("Password must contain at least one lowercase letter")
-    .matches(/\d/)
-    .withMessage("Password must contain at least one number")
-    .matches(/[\W_]/)
-    .withMessage("Password must contain at least one special character")
-    .not()
-    .matches(/\s/)
-    .withMessage("Password must not contain spaces"),
-];
-
 export const AuthController = {
-  login: async (req, res) => {
-    try {
-      // Validate Request
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-
-      const { mob_no, password } = req.body;
-
-      // Check if user exists
-      const users = await query("SELECT * FROM users WHERE mob_no = ?", [
-        mob_no,
-      ]);
-
-      if (users.length === 0) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      const user = users[0];
-
-      // Verify the password
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      // Generate JWT Token
-      const token = jwt.sign(
-        { id: user.id, role_id: user.role_id },
-        process.env.JWT_SECRET,
-        { algorithm: "HS256", expiresIn: "1h" }
-      );
-
-      res.json({ message: "Login successful", token });
-    } catch (err) {
-      res.status(500).json({ message: "Error logging in", error: err.message });
-    }
-  },
-
   register: async (req, res) => {
     try {
-      // Check for validation errors
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-
       const {
         first_name,
         middle_name,
@@ -143,41 +25,42 @@ export const AuthController = {
         device_id,
       } = req.body;
 
-      // Validate required fields (email is optional)
-      if (
-        !first_name ||
-        !middle_name ||
-        !last_name ||
-        !mob_no ||
-        !department_id ||
-        !office_location_id ||
-        !taluka_id ||
-        !village_id ||
-        !cader_id ||
-        !password ||
-        !role_id ||
-        !device_id
-      ) {
-        return res
-          .status(400)
-          .json({ message: "All required fields must be provided" });
+      // Encrypt mobile number for checking existence
+      const encryptedMobNo = encrypt(mob_no);
+
+      // Check if user exists using encrypted mobile number
+      const existingUser = await query(
+        "SELECT id FROM users WHERE mob_no = ?",
+        [encryptedMobNo]
+      );
+      
+      if (existingUser.length > 0) {
+        return res.status(400).json({ 
+          message: "User already exists with this mobile number" 
+        });
       }
 
-      // Hash the password before storing
+      // Hash password
       const hashedPassword = await bcrypt.hash(password, 8);
 
-      // Get current timestamp
-      const createdAt = new Date();
+      // Encrypt all sensitive data
+      const encryptedData = {
+        first_name: encrypt(first_name),
+        middle_name: encrypt(middle_name),
+        last_name: encrypt(last_name),
+        mob_no: encryptedMobNo,
+        email: email ? encrypt(email) : null,
+      };
 
-      // Call the stored procedure
+      // Store encrypted data in database
       const result = await query(
-        "CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO users (first_name, middle_name, last_name, mob_no, email, department_id, office_location_id, taluka_id, village_id, cader_id, password, role_id, device_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
         [
-          first_name,
-          middle_name,
-          last_name,
-          mob_no,
-          email || null,
+          encryptedData.first_name,
+          encryptedData.middle_name,
+          encryptedData.last_name,
+          encryptedData.mob_no,
+          encryptedData.email,
           department_id,
           office_location_id,
           taluka_id,
@@ -186,30 +69,78 @@ export const AuthController = {
           hashedPassword,
           role_id,
           device_id,
-          createdAt,
         ]
       );
 
-      // Log result for debugging
-      console.log(result);
-
-      // Check if user was inserted successfully
       if (result.affectedRows > 0) {
-        return res
-          .status(201)
-          .json({ message: "User registered successfully" });
+        return res.status(201).json({ 
+          message: "User registered successfully" 
+        });
       } else {
-        return res.status(400).json({ message: "Failed to register user" });
+        return res.status(400).json({ 
+          message: "Failed to register user" 
+        });
       }
     } catch (err) {
-      // Handle duplicate email error
-      if (err.message.includes("Duplicate entry")) {
-        return res.status(400).json({ error: err.message });
+      console.error("Registration Error:", err.message);
+      res.status(500).json({ 
+        message: "Error registering user", 
+        error: err.message 
+      });
+    }
+  },
+
+  login: async (req, res) => {
+    try {
+      const { mob_no, password } = req.body;
+      const encryptedMobNo = encrypt(mob_no);
+
+      // Fetch user based on encrypted mobile number
+      const user = await query("SELECT * FROM users WHERE mob_no = ?", [encryptedMobNo]);
+
+      if (user.length === 0) {
+        return res.status(400).json({ message: "Invalid mobile number or password" });
       }
-      // Handle other errors
-      res
-        .status(500)
-        .json({ message: "Error registering user", error: err.message });
+
+      const userData = user[0];
+
+      // Decrypt user data
+      const decryptedUser = {
+        id: userData.id,
+        first_name: decrypt(userData.first_name),
+        middle_name: decrypt(userData.middle_name),
+        last_name: decrypt(userData.last_name),
+        mob_no: decrypt(userData.mob_no),
+        email: userData.email ? decrypt(userData.email) : null,
+        department_id: userData.department_id,
+        office_location_id: userData.office_location_id,
+        taluka_id: userData.taluka_id,
+        village_id: userData.village_id,
+        cader_id: userData.cader_id,
+        role_id: userData.role_id,
+      };
+
+      // Compare password
+      const isPasswordMatch = await bcrypt.compare(password, userData.password);
+      if (!isPasswordMatch) {
+        return res.status(400).json({ message: "Invalid mobile number or password" });
+      }
+
+      // Generate token
+      const token = jwt.sign(
+        { id: decryptedUser.id, role_id: decryptedUser.role_id },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      return res.status(200).json({
+        message: "Login successful",
+        token,
+        user: decryptedUser,
+      });
+    } catch (err) {
+      console.error("Login Error:", err.message);
+      res.status(500).json({ message: "Error logging in", error: err.message });
     }
   },
 };
