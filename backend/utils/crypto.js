@@ -4,8 +4,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const algorithm = "aes-256-cbc";
-const secretKey = process.env.ENCRYPTION_KEY; // Must be 32 characters
-const iv = crypto.randomBytes(16); // Initialization vector
+const secretKey = process.env.ENCRYPTION_KEY; 
+const iv = crypto.randomBytes(16); 
 
 export const encrypt = (text) => {
   if (!text) return null;
@@ -14,14 +14,14 @@ export const encrypt = (text) => {
   let encrypted = cipher.update(text, "utf8", "hex");
   encrypted += cipher.final("hex");
 
-  return iv.toString("hex") + ":" + encrypted; // Store IV with encrypted data
+  return iv.toString("hex") + ":" + encrypted; 
 };
 
 export const decrypt = (text) => {
   if (!text) return null;
 
   const parts = text.split(":");
-  if (parts.length !== 2) return null; // Ensure valid format
+  if (parts.length !== 2) return null; 
   
   const iv = Buffer.from(parts[0], "hex");
   const encryptedText = parts[1];

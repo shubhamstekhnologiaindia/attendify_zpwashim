@@ -25,10 +25,8 @@ export const AuthController = {
         device_id,
       } = req.body;
 
-      // Encrypt mobile number for checking existence
       const encryptedMobNo = encrypt(mob_no);
 
-      // Check if user exists using encrypted mobile number
       const existingUser = await query(
         "SELECT id FROM users WHERE mob_no = ?",
         [encryptedMobNo]
@@ -40,10 +38,8 @@ export const AuthController = {
         });
       }
 
-      // Hash password
       const hashedPassword = await bcrypt.hash(password, 8);
 
-      // Encrypt all sensitive data
       const encryptedData = {
         first_name: encrypt(first_name),
         middle_name: encrypt(middle_name),
@@ -52,7 +48,6 @@ export const AuthController = {
         email: email ? encrypt(email) : null,
       };
 
-      // Store encrypted data in database
       const result = await query(
         "INSERT INTO users (first_name, middle_name, last_name, mob_no, email, department_id, office_location_id, taluka_id, village_id, cader_id, password, role_id, device_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
         [
