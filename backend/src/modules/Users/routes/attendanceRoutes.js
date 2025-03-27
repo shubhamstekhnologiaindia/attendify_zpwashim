@@ -6,7 +6,7 @@ import {authMiddleware} from "../../../middleware/authMiddleware.js";
 const router = express.Router();
 
 // router.post("/record",authMiddleware, handleAttendance);
-router.get("/calculate-attendance", AttendanceController.CalculateAttendanceHours);
+router.get("/calculate-attendance", authMiddleware,AttendanceController.CalculateAttendanceHours);
 
 export default router; // ✅ Use default export
 
