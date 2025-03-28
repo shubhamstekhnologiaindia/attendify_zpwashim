@@ -1,21 +1,25 @@
 import { query } from "../../../../utils/database.js"; 
 import moment from "moment-timezone";
 export const AttendanceService = {
- recordAttendance : async (user_id, in_time, out_time, out_reason) => {
-    try {
-       
-        await query("CALL record_attendance(?, ?, ?, ?)", [user_id, in_time, out_time, out_reason]);
 
-        return {
-            status: true,
-            message: out_time ? "Out time recorded successfully" : "In time recorded successfully"
-        };
-    } catch (error) {
-        console.error("Error executing procedure:", error);
-        throw { status: false, message: "Database error" };
-    }
-},
-  calculateTotalHoursForDate: async (user_id) => {
+
+    recordAttendance: async (user_id, inOutId, epochTime) => {
+        try {
+            await query("CALL MarkAttendance(?, ?, ?)", [user_id, inOutId, epochTime]);
+
+            return {
+                status: true,
+                message: inOutId === 3 ? "Out time recorded successfully" : "In time recorded successfully"
+            };
+        } catch (error) {
+            if (error.sqlState === '45000') {
+                throw { status: false, message: error.sqlMessage };
+            }
+            throw { status: false, message: "Database error" };
+        }
+    },
+
+calculateTotalHoursForDate: async (user_id) => {
     try {
         if (!user_id) {
             throw new Error("user_id is required");
