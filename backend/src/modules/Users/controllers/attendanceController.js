@@ -5,28 +5,23 @@ import { getEpochTime } from "../../../../utils/epochTime.js";
 
 export const AttendanceController = {
 
-        recordAttendance: async (req, res) => {
-          try {
-            const { user_id, in_out_id } = req.body;
-            
-            // Validate required fields
-            if (!user_id || !in_out_id) {
-              return res.status(400).json({ status: false, message: "user_id and inOutId are required" });
-            }
-            
-            // Generate current epoch time using your utility function
-            const epochTime = getEpochTime(); // This should return the epoch time in the expected format
-            
-            // Call the service with the new parameters
-            const result = await AttendanceService.recordAttendance(user_id, in_out_id, epochTime);
-            
-            return res.status(200).json(result);
-          } catch (error) {
-            console.error("Error:", error.message);
-            return res.status(500).json({ status: false, message: "Internal server error" });
-          }
-        },
-      
+  recordAttendance: async (req, res) => {
+    try {
+        const { user_id, in_out_id } = req.body;
+
+        if (!user_id || !in_out_id) {
+            return res.status(400).json({ status: false, message: "user_id and inOutId are required" });
+        }
+
+        const epochTime = getEpochTime();
+        console.log(epochTime)
+
+        const result = await AttendanceService.recordAttendance(user_id, in_out_id, epochTime);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ status: false, message: error.message });
+    }
+},
 
     CalculateAttendanceHours: async (req, res) => {
         try {

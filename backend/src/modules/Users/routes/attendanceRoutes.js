@@ -7,7 +7,7 @@ import {authMiddleware} from "../../../middleware/authMiddleware.js";
 const router = express.Router();
 
 
-router.post("/Record_Attendance", AttendanceController.recordAttendance);
+router.post("/Mark_Attendance", AttendanceController.recordAttendance);
 
 router.post("/record",authMiddleware, AttendanceController.recordAttendance);
 router.get("/calculate-attendance", AttendanceController.CalculateAttendanceHours);
