@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import { query } from "../../../../utils/database.js";
 import dotenv from "dotenv";
 import { encrypt, decrypt } from '../../../../utils/crypto.js';
-
 dotenv.config();
 
 export const AuthController = {
