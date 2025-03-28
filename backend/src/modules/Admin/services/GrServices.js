@@ -16,7 +16,16 @@ export const GRService = {
             throw new Error(error.message);
         }
     },
-
+    updateGR: async (gr_id, dept_id, subject, description, file_upload) => {
+        try {
+            const sql = `CALL UpdateGR(?, ?, ?, ?, ?)`; // Call stored procedure
+            const values = [gr_id, dept_id, subject, description, file_upload];
+            const result = await query(sql, values);
+            return result;
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    },
     getGRByDepartment: async (dept_id) => {
         try {
             const sql = `SELECT * FROM tbl_gr WHERE dept_id = ?`;
@@ -34,5 +43,19 @@ export const GRService = {
         } catch (error) {
             throw new Error(error.message);
         }
+    },
+     deleteGRService: async (gr_id) => {
+        try {
+            const sql = `DELETE FROM tbl_gr WHERE id = ?`;
+            const values = [gr_id];
+            const result = await query(sql, values); // Remove destructuring
+    
+            console.log("Delete Query Result:", result); // Debugging
+    
+            return result;
+        } catch (error) {
+            throw new Error(error.message);
+        }
     }
+   
 };
