@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
  
-import Route from "./src/modules/Auth/routes/AuthRoute.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -19,11 +18,7 @@ app.use(cors());
 app.use(express.json());
  
 app.use('/api/auth', AuthRoute);
-app.use('/api', dropdownRoute);
-app.use('/api', hodRoutes);
-
-app.use('/api/attendance', attendanceRoutes);
-app.use('/api/gr', GrRoutes);
+app.use('/api', dropdownRoute, hodRoutes,attendanceRoutes,GrRoutes);
 
 const PORT = process.env.PORT || 3008;
  

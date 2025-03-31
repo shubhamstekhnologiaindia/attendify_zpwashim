@@ -9,7 +9,6 @@ const router = express.Router();
 
 router.post("/Mark_Attendance", AttendanceController.recordAttendance);
 
-router.post("/record",authMiddleware, AttendanceController.recordAttendance);
-router.get("/calculate-attendance", AttendanceController.CalculateAttendanceHours);
-
+// router.post("/record",authMiddleware, AttendanceController.recordAttendance);
+router.get("/Fetch_Attendance/:employee_id", AttendanceController.getUserAttendance);
 export default router; 

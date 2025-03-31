@@ -1,21 +1,49 @@
 import moment from "moment-timezone";
-import { AttendanceService } from "../services/attendanceService.js"; 
-
+import { AttendanceService } from "../services/attendanceService.js";
 import { getEpochTime } from "../../../../utils/epochTime.js";
 
-export const AttendanceController = {
+const convertEpochToIST = (epochTime) => {
+  if (!epochTime || epochTime == "0") return null;
+  return moment
+    .unix(epochTime)
+    .tz("Asia/Kolkata")
+    .format("YYYY-MM-DD HH:mm:ss");
+};
+// helper function
+const calculateWorkingHours = (
+  att_morning_in_time,
+  att_afternoon_in_time,
+  att_out_time
+) => {
+  if (!att_out_time) return "00:00:00";
 
+  let inTime = att_morning_in_time || att_afternoon_in_time;
+  if (!inTime) return "00:00:00";
+
+  let startTime = moment.unix(inTime);
+  let endTime = moment.unix(att_out_time);
+
+  let duration = moment.duration(endTime.diff(startTime));
+
+  let hours = String(Math.floor(duration.asHours())).padStart(2, "0");
+  let minutes = String(duration.minutes()).padStart(2, "0");
+  let seconds = String(duration.seconds()).padStart(2, "0");
+
+  return `${hours}:${minutes}:${seconds}`;
+};
+
+export const AttendanceController = {
   recordAttendance: async (req, res) => {
     try {
         const { user_id, in_out_id } = req.body;
-
+ 
         if (!user_id || !in_out_id) {
             return res.status(400).json({ status: false, message: "user_id and inOutId are required" });
         }
-
+ 
         const epochTime = getEpochTime();
         console.log(epochTime)
-
+ 
         const result = await AttendanceService.recordAttendance(user_id, in_out_id, epochTime);
         return res.status(200).json(result);
     } catch (error) {
@@ -23,25 +51,54 @@ export const AttendanceController = {
     }
 },
 
-    CalculateAttendanceHours: async (req, res) => {
-        try {
-            const { user_id } = req.body; // ✅ Get user_id from body
+  getUserAttendance: async (req, res) => {
+    try {
+      const { employee_id } = req.params;
+      if (!employee_id) {
+        return res.status(400).json({ error: "Employee ID is required" });
+      }
 
-            if (!user_id) {
-                return res.status(400).json({ status: false, message: "user_id is required" });
-            }
+      const attendanceData = await AttendanceService.getUserAttendance(
+        employee_id
+      );
+      if (!attendanceData?.length) {
+        return res.status(404).json({ message: "No attendance records found" });
+      }
 
-            // Call the service
-            const records = await AttendanceService.calculateTotalHoursForDate(user_id);
+      const formattedData = attendanceData.map((record) => {
+        const att_morning_in_time = record.att_morning_in_time
+          ? record.att_morning_in_time
+          : null;
+        const att_afternoon_in_time = record.att_afternoon_in_time
+          ? record.att_afternoon_in_time
+          : null;
+        const att_out_time = record.att_out_time ? record.att_out_time : null;
 
-            return res.status(200).json({ 
-                status: true, 
-                message: "Total working hours calculated successfully", 
-                data: records 
-            });
+        return {
+          attendance_date:
+            record.attendance_date ||
+            moment().tz("Asia/Kolkata").format("YYYY-MM-DD"),
+          att_morning_in_time: convertEpochToIST(att_morning_in_time),
+          att_afternoon_in_time: convertEpochToIST(att_afternoon_in_time),
+          att_out_time: convertEpochToIST(att_out_time),
+          total_working_hours: calculateWorkingHours(
+            att_morning_in_time,
+            att_afternoon_in_time,
+            att_out_time
+          ),
+        };
+      });
 
-        } catch (error) {
-            return res.status(500).json({ status: false, message: error.message });
-        }
+      res.status(200).json({
+        success: true,
+        message: "Attendance records fetched successfully",
+        data: formattedData,
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: "Internal server error",
+        details: error.message,
+      });
     }
+  },
 };
