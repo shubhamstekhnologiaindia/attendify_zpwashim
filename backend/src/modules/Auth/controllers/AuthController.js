@@ -87,10 +87,65 @@ export const AuthController = {
       });
     }
   },
+// old running code
+  // login: async (req, res) => {
+  //   try {
+  //     const { mob_no, password } = req.body;
+
+  //     // Encrypt mob_no deterministically for lookup
+  //     const encryptedMobNo = encryptDeterministic(mob_no);
+  //     if (!encryptedMobNo) {
+  //       return res.status(400).json({ message: "Invalid mobile number" });
+  //     }
+
+  //     // Fetch user based on encrypted mobile number
+  //     const user = await query("SELECT * FROM users WHERE mob_no = ?", [
+  //       encryptedMobNo,
+  //     ]);
+
+  //     if (user.length === 0) {
+  //       return res.status(400).json({ message: "Invalid mobile number or password" });
+  //     }
+
+  //     const userData = user[0];
+
+  //     // Decrypt user data (non-deterministic fields)
+  //     const decryptedUser = {
+  //       id: userData.id,
+        
+  //       role_id: userData.role_id,
+  //     };
+
+  //     // Compare password
+  //     const isPasswordMatch = await bcrypt.compare(password, userData.password);
+  //     if (!isPasswordMatch) {
+  //       return res.status(400).json({ message: "Invalid mobile number or password" });
+  //     }
+
+  //     // Generate JWT token
+  //     const token = jwt.sign(
+  //       { id: decryptedUser.id, role_id: decryptedUser.role_id },
+  //       process.env.JWT_SECRET,
+  //       { expiresIn: "7d" }
+  //     );
+
+  //     return res.status(200).json({
+  //       message: "Login successful",
+  //       token,
+        
+  //     });
+  //   } catch (err) {
+  //     console.error("Login Error:", err.message);
+  //     return res.status(500).json({
+  //       message: "Error logging in",
+  //       error: err.message,
+  //     });
+  //   }
+  // },
 
   login: async (req, res) => {
     try {
-      const { mob_no, password } = req.body;
+      const { mob_no, password, fcm_token } = req.body; // Accept FCM token from request
 
       // Encrypt mob_no deterministically for lookup
       const encryptedMobNo = encryptDeterministic(mob_no);
@@ -109,31 +164,20 @@ export const AuthController = {
 
       const userData = user[0];
 
-      // Decrypt user data (non-deterministic fields)
-      const decryptedUser = {
-        id: userData.id,
-        first_name: decrypt(userData.first_name),
-        middle_name: userData.middle_name ? decrypt(userData.middle_name) : null,
-        last_name: decrypt(userData.last_name),
-        mob_no: decryptDeterministic(userData.mob_no), // Deterministic decryption
-        email: userData.email ? decrypt(userData.email) : null,
-        department_id: userData.department_id,
-        office_location_id: userData.office_location_id,
-        taluka_id: userData.taluka_id,
-        village_id: userData.village_id,
-        cader_id: userData.cader_id,
-        role_id: userData.role_id,
-      };
-
       // Compare password
       const isPasswordMatch = await bcrypt.compare(password, userData.password);
       if (!isPasswordMatch) {
         return res.status(400).json({ message: "Invalid mobile number or password" });
       }
 
+      // Update FCM token in database
+      if (fcm_token) {
+        await query("UPDATE users SET fcm_token = ? WHERE id = ?", [fcm_token, userData.id]);
+      }
+
       // Generate JWT token
       const token = jwt.sign(
-        { id: decryptedUser.id, role_id: decryptedUser.role_id },
+        { id: userData.id, role_id: userData.role_id },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
@@ -141,7 +185,6 @@ export const AuthController = {
       return res.status(200).json({
         message: "Login successful",
         token,
-        user: decryptedUser,
       });
     } catch (err) {
       console.error("Login Error:", err.message);
@@ -151,4 +194,5 @@ export const AuthController = {
       });
     }
   },
+
 };

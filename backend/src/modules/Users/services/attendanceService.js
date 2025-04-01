@@ -34,7 +34,4 @@ export const AttendanceService = {
         }
     },
 
-    
-
-
 };

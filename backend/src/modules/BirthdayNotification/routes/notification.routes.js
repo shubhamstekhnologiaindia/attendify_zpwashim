@@ -1,7 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const { sendBirthdayNotification } = require("./notification.controller");
+// import express from "express";
 
-router.post("/send-birthday-notification", sendBirthdayNotification);
+// import { BirthdayController  } from "../controllers/notification.controller.js";
+// const router = express.Router();
 
-module.exports = router;
+
+// router.get("/send-birthday-notifications", BirthdayController.sendBirthdayNotification);
+// export default router; 
