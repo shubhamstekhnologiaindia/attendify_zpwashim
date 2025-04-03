@@ -10,5 +10,10 @@ const router = express.Router();
 router.post("/Mark_Attendance", AttendanceController.recordAttendance);
 
 // router.post("/record",authMiddleware, AttendanceController.recordAttendance);
+
 router.get("/Fetch_Attendance/:employee_id", AttendanceController.getUserAttendance);
+
+router.post("/Mark_Offline_Attendance", AttendanceController.recordOfflineAttendance);
+
 export default router; 
+

@@ -18,6 +18,4 @@ export const UserService = {
             res.status(500).json({ success: false, message: "Server error" });
         }
     }
-
-
 }

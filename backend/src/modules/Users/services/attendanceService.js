@@ -32,18 +32,30 @@ export const AttendanceService = {
             throw error;
         }
     },
-    recordBulkAttendance: async (user_id, attendance) => {
+
+    recordOfflineAttendance: async (user_id, attendance) => {
+      
         const { morning_in_time = null, afternoon_in_time = null, out_time = null } = attendance;
+      
     
+        if (morning_in_time !== null && typeof morning_in_time !== 'number') {
+          throw new Error("morning_in_time must be a number");
+        }
+        if (afternoon_in_time !== null && typeof afternoon_in_time !== 'number') {
+          throw new Error("afternoon_in_time must be a number");
+        }
+        if (out_time !== null && typeof out_time !== 'number') {
+          throw new Error("out_time must be a number");
+        }
+      
         try {
-          // Call the stored procedure with the provided parameters
-          await query("CALL MarkOfflineAttendance(?, ?, ?, ?)", [
+          await query("CALL MarkOfflineAttendance1(?, ?, ?, ?)", [
             user_id,
             morning_in_time,
             afternoon_in_time,
             out_time
           ]);
-    
+      
           return {
             status: true,
             message: "Attendance recorded successfully"
@@ -54,7 +66,7 @@ export const AttendanceService = {
           }
           throw new Error("Database error");
         }
-      },
-};
+      }
+    }
 
 
