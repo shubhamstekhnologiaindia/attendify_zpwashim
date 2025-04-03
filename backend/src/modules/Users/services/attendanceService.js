@@ -20,7 +20,6 @@ export const AttendanceService = {
         }
     },
 
-
     getUserAttendance: async (employee_id) => {
         try {
             if (!employee_id) {
