@@ -3,14 +3,9 @@
 # dependencies
 /node_modules
 
-
-#backend
-/frontend
-
-
 # production
 /build
 
-# .env
+.env
 
 /FireBaseConfig.json
