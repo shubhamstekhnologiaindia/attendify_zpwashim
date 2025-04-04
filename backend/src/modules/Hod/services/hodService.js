@@ -45,4 +45,36 @@ export const hodService = {
       return { error: "Database error", details: err.message };
     }
   },
+  updateEmployeeStatus: async (hod_id, employee_id, status) => {
+    try {
+      // Check if the HOD ID is valid by querying the taluka table
+      const checkHodQuery = `SELECT id FROM taluka WHERE hod_id = ?`;
+      const checkHod = await query(checkHodQuery, [hod_id]);
+  
+      if (!checkHod || checkHod.length === 0) {
+        return { message: "This user is not a valid HOD" };
+      }
+  
+      // Check if employee belongs to the specified HOD (via taluka_id)
+      const checkEmployeeQuery = `
+        SELECT id FROM users WHERE id = ? AND taluka_id IN (SELECT id FROM taluka WHERE hod_id = ?)
+      `;
+      const checkEmployee = await query(checkEmployeeQuery, [employee_id, hod_id]);
+  
+      if (!checkEmployee || checkEmployee.length === 0) {
+        return { message: "Employee not found or doesn't belong to the HOD" };
+      }
+  
+      // Update employee status (1 = approved, 2 = rejected)
+      const updateStatusQuery = `
+        UPDATE users SET status = ? WHERE id = ?
+      `;
+      await query(updateStatusQuery, [status, employee_id]);
+  
+      return { message: status === 1 ? "Employee status approved successfully" : "Employee status rejected successfully" };
+    } catch (err) {
+      console.error("Database error: ", err.message);
+      return { error: "Database error", details: err.message };
+    }
+  },
 };
