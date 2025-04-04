@@ -11,6 +11,7 @@ import hodRoutes from "./src/modules/Hod/routes/hodroutes.js";
 import GrRoutes from "./src/modules/Admin/routes/GrRoutes.js";
 
 import SendmsgRoute from "./src/modules/Admin/routes/MsgRoute.js";
+import  HqRoutes from "./src/modules/Admin/routes/HqRoutes.js";
 
 
 // import notificationRoutes from "./src/modules/BirthdayNotification/routes/notification.routes.js";
@@ -21,7 +22,7 @@ app.use(cors());
 app.use(express.json());
  
 app.use('/api/auth', AuthRoute);
-app.use('/api', dropdownRoute, hodRoutes,attendanceRoutes,GrRoutes,SendmsgRoute);
+app.use('/api', dropdownRoute, hodRoutes,attendanceRoutes,GrRoutes,SendmsgRoute,HqRoutes);
 
 const PORT = 3001
  
