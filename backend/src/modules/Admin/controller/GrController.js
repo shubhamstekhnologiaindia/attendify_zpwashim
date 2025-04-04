@@ -61,18 +61,14 @@ export const GRController = {
     getGRByDepartment: async (req, res) => {
         try {
             const { dept_id } = req.params;
-    
-            if (!dept_id) {
-                return res.status(400).json({ status: false, message: "Department ID is required" });
-            }
-    
+
             const grRecords = await GRService.getGRByDepartment(dept_id);
-    
+
             return res.status(200).json({ 
                 status: true, 
                 data: grRecords 
             });
-    
+
         } catch (error) {
             return res.status(500).json({ status: false, message: error.message });
         }

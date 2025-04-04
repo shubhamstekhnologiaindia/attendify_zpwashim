@@ -17,8 +17,7 @@ export const MasterDropdown = {
       });
     }
   },
-
-  getOfficeLocationsByDepartmentId: async (req, res) => {
+  getHeadquartersAndOfficeLocations: async (req, res) => {
     try {
       const { departmentId } = req.params;
 
@@ -29,18 +28,26 @@ export const MasterDropdown = {
         });
       }
 
-      const locations =
-        await masterDropdownService.getOfficeLocationsByDepartmentId(
-          departmentId
-        );
+      // Fetch all headquarters
+      const headquarters = await masterDropdownService.getHeadquarters();
+
+      // Fetch office locations by department ID
+      const officeLocations = await masterDropdownService.getOfficeLocationsByDepartmentId(departmentId);
+
+       // Fetch all sansthas
+    const sansthas = await masterDropdownService.getAllSansthas();
 
       res.status(200).json({
         success: true,
-        data: locations,
+        data: {
+          headquarters: headquarters.length > 0 ? headquarters : [],
+          officeLocations: officeLocations.length > 0 ? officeLocations : [],
+          sansthas: sansthas.length > 0 ? sansthas : [],
+        },
       });
     } catch (error) {
       console.error(
-        "Error in MasterDropdown - getOfficeLocationsByDepartmentId:",
+        "Error in MasterDropdown - getHeadquartersAndOfficeLocations:",
         error
       );
       res.status(500).json({
@@ -49,6 +56,7 @@ export const MasterDropdown = {
       });
     }
   },
+ 
 
   getCadresByOfficeLocationId: async (req, res) => {
     try {

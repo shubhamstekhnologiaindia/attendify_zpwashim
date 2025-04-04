@@ -8,7 +8,7 @@ export const GRService = {
     
     insertGR: async (dept_id, subject, description, file_upload) => {
         try {
-            const sql = `CALL StoreGR(?, ?, ?, ?)`; // Call stored procedure
+            const sql = `CALL StoreGR(?, ?, ?, ?)`; 
             const values = [dept_id, subject, description, file_upload];
             const result = await query(sql, values);
             return result;
@@ -18,7 +18,7 @@ export const GRService = {
     },
     updateGR: async (gr_id, dept_id, subject, description, file_upload) => {
         try {
-            const sql = `CALL UpdateGR(?, ?, ?, ?, ?)`; // Call stored procedure
+            const sql = `CALL UpdateGR(?, ?, ?, ?, ?)`; 
             const values = [gr_id, dept_id, subject, description, file_upload];
             const result = await query(sql, values);
             return result;
@@ -28,18 +28,24 @@ export const GRService = {
     },
     getGRByDepartment: async (dept_id) => {
         try {
-            const sql = `SELECT * FROM tbl_gr WHERE dept_id = ?`;
-            const result = await query(sql, [dept_id]);
-    
-            // Trim image path to get only filename (remove 'gr_uploads/')
-            const formattedResult = result.map(gr => ({
+            let sql = `SELECT * FROM tbl_gr`;
+            let params = [];
+
+            if (dept_id) {
+                sql += ` WHERE dept_id = ?`;
+                params.push(dept_id);
+            }
+
+            const result = await query(sql, params);
+
+           
+            return result.map(gr => ({
                 ...gr,
                 file_upload: gr.file_upload 
-                    ? path.basename(gr.file_upload.replace(/\\/g, '/').replace(/^gr_uploads\//, '').trim()) 
+                    ? `uploads/upload_gr/${path.basename(gr.file_upload)}`
                     : null
             }));
-    
-            return formattedResult;
+
         } catch (error) {
             throw new Error(error.message);
         }

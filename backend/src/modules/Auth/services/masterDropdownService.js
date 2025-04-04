@@ -20,24 +20,80 @@ export const masterDropdownService = {
     },
 
 
-    getOfficeLocationsByDepartmentId: async (departmentId) => {
-        try {
-            const sql = `
-                SELECT id,loc_name_marathi 
-                FROM office_location 
-                WHERE dept_id = ?
-            `;
+    // getOfficeLocationsByDepartmentId: async (departmentId) => {
+    //     try {
+    //         const sql = `
+    //             SELECT id,loc_name_marathi 
+    //             FROM office_location 
+    //             WHERE dept_id = ?
+    //         `;
             
-            const results = await query(sql, [departmentId]);
+    //         const results = await query(sql, [departmentId]);
 
-            const locations = results.map(row =>({ id: row.id, loc_name_marathi: row.loc_name_marathi }));
+    //         const locations = results.map(row =>({ id: row.id, loc_name_marathi: row.loc_name_marathi }));
 
-            return locations;
+    //         return locations;
+    //     } catch (error) {
+    //         console.error("Error in masterDropdownService - getOfficeLocationsByDepartmentId:", error);
+    //         throw error; 
+    //     }
+    // },
+
+    getHeadquarters: async () => {
+        try {
+          const sql = `SELECT head_id, name FROM tbl_headquarter ORDER BY head_id ASC`;
+          const results = await query(sql);
+    
+          return results.map(row => ({
+            head_id: row.head_id,
+            name: row.name,
+          }));
         } catch (error) {
-            console.error("Error in masterDropdownService - getOfficeLocationsByDepartmentId:", error);
-            throw error; 
+          console.error("Error in masterDropdownService - getHeadquarters:", error);
+          throw error;
         }
-    },
+      },
+
+      getAllSansthas: async () => {
+        try {
+          const sql = `
+            SELECT id, sanstha_name, taluka_id, sansta_location 
+            FROM sanstha 
+            ORDER BY id ASC
+          `;
+          const results = await query(sql);
+          return results.map(row => ({
+            id: row.id,
+            sanstha_name: row.sanstha_name,
+            taluka_id: row.taluka_id,
+            sansta_location: row.sansta_location,
+          }));
+        } catch (error) {
+          console.error("Error in masterDropdownService - getAllSansthas:", error);
+          throw error;
+        }
+      },
+    
+      // Fetch office locations by department ID
+      getOfficeLocationsByDepartmentId: async (departmentId) => {
+        try {
+          const sql = `
+              SELECT id, loc_name_marathi 
+              FROM office_location 
+              WHERE dept_id = ?
+          `;
+    
+          const results = await query(sql, [departmentId]);
+    
+          return results.map(row => ({
+            id: row.id,
+            loc_name_marathi: row.loc_name_marathi,
+          }));
+        } catch (error) {
+          console.error("Error in masterDropdownService - getOfficeLocationsByDepartmentId:", error);
+          throw error;
+        }
+      },
 
     getCadresByOfficeLocationId: async (officeLocationId) => {
         try {
