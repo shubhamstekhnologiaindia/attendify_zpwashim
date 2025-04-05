@@ -117,4 +117,20 @@ export const MasterDropdown = {
         .json({ success: false, message: "Internal server error" });
     }
   },
+
+  getCadresByDeptId: async (req, res) => {
+    try {
+        const { deptId } = req.params;
+
+        if (!deptId) {
+            return res.status(400).json({ status: false, message: "deptId is required" });
+        }
+
+        const result = await masterDropdownService.getCadresByDeptId(deptId);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ status: false, message: error.message });
+    }
+}
+
 };

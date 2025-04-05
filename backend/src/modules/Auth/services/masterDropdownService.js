@@ -102,5 +102,22 @@ export const masterDropdownService = {
             console.error("Error in VillageService - getVillagesByTalukaId:", error);
             throw error;
         }
+    },
+    getCadresByDeptId: async (deptId) => {
+        try {
+            const result = await query("CALL GetCadresByDeptId(?)", [deptId]);
+            // result[0] contains the actual data
+            return {
+                status: true,
+                data: result[0],
+                message: "Cadres fetched successfully"
+            };
+        } catch (error) {
+            console.error("Error fetching cadres:", error);
+            throw {
+                status: false,
+                message: "Database error while fetching cadres"
+            };
+        }
     }
 };
