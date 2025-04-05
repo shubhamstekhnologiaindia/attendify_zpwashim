@@ -29,8 +29,7 @@ export const hodService = {
         return { message: "No Employees found with role_id 103" };
       }
 
-      console.log("Employee Results: ", employeeResults); // Debugging line
-
+      console.log("Employee Results: ", employeeResults); 
       const decryptedEmployees = employeeResults.map((employee) => ({
         id: employee.id,
         first_name: decrypt(employee.first_name) || "N/A",

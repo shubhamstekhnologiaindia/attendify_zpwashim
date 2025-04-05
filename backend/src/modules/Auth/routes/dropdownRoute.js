@@ -8,6 +8,6 @@ router.get("/show/departments",MasterDropdown.getDepartments);
 router.get("/show-cadres/:officeLocationId",MasterDropdown.getCadresByOfficeLocationId);
 router.get('/show/talukas', MasterDropdown.getTalukas);
 router.get("/show/villages/:talukaId",  MasterDropdown.getVillagesByTalukaId);
-router.get("/office-locations/:departmentId", MasterDropdown.getHeadquartersAndOfficeLocations);
+router.get("/office-locations/:departmentId", MasterDropdown.getHeadquartersZpSanstha);
 
 export default router;
