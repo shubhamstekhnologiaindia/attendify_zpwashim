@@ -1,4 +1,4 @@
-import { GRService } from "../services/GrServices.js";
+import { GRService } from "../services/grServices.js";
 import path from "path";
 import multer from "multer";
 import fs from "fs";

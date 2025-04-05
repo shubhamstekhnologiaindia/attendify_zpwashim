@@ -1,9 +1,10 @@
-import { masterDropdownService } from "../services/masterDropdownService.js";
+import { masterDataService } from "../services/masterDataService.js";
 
-export const MasterDropdown = {
+
+export const MasterData = {
   getDepartments: async (req, res) => {
     try {
-      const departments = await masterDropdownService.getDepartments();
+      const departments = await masterDataService.getDepartments();
 
       res.status(200).json({
         success: true,
@@ -29,13 +30,13 @@ export const MasterDropdown = {
   //     }
 
   //     // Fetch all headquarters
-  //     const headquarters = await masterDropdownService.getHeadquarters();
+  //     const headquarters = await masterDataService.getHeadquarters();
 
   //     // Fetch office locations by department ID
-  //     const officeLocations = await masterDropdownService.getOfficeLocationsByDepartmentId();
+  //     const officeLocations = await masterDataService.getOfficeLocationsByDepartmentId();
 
   //      // Fetch all sansthas
-  //   const sansthas = await masterDropdownService.getAllSansthas();
+  //   const sansthas = await masterDataService.getAllSansthas();
 
   //     res.status(200).json({
   //       success: true,
@@ -70,7 +71,7 @@ export const MasterDropdown = {
         });
       }
   
-      const dropdownData = await masterDropdownService.getMasterDropdownData(departmentId);
+      const dropdownData = await masterDataService.getMasterDropdownData(departmentId);
   
      
       res.status(200).json({
@@ -100,7 +101,7 @@ export const MasterDropdown = {
         });
       }
 
-      const cadres = await masterDropdownService.getCadresByOfficeLocationId(
+      const cadres = await masterDataService.getCadresByOfficeLocationId(
         officeLocationId
       );
 
@@ -122,7 +123,7 @@ export const MasterDropdown = {
 
   getTalukas: async (req, res) => {
     try {
-      const talukas = await masterDropdownService.getTalukas();
+      const talukas = await masterDataService.getTalukas();
       res.status(200).json({ success: true, data: talukas });
     } catch (error) {
       console.error("Error in TalukaController - getTalukas:", error);
@@ -142,7 +143,7 @@ export const MasterDropdown = {
           .json({ success: false, message: "Taluka ID is required" });
       }
 
-      const villages = await masterDropdownService.getVillagesByTalukaId(
+      const villages = await masterDataService.getVillagesByTalukaId(
         talukaId
       );
       res.status(200).json({ success: true, data: villages });
@@ -165,7 +166,7 @@ export const MasterDropdown = {
             return res.status(400).json({ status: false, message: "deptId is required" });
         }
 
-        const result = await masterDropdownService.getCadresByDeptId(deptId);
+        const result = await masterDataService.getCadresByDeptId(deptId);
         return res.status(200).json(result);
     } catch (error) {
         return res.status(400).json({ status: false, message: error.message });

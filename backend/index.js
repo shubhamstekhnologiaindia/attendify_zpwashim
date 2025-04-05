@@ -38,16 +38,16 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import AuthRoute from "./src/modules/Auth/routes/AuthRoute.js";
-import dropdownRoute from "./src/modules/Auth/routes/dropdownRoute.js";
-import attendanceRoutes from "./src/modules/Users/routes/attendanceRoutes.js";
-import hodRoutes from "./src/modules/Hod/routes/hodRoutes.js";
-import GrRoutes from "./src/modules/Admin/routes/GrRoutes.js";
+import masterDataRoute from "./src/modules/MasterData/routes/masterDataRoute.js";
+import attendanceRoute from "./src/modules/Users/routes/attendanceRoute.js";
+import hodRoutes from "./src/modules/Hod/routes/hodRoute.js";
+import GrRoutes from "./src/modules/Admin/routes/GrRoute.js";
 
-import SendmsgRoute from "./src/modules/Admin/routes/MsgRoute.js";
-import  HqRoutes from "./src/modules/Admin/routes/HqRoutes.js";
+import SendmsgRoute from "./src/modules/Admin/routes/msgRoute.js";
+import  HqRoutes from "./src/modules/Admin/routes/hqRoute.js";
 
 
-import notificationRoutes from "./src/modules/BirthdayNotification/routes/notification.routes.js";
+import notificationRoutes from "./src/modules/BirthdayNotification/routes/notificationRoute.js";
 
 const app = express();
  
@@ -57,7 +57,7 @@ app.use(express.json());
 const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', AuthRoute);
-app.use('/api', dropdownRoute, hodRoutes,attendanceRoutes,GrRoutes);
+app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes);
 
 const PORT = 3001
  

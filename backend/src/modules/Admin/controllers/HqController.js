@@ -1,7 +1,7 @@
 
 //import MsgService from "../services/MsgService";
 
-import  {HeadquarterService } from "../services/HqService.js";
+import  {HeadquarterService } from "../services/hqService.js";
 
 export const HeadQuarterController = {
 

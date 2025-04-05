@@ -1,7 +1,7 @@
 
 //import MsgService from "../services/MsgService";
 
-import  {MsgService1 } from "../services/MsgService.js";
+import  {MsgService1 } from "../services/msgService.js";
 
 export const MsgController = {
 

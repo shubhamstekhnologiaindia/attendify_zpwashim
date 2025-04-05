@@ -1,4 +1,4 @@
-import { sendBirthdayMessages  } from '../services/notification.service.js';
+import { sendBirthdayMessages  } from '../services/notificationService.js';
 import { query } from "../../../../utils/database.js"; 
 
 export const BirthdayController = {
