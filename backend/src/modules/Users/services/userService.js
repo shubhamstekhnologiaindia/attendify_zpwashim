@@ -1,5 +1,5 @@
 import { query } from "../../../../utils/database.js"; 
-import { decrypt, decryptDeterministic } from "../../../../utils/crypto.js"; // Import decryption functions
+import { decrypt, decryptDeterministic } from "../../../../utils/crypto.js"; 
 
 export const UserService = {
   getUserProfileById: async (id) => {
@@ -17,7 +17,7 @@ export const UserService = {
       first_name: decrypt(user[0].first_name),
       middle_name: user[0].middle_name ? decrypt(user[0].middle_name) : null,
       last_name: decrypt(user[0].last_name),
-      mob_no: decryptDeterministic(user[0].mob_no), // Deterministic decryption for consistent lookup
+      mob_no: decryptDeterministic(user[0].mob_no), 
       email: user[0].email ? decrypt(user[0].email) : null,
     };
   },

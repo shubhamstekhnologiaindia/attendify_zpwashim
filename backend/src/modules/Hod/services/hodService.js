@@ -18,8 +18,9 @@ export const hodService = {
       const talukaId = talukaResults[0].id;
 
       const employeeQuery = `
-        SELECT id, first_name, last_name, mob_no, email 
-        FROM users 
+        SELECT u.id, u.first_name, u.last_name, u.mob_no, u.email, u.status, u.department_id, d.department_name
+        FROM users u
+        JOIN departments d ON u.department_id = d.id
         WHERE taluka_id = ? AND role_id = 103
       `;
       const employeeResults = await query(employeeQuery, [talukaId]);
@@ -28,12 +29,17 @@ export const hodService = {
         return { message: "No Employees found with role_id 103" };
       }
 
+      console.log("Employee Results: ", employeeResults); // Debugging line
+
       const decryptedEmployees = employeeResults.map((employee) => ({
         id: employee.id,
         first_name: decrypt(employee.first_name) || "N/A",
         last_name: decrypt(employee.last_name) || "N/A",
         mob_no: decrypt(employee.mob_no) || "N/A",
         email: decrypt(employee.email) || "N/A",
+        status: employee.status,
+        department_id: employee.department_id,
+        department_name: employee.department_name,
       }));
 
       return {

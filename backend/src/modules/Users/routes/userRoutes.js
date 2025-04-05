@@ -1,8 +1,8 @@
 import express from "express";
-import { UserController } from "../controllers/UserController.js";
+import { UserController } from "../controllers/userController.js";
 
 const router = express.Router();
 
-router.get("/user/:id", UserController.getUserProfile); // API endpoint for getting user details
+router.get("/user/:id", UserController.getUserProfile); 
 
 export default router;
