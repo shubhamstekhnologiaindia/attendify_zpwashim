@@ -5,10 +5,10 @@ const router = express.Router();
 
 
 router.get("/show/departments",MasterDropdown.getDepartments);
-router.get("/office-locations/:departmentId", MasterDropdown.getOfficeLocationsByDepartmentId);
 router.get("/show-cadres/:officeLocationId",MasterDropdown.getCadresByOfficeLocationId);
 router.get('/show/talukas', MasterDropdown.getTalukas);
 router.get("/show/villages/:talukaId",  MasterDropdown.getVillagesByTalukaId);
+router.get("/office-locations/:departmentId", MasterDropdown.getHeadquartersZpSanstha);
 
 
 router.get("/Get_Caders_By_DeptId/:deptId",  MasterDropdown.getCadresByDeptId);

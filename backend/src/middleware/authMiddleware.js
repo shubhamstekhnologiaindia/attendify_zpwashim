@@ -11,8 +11,6 @@ export const authMiddleware = (req, res, next) => {
         token = token.slice(7);
     }
 
-  
-
     try {
         const verified = jwt.verify(token, process.env.JWT_SECRET);
         req.user = verified;

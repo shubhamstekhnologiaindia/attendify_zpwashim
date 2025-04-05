@@ -17,38 +17,77 @@ export const MasterDropdown = {
       });
     }
   },
+  // getHeadquartersAndOfficeLocations: async (req, res) => {
+  //   try {
+  //     const { departmentId } = req.params;
 
-  getOfficeLocationsByDepartmentId: async (req, res) => {
+  //     if (!departmentId || isNaN(departmentId)) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: "Invalid department ID",
+  //       });
+  //     }
+
+  //     // Fetch all headquarters
+  //     const headquarters = await masterDropdownService.getHeadquarters();
+
+  //     // Fetch office locations by department ID
+  //     const officeLocations = await masterDropdownService.getOfficeLocationsByDepartmentId();
+
+  //      // Fetch all sansthas
+  //   const sansthas = await masterDropdownService.getAllSansthas();
+
+  //     res.status(200).json({
+  //       success: true,
+  //       data: {
+  //         headquarters: headquarters.length > 0 ? headquarters : [],
+  //         officeLocations: officeLocations.length > 0 ? officeLocations : [],
+  //         sansthas: sansthas.length > 0 ? sansthas : [],
+  //       },
+  //     });
+  //   } catch (error) {
+  //     console.error(
+  //       "Error in MasterDropdown - getHeadquartersAndOfficeLocations:",
+  //       error
+  //     );
+  //     res.status(500).json({
+  //       success: false,
+  //       message: "Internal server error",
+  //     });
+  //   }
+  // },
+ 
+
+
+  getHeadquartersZpSanstha: async (req, res) => {
     try {
       const { departmentId } = req.params;
-
+  
       if (!departmentId || isNaN(departmentId)) {
         return res.status(400).json({
           success: false,
           message: "Invalid department ID",
         });
       }
-
-      const locations =
-        await masterDropdownService.getOfficeLocationsByDepartmentId(
-          departmentId
-        );
-
+  
+      const dropdownData = await masterDropdownService.getMasterDropdownData(departmentId);
+  
+     
       res.status(200).json({
         success: true,
-        data: locations,
+        data: {
+          ...dropdownData,
+        },
       });
     } catch (error) {
-      console.error(
-        "Error in MasterDropdown - getOfficeLocationsByDepartmentId:",
-        error
-      );
+      console.error("Error in MasterDropdown - getHeadquartersAndOfficeLocations:", error);
       res.status(500).json({
         success: false,
         message: "Internal server error",
       });
     }
   },
+  
 
   getCadresByOfficeLocationId: async (req, res) => {
     try {
