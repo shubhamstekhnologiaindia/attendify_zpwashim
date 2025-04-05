@@ -42,10 +42,13 @@ import dropdownRoute from "./src/modules/Auth/routes/dropdownRoute.js";
 import attendanceRoutes from "./src/modules/Users/routes/attendanceRoutes.js";
 import hodRoutes from "./src/modules/Hod/routes/hodRoutes.js";
 import GrRoutes from "./src/modules/Admin/routes/GrRoutes.js";
+
+import SendmsgRoute from "./src/modules/Admin/routes/MsgRoute.js";
+import  HqRoutes from "./src/modules/Admin/routes/HqRoutes.js";
+
+
 import notificationRoutes from "./src/modules/BirthdayNotification/routes/notification.routes.js";
 
-
- 
 const app = express();
  
 app.use(cors());
@@ -54,10 +57,11 @@ app.use(express.json());
 const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', AuthRoute);
-app.use('/api', dropdownRoute, hodRoutes,attendanceRoutes,GrRoutes,notificationRoutes);
+app.use('/api', dropdownRoute, hodRoutes,attendanceRoutes,GrRoutes);
 
-const PORT = process.env.PORT || 3008;
+const PORT = 3001
  
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 })
+

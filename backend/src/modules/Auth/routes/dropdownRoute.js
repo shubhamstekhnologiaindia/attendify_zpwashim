@@ -10,4 +10,7 @@ router.get('/show/talukas', MasterDropdown.getTalukas);
 router.get("/show/villages/:talukaId",  MasterDropdown.getVillagesByTalukaId);
 router.get("/office-locations/:departmentId", MasterDropdown.getHeadquartersZpSanstha);
 
+
+router.get("/Get_Caders_By_DeptId/:deptId",  MasterDropdown.getCadresByDeptId);
+
 export default router;
