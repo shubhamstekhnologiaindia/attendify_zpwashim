@@ -72,9 +72,11 @@ export const hodService = {
   
       // Update employee status (1 = approved, 2 = rejected)
       const updateStatusQuery = `
-        UPDATE users SET status = ? WHERE id = ?
+        UPDATE users SET status = ${status} WHERE id = ${employee_id};
       `;
-      await query(updateStatusQuery, [status, employee_id]);
+      console.log("Checking",updateStatusQuery); // Log the HOD ID for debugging
+
+      await query(updateStatusQuery);
   
       return { message: status === 1 ? "Employee status approved successfully" : "Employee status rejected successfully" };
     } catch (err) {
