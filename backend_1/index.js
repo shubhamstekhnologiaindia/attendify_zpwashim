@@ -1,6 +1,4 @@
 
-
-
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -12,7 +10,7 @@ import masterDataRoute from "./src/modules/MasterData/routes/masterDataRoute.js"
 import attendanceRoute from "./src/modules/Users/routes/attendanceRoute.js";
 import userRoute from "./src/modules/Users/routes/userRoute.js";
 import hodRoutes from "./src/modules/Hod/routes/hodRoute.js";
-import GrRoutes from "./src/modules/Admin/routes/GrRoute.js";
+import GrRoutes from "./src/modules/Admin/routes/grRoute.js";
 
 import SendmsgRoute from "./src/modules/Admin/routes/msgRoute.js";
 import  HqRoutes from "./src/modules/Admin/routes/hqRoute.js";
