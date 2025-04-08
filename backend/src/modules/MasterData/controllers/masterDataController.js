@@ -63,25 +63,14 @@ export const MasterData = {
   getHeadquartersZpSanstha: async (req, res) => {
     try {
       const { departmentId } = req.params;
+      const dropdownData = await masterDataService.getOfficeLocationDropdown(departmentId);
   
-      if (!departmentId || isNaN(departmentId)) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid department ID",
-        });
-      }
-  
-      const dropdownData = await masterDataService.getMasterDropdownData(departmentId);
-  
-     
       res.status(200).json({
         success: true,
-        data: {
-          ...dropdownData,
-        },
+        data: dropdownData
       });
     } catch (error) {
-      console.error("Error in MasterDropdown - getHeadquartersAndOfficeLocations:", error);
+      console.error("Error in MasterDropdown - getOfficeLocations:", error);
       res.status(500).json({
         success: false,
         message: "Internal server error",
@@ -158,7 +147,8 @@ export const MasterData = {
     }
   },
 
-  getCadresByDeptId: async (req, res) => {
+ // controller.js
+getCadresByDeptId: async (req, res) => {
     try {
         const { deptId } = req.params;
 
@@ -172,5 +162,6 @@ export const MasterData = {
         return res.status(400).json({ status: false, message: error.message });
     }
 }
+
 
 };
