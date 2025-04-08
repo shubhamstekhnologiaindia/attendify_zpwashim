@@ -1,6 +1,6 @@
 import { query } from "../../../../utils/database.js";
 
-export const masterDropdownService = {
+export const masterDataService = {
     getDepartments: async () => {
         try {
             const sql = "SELECT id, dept_name_marathi FROM departments";

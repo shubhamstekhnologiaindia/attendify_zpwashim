@@ -1,10 +1,6 @@
 import express from "express";
-<<<<<<< HEAD
 import { GRController } from "../controllers/GrController.js";
 // import {authMiddleware} from "../../../middleware/authMiddleware.js";
-=======
-import { GRController } from "../controller/GrController.js";
->>>>>>> 8811d33d3fc27322bbd7847ebbd87eb065881afe
 import upload from "../../../middleware/multer.js";
 
 const router = express.Router();
