@@ -3,11 +3,11 @@ import moment from "moment-timezone";
 import { decrypt, decryptDeterministic } from "../../../../utils/crypto.js";
 
 export const BirthdayService = {
-    getTodaysBirthdays: async () => {
+    getTodaysBirthdays : async () => {
         const today = moment().format("MM-DD");
 
         const sql = `
-            SELECT id, first_name, middle_name, last_name, birth_date
+            SELECT id, first_name, middle_name, last_name, birth_date,user_profile
             FROM users
             WHERE status = 1 AND DATE_FORMAT(birth_date, '%m-%d') = ?
         `;
@@ -24,7 +24,9 @@ export const BirthdayService = {
             return {
                 id: user.id,
                 full_name: fullName,
-                birth_date: moment(user.birth_date).format("YYYY-MM-DD")
+                birth_date: moment(user.birth_date).format("YYYY-MM-DD"),
+                user_profile: user.user_profile ? `/${user.user_profile.replace(/\\/g, "/")}` : null
+
             };
         });
     }
