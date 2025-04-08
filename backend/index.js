@@ -1,4 +1,3 @@
-
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -14,19 +13,24 @@ import GrRoutes from "./src/modules/Admin/routes/grRoute.js";
 
 import SendmsgRoute from "./src/modules/Admin/routes/msgRoute.js";
 import  HqRoutes from "./src/modules/Admin/routes/hqRoute.js";
+import  holidayRoute from "./src/modules/WebDashboard/routes/holidayRoute.js";
+import  birthdayRoute from "./src/modules/WebDashboard/routes/birthdayRoute.js";
 
 import loginPermissionRoutes from "./src/modules/Hod/routes/loginPermissionRoute.js";
+import UserController from "./src/modules/Users/routes/userRoute.js";
+import otpRoute from "./src/modules/Users/routes/otpRoute.js";
+
 import notificationRoutes from "./src/modules/BirthdayNotification/routes/notificationRoute.js";
 
 const app = express();
  
 app.use(cors());
 app.use(express.json());
-// Serve static files from 'uploads' directory
 const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', AuthRoute);
-app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,userRoute,loginPermissionRoutes);
+// app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,userRoute,loginPermissionRoutes);
+app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserController,otpRoute,loginPermissionRoutes);
 
 const PORT = 3001
  
