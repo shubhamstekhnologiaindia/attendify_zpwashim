@@ -121,6 +121,14 @@ export const AuthController = {
 
       const userData = user[0];
 
+      
+      // Check user status
+      if (userData.status !== 1) {
+        return res.status(403).json({ 
+          message: "तुमचे प्रोफाइल सध्या मंजुरीसाठी प्रलंबित आहे. कृपया मंजुरीसाठी तुमच्या प्रशासक किंवा वरिष्ठ अधिकाऱ्याशी संपर्क साधा. तुमच्या संयमाबद्दल धन्यवाद !" 
+        });
+      }
+
       // Compare password
       const isPasswordMatch = await bcrypt.compare(password, userData.password);
       if (!isPasswordMatch) {
