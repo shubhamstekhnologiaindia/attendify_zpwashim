@@ -12,6 +12,8 @@ import GrRoutes from "./src/modules/Admin/routes/GrRoute.js";
 
 import SendmsgRoute from "./src/modules/Admin/routes/msgRoute.js";
 import  HqRoutes from "./src/modules/Admin/routes/hqRoute.js";
+import  holidayRoute from "./src/modules/WebDashboard/routes/holidayRoute.js";
+import  birthdayRoute from "./src/modules/WebDashboard/routes/birthdayRoute.js";
 
 import UserController from "./src/modules/Users/routes/userRoute.js";
 import otpRoute from "./src/modules/Users/routes/otpRoute.js";
@@ -25,7 +27,7 @@ app.use(express.json());
 const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', AuthRoute);
-app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,UserController,otpRoute);
+app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserController,otpRoute);
 
 const PORT = 3001
  
