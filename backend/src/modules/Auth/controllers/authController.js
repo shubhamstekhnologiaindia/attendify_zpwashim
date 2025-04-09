@@ -2,7 +2,12 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { query } from "../../../../utils/database.js";
 import dotenv from "dotenv";
-import { encrypt, decrypt, encryptDeterministic, decryptDeterministic } from "../../../../utils/crypto.js";
+import {
+  encrypt,
+  decrypt,
+  encryptDeterministic,
+  decryptDeterministic,
+} from "../../../../utils/crypto.js";
 
 dotenv.config();
 
@@ -14,6 +19,7 @@ export const AuthController = {
         middle_name,
         last_name,
         mob_no,
+        birth_date,
         email,
         department_id,
         office_location_id,
@@ -32,9 +38,10 @@ export const AuthController = {
       }
 
       // Check for existing user
-      const existingUser = await query("SELECT id FROM users WHERE mob_no = ?", [
-        encryptedMobNo,
-      ]);
+      const existingUser = await query(
+        "SELECT id FROM users WHERE mob_no = ?",
+        [encryptedMobNo]
+      );
 
       if (existingUser.length > 0) {
         return res.status(400).json({
@@ -56,7 +63,7 @@ export const AuthController = {
 
       // Insert user into the database
       const result = await query(
-        "INSERT INTO users (first_name, middle_name, last_name, mob_no, email, department_id, office_location_id, taluka_id, village_id, cader_id, password, role_id, device_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+        "INSERT INTO users (first_name, middle_name, last_name, mob_no, email, department_id, office_location_id, taluka_id, village_id, cader_id, password, role_id, device_id,birth_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, NOW())",
         [
           encryptedData.first_name,
           encryptedData.middle_name,
@@ -71,11 +78,14 @@ export const AuthController = {
           hashedPassword,
           role_id,
           device_id,
+          birth_date
         ]
       );
 
       if (result.affectedRows > 0) {
-        return res.status(201).json({ message: "User registered successfully" });
+        return res
+          .status(201)
+          .json({ message: "User registered successfully" });
       } else {
         return res.status(400).json({ message: "Failed to register user" });
       }
@@ -87,61 +97,6 @@ export const AuthController = {
       });
     }
   },
-// old running code
-  // login: async (req, res) => {
-  //   try {
-  //     const { mob_no, password } = req.body;
-
-  //     // Encrypt mob_no deterministically for lookup
-  //     const encryptedMobNo = encryptDeterministic(mob_no);
-  //     if (!encryptedMobNo) {
-  //       return res.status(400).json({ message: "Invalid mobile number" });
-  //     }
-
-  //     // Fetch user based on encrypted mobile number
-  //     const user = await query("SELECT * FROM users WHERE mob_no = ?", [
-  //       encryptedMobNo,
-  //     ]);
-
-  //     if (user.length === 0) {
-  //       return res.status(400).json({ message: "Invalid mobile number or password" });
-  //     }
-
-  //     const userData = user[0];
-
-  //     // Decrypt user data (non-deterministic fields)
-  //     const decryptedUser = {
-  //       id: userData.id,
-        
-  //       role_id: userData.role_id,
-  //     };
-
-  //     // Compare password
-  //     const isPasswordMatch = await bcrypt.compare(password, userData.password);
-  //     if (!isPasswordMatch) {
-  //       return res.status(400).json({ message: "Invalid mobile number or password" });
-  //     }
-
-  //     // Generate JWT token
-  //     const token = jwt.sign(
-  //       { id: decryptedUser.id, role_id: decryptedUser.role_id },
-  //       process.env.JWT_SECRET,
-  //       { expiresIn: "7d" }
-  //     );
-
-  //     return res.status(200).json({
-  //       message: "Login successful",
-  //       token,
-        
-  //     });
-  //   } catch (err) {
-  //     console.error("Login Error:", err.message);
-  //     return res.status(500).json({
-  //       message: "Error logging in",
-  //       error: err.message,
-  //     });
-  //   }
-  // },
 
   login: async (req, res) => {
     try {
@@ -159,20 +114,35 @@ export const AuthController = {
       ]);
 
       if (user.length === 0) {
-        return res.status(400).json({ message: "Invalid mobile number or password" });
+        return res
+          .status(400)
+          .json({ message: "Invalid mobile number or password" });
       }
 
       const userData = user[0];
 
+      
+      // Check user status
+      if (userData.status !== 1) {
+        return res.status(403).json({ 
+          message: "तुमचे प्रोफाइल सध्या मंजुरीसाठी प्रलंबित आहे. कृपया मंजुरीसाठी तुमच्या प्रशासक किंवा वरिष्ठ अधिकाऱ्याशी संपर्क साधा. तुमच्या संयमाबद्दल धन्यवाद !" 
+        });
+      }
+
       // Compare password
       const isPasswordMatch = await bcrypt.compare(password, userData.password);
       if (!isPasswordMatch) {
-        return res.status(400).json({ message: "Invalid mobile number or password" });
+        return res
+          .status(400)
+          .json({ message: "Invalid mobile number or password" });
       }
 
       // Update FCM token in database
       if (fcm_token) {
-        await query("UPDATE users SET fcm_token = ? WHERE id = ?", [fcm_token, userData.id]);
+        await query("UPDATE users SET fcm_token = ? WHERE id = ?", [
+          fcm_token,
+          userData.id,
+        ]);
       }
 
       // Generate JWT token
@@ -194,5 +164,4 @@ export const AuthController = {
       });
     }
   },
-
 };

@@ -19,46 +19,54 @@ export const masterDataService = {
         }
     },
 
-    getMasterDropdownData: async (departmentId) => {
-      try {
-        // 1. Panchayat Samitis
-        const panchayatSql = `SELECT id, name FROM panchayat_samiti WHERE status = 'Active' ORDER BY id ASC`;
-        const panchayatResults = await query(panchayatSql);
+   // services
+getOfficeLocationDropdown: async (departmentId) => {
+  try {
+    let defaultSql = `
+      SELECT loc_id, loc_name_marathi, location_type 
+      FROM office_location 
+      WHERE dept_id IS NULL 
+      ORDER BY loc_id ASC 
+      LIMIT 8
+    `;
+
+    const defaultResults = await query(defaultSql);
+
+    let filteredResults = [];
+
+    if (departmentId && !isNaN(departmentId)) {
+      const filterSql = `
+        SELECT loc_id, loc_name_marathi, location_type 
+        FROM office_location 
+        WHERE dept_id = ? 
+        ORDER BY loc_id ASC
+      `;
+      filteredResults = await query(filterSql, [departmentId]);
+    }
+
+    // Combine both results
+    const combinedResults = [...defaultResults, ...filteredResults];
+
+    const formattedData = combinedResults.map(row => ({
+      type: row.location_type || "unknown",
+      id: row.loc_id,
+      name: row.loc_name_marathi
+    }));
+
+    return formattedData;
+
+  } catch (error) {
+    console.error("Error in masterDataService - getOfficeLocationDropdown:", error);
+    throw {
+      success: false,
+      message: "Error fetching office locations"
+    };
+  }
+},
+
     
-        const panchayatSamitis = panchayatResults.map(row => ({
-          id: row.id,
-          name: row.name,
-        }));
     
-        // 2. Headquarters
-        const headquarterSql = `SELECT head_id, name FROM tbl_headquarter ORDER BY head_id ASC`;
-        const headquarterResults = await query(headquarterSql);
     
-        const headquarters = headquarterResults.map(row => ({
-          head_id: row.head_id,
-          name: row.name,
-        }));
-    
-        // 3. Sansthas filtered by department
-        const sansthaSql = `SELECT id, sanstha_name FROM sanstha WHERE dept_id = ? ORDER BY id ASC`;
-        const sansthaResults = await query(sansthaSql, [departmentId]);
-    
-        const sansthas = sansthaResults.map(row => ({
-          id: row.id,
-          sanstha_name: row.sanstha_name,
-        }));
-    
-        // Return combined data
-        return {
-          panchayatSamitis,
-          headquarters,
-          sansthas,
-        };
-      } catch (error) {
-        console.error("Error in masterDropdownService - getMasterDropdownData:", error);
-        throw error;
-      }
-    },
     
    
     // getHeadquarters: async () => {
@@ -181,21 +189,34 @@ export const masterDataService = {
             throw error;
         }
     },
-    getCadresByDeptId: async (deptId) => {
-        try {
-            const result = await query("CALL GetCadresByDeptId(?)", [deptId]);
-            // result[0] contains the actual data
-            return {
-                status: true,
-                data: result[0],
-                message: "Cadres fetched successfully"
-            };
-        } catch (error) {
-            console.error("Error fetching cadres:", error);
-            throw {
-                status: false,
-                message: "Database error while fetching cadres"
-            };
-        }
-    }
+    // service.js
+getCadresByDeptId: async (deptId) => {
+  try {
+    const result = await query(
+      `SELECT 
+          c.id AS cadre_id,
+          c.cader_name,
+          c.cader_name
+       FROM 
+          department_cadre dc
+       INNER JOIN 
+          tbl_cader c ON dc.cader_id = c.id
+       WHERE 
+          dc.department_id = ?`,
+      [deptId]
+  );
+
+      return {
+          status: true,
+          data: result,
+          message: "Cadres fetched successfully"
+      };
+  } catch (error) {
+      console.error("Error fetching cadres:", error);
+      throw {
+          status: false,
+          message: "Database error while fetching cadres"
+      };
+  }
+}
 };
