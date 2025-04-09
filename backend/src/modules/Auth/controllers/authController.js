@@ -98,70 +98,140 @@ export const AuthController = {
 //     }
 //   },
 
-  login: async (req, res) => {
-    try {
-      const { mob_no, password, fcm_token } = req.body; // Accept FCM token from request
+//   login: async (req, res) => {
+//     try {
+//       const { mob_no, password, fcm_token } = req.body; // Accept FCM token from request
 
-      // Encrypt mob_no deterministically for lookup
+//       // Encrypt mob_no deterministically for lookup
+//       const encryptedMobNo = encryptDeterministic(mob_no);
+//       if (!encryptedMobNo) {
+//         return res.status(400).json({ message: "Invalid mobile number" });
+//       }
+// console.log("Login Encrypted Mobile Number:", encryptedMobNo);
+//       // Fetch user based on encrypted mobile number
+//       const user = await query("SELECT * FROM users WHERE mob_no = ?", [
+//         encryptedMobNo,
+//       ]);
+
+//       if (user.length === 0) {
+//         return res
+//           .status(400)
+//           .json({ message: "Invalid mobile number or password" });
+//       }
+
+//       const userData = user[0];
+
+      
+//       // Check user status
+//       // if (userData.status !== 1) {
+//       //   return res.status(403).json({ 
+//       //     message: "तुमचे प्रोफाइल सध्या मंजुरीसाठी प्रलंबित आहे. कृपया मंजुरीसाठी तुमच्या प्रशासक किंवा वरिष्ठ अधिकाऱ्याशी संपर्क साधा. तुमच्या संयमाबद्दल धन्यवाद !" 
+//       //   });
+//       // }
+
+//       // Compare password
+//       const isPasswordMatch = await bcrypt.compare(password, userData.password);
+//       if (!isPasswordMatch) {
+//         return res
+//           .status(400)
+//           .json({ message: "Invalid mobile number or password" });
+//       }
+
+//       // Update FCM token in database
+//       if (fcm_token) {
+//         await query("UPDATE users SET fcm_token = ? WHERE id = ?", [
+//           fcm_token,
+//           userData.id,
+//         ]);
+//       }
+
+//       // Generate JWT token
+//       const token = jwt.sign(
+//         { id: userData.id, role_id: userData.role_id },
+//         process.env.JWT_SECRET,
+//         { expiresIn: "7d" }
+//       );
+
+//       return res.status(200).json({
+//         message: "Login successful",
+//         token,
+//       });
+//     } catch (err) {
+//       console.error("Login Error:", err.message);
+//       return res.status(500).json({
+//         message: "Error logging in",
+//         error: err.message,
+//       });
+//     }
+//   },
+
+
+
+login: async (req, res) => {
+  try {
+      const { mob_no, password, fcm_token } = req.body;
+
       const encryptedMobNo = encryptDeterministic(mob_no);
       if (!encryptedMobNo) {
-        return res.status(400).json({ message: "Invalid mobile number" });
+          return res.status(400).json({ message: "Invalid mobile number" });
       }
 
-      // Fetch user based on encrypted mobile number
+      console.log("Login Encrypted Mobile Number:", encryptedMobNo);
+
       const user = await query("SELECT * FROM users WHERE mob_no = ?", [
-        encryptedMobNo,
+          encryptedMobNo,
       ]);
 
       if (user.length === 0) {
-        return res
-          .status(400)
-          .json({ message: "Invalid mobile number or password" });
+          return res
+              .status(400)
+              .json({ message: "Invalid mobile number or password" });
       }
 
       const userData = user[0];
 
-      
-      // Check user status
-      if (userData.status !== 1) {
-        return res.status(403).json({ 
-          message: "तुमचे प्रोफाइल सध्या मंजुरीसाठी प्रलंबित आहे. कृपया मंजुरीसाठी तुमच्या प्रशासक किंवा वरिष्ठ अधिकाऱ्याशी संपर्क साधा. तुमच्या संयमाबद्दल धन्यवाद !" 
-        });
+      // console.log("User Data:", userData.status !== '1');
+      // ✅ Validate status
+      if (userData.status !== '1') {
+          return res.status(403).json({
+              message: "तुमचे प्रोफाइल सध्या मंजुरीसाठी प्रलंबित आहे. कृपया प्रशासकाशी संपर्क साधा.",
+          });
       }
 
-      // Compare password
+      // ✅ Compare hashed password
       const isPasswordMatch = await bcrypt.compare(password, userData.password);
       if (!isPasswordMatch) {
-        return res
-          .status(400)
-          .json({ message: "Invalid mobile number or password" });
+          return res
+              .status(400)
+              .json({ message: "Invalid mobile number or password" });
       }
 
-      // Update FCM token in database
+      // ✅ Update FCM token if present
       if (fcm_token) {
-        await query("UPDATE users SET fcm_token = ? WHERE id = ?", [
-          fcm_token,
-          userData.id,
-        ]);
+          await query("UPDATE users SET fcm_token = ? WHERE id = ?", [
+              fcm_token,
+              userData.id,
+          ]);
       }
 
-      // Generate JWT token
+      // ✅ JWT token
       const token = jwt.sign(
-        { id: userData.id, role_id: userData.role_id },
-        process.env.JWT_SECRET,
-        { expiresIn: "7d" }
+          { id: userData.id, role_id: userData.role_id },
+          process.env.JWT_SECRET,
+          { expiresIn: "7d" }
       );
 
       return res.status(200).json({
-        message: "Login successful",
-        token,
+          message: "Login successful",
+          token,
       });
-    } catch (err) {
+
+  } catch (err) {
       console.error("Login Error:", err.message);
       return res.status(500).json({
-        message: "Error logging in",
-        error: err.message,
+          message: "Error logging in",
+          error: err.message,
       });
-    }
-  },
+  }
+},
 };
