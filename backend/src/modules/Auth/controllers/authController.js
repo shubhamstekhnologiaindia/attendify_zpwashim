@@ -214,12 +214,29 @@ login: async (req, res) => {
           ]);
       }
 
-      // ✅ JWT token
-      const token = jwt.sign(
-          { id: userData.id, role_id: userData.role_id },
-          process.env.JWT_SECRET,
-          { expiresIn: "7d" }
-      );
+       // ✅ Decrypt name fields
+    const middleName = decrypt(userData.middle_name);
+    const lastName = decrypt(userData.last_name);
+
+    const fullName = `${middleName} ${lastName}`;
+
+    // ✅ JWT token with decrypted data
+    const token = jwt.sign(
+      {
+        id: userData.id,
+        role_id: userData.role_id,
+        username: fullName,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    //   // ✅ JWT token
+    //   const token = jwt.sign(
+    //       { id: userData.id, role_id: userData.role_id },
+    //       process.env.JWT_SECRET,
+    //       { expiresIn: "7d" }
+    //   );
 
       return res.status(200).json({
           message: "Login successful",

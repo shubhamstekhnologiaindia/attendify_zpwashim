@@ -49,12 +49,12 @@ RegisterUser: async (userData) => {
   try {
       const {
           first_name, middle_name, last_name,
-          mob_no, email, department_id, office_location_id,
+          mob_no, email,birth_date, department_id, office_location_id,
           taluka_id, village_id, cader_id,
           password, role_id, device_id
       } = userData;
 
-      const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
       const hashedPassword = await bcrypt.hash(password, 10); // ✅ Bcrypt hash
 
@@ -64,6 +64,7 @@ RegisterUser: async (userData) => {
           encrypt(last_name),
           encryptDeterministic(mob_no),
           encrypt(email),
+          birth_date,
           department_id,
           office_location_id,
           taluka_id,

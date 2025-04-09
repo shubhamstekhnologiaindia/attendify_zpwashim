@@ -19,7 +19,7 @@ export const loginPermission = {
             }
     
             return results.map(user => ({
-                id: user.id,
+                id: user.user_id,
                 first_name: decrypt(user.first_name),
                 middle_name: user.middle_name ? decrypt(user.middle_name) : null,
                 last_name: decrypt(user.last_name),
