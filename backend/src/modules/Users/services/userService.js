@@ -2,9 +2,7 @@ import { query } from "../../../../utils/database.js";
 import { decrypt, decryptDeterministic,encrypt,encryptDeterministic } from "../../../../utils/crypto.js"; 
 import axios from "axios";
 
-import { decrypt, decryptDeterministic } from "../../../../utils/crypto.js"; 
 // src/modules/user/services/UserService.js
-import { encrypt, encryptDeterministic } from "../../../../utils/crypto.js";
 import path from "path";
 
 export const UserService = {
@@ -162,7 +160,7 @@ export const UserService = {
       console.error("Error updating user profile:", error.message);
       throw error;
     }
-  }
+  },
 
   SendOtp: async (phoneNumber, otp) => {
    

@@ -11,7 +11,6 @@ import userRoute from "./src/modules/Users/routes/userRoute.js";
 import hodRoutes from "./src/modules/Hod/routes/hodRoute.js";
 import GrRoutes from "./src/modules/Admin/routes/GrRoute.js";
 import UserRoutes from "./src/modules/Users/routes/userRoute.js";
-import GrRoutes from "./src/modules/Admin/routes/grRoute.js";
 
 import SendmsgRoute from "./src/modules/Admin/routes/msgRoute.js";
 import  HqRoutes from "./src/modules/Admin/routes/hqRoute.js";
