@@ -10,7 +10,6 @@ import multer from "multer";
 
 export const UserController = {
 
-
   RegisterUser: async (req, res) => {
     try {
 
@@ -58,7 +57,7 @@ updateUserProfile: async (req, res) => {
   }
 },
 
-    SendOtp: async (req, res) => {
+SendOtp: async (req, res) => {
       try {
           const { phoneNumber, otp } = req.body; // Expecting phoneNumber and otp in the request body
 
@@ -76,7 +75,17 @@ updateUserProfile: async (req, res) => {
               message: "Failed to send OTP"
           });
       }
-  },
+},
+
+
+getUserLocationCounts: async (req, res) => {
+  try {
+    const counts = await UserService.getUserCountsByOfficeLocation();
+    res.status(200).json(counts);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch user counts", error: error.message });
+  }
+},
 
  
 

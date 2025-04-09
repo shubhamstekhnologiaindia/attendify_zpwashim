@@ -46,8 +46,6 @@ export const UserService = {
 },
 
 
-
-
 getUserProfileById: async (id) => {
   const user = await query(
     "SELECT id, first_name, middle_name, last_name, mob_no, email,user_profile,DATE_FORMAT(birth_date, '%Y-%m-%d') AS birth_date FROM users WHERE id = ?",
@@ -130,8 +128,7 @@ updateUserProfile: async (userId, data, file) => {
   }
 },
 
- 
-  SendOtp: async (phoneNumber, otp) => {
+SendOtp: async (phoneNumber, otp) => {
    
     try {
         const apiUrl = 'http://bulksms.saakshisoftware.com/api/mt/SendSMS';
@@ -162,5 +159,22 @@ updateUserProfile: async (userId, data, file) => {
         console.error("Error in SendOtp service:", error);
         throw new Error("Failed to send OTP");
     }
+},
+
+getUserCountsByOfficeLocation: async () => {
+  try {
+    const [hqResult] = await query("SELECT COUNT(*) AS count FROM users WHERE office_location_id = 1");
+    const [districtResult] = await query("SELECT COUNT(*) AS count FROM users WHERE office_location_id != 1");
+
+    const headquarterArray = { title: "Headquarter Count", count: hqResult.count };
+    const districtArray = { title: "District Count", count: districtResult.count };
+
+      return [headquarterArray, districtArray];
+
+  } catch (err) {
+    console.error("Error fetching user counts:", err);
+    throw err;
+  }
 }
+
 };

@@ -11,7 +11,8 @@ router.post("/Register_User", UserController.RegisterUser);
 
 router.post("/Send_Registration_OTP", UserController.SendOtp); 
 
-
 router.put("/update-user/:id", upload.single("user_profile"), UserController.updateUserProfile);
+
+router.get("/total-user-counts", UserController.getUserLocationCounts);
 
 export default router;
