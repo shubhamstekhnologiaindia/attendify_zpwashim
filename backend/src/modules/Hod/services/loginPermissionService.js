@@ -25,6 +25,7 @@ export const loginPermission = {
                 last_name: decrypt(user.last_name),
                 mob_no: decryptDeterministic(user.mob_no),
                 email: user.email ? decrypt(user.email) : null,
+                status: user.status,
                 village_name: user.village_name,
                 sanstha_name: user.sanstha_name,
                 cader_name: user.cader_name,
