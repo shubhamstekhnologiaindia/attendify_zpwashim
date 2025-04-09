@@ -66,18 +66,16 @@ export const UserController = {
       }
   },
 
-  } 
+  updateUserProfile: async (req, res) => {
+    try {
+      const userId = req.params.id;
+      await UserService.updateUserProfile(userId, req.body, req.file);
 
+      res.status(200).json({ success: true, message: "User profile updated successfully" });
+    } catch (err) {
+      console.error("Update error:", err);
+      res.status(500).json({ success: false, message: "Something went wrong" });
+    }
+  },
 
-
-    updateUserProfile: async (req, res) => {
-      try {
-        const userId = req.params.id;
-        await UserService.updateUserProfile(userId, req.body, req.file);
-  
-        res.status(200).json({ success: true, message: "User profile updated successfully" });
-      } catch (err) {
-        console.error("Update error:", err);
-        res.status(500).json({ success: false, message: "Something went wrong" });
-      }
-    };
+  };
