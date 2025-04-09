@@ -138,7 +138,7 @@ RegisterUser: async (userData) => {
 },
 getUserProfileById: async (id) => {
   const user = await query(
-    "SELECT id, first_name, middle_name, last_name, mob_no, email,user_profile FROM users WHERE id = ?",
+    "SELECT id, first_name, middle_name, last_name, mob_no, email, birth_date, user_profile FROM users WHERE id = ?",
     [id]
   );
 
@@ -153,9 +153,11 @@ getUserProfileById: async (id) => {
     last_name: decrypt(user[0].last_name),
     mob_no: decryptDeterministic(user[0].mob_no),
     email: user[0].email ? decrypt(user[0].email) : null,
-    user_profile: user[0].user_profile ? `/` + user[0].user_profile.replace(/\\/g, "/") : null
+    birth_date: user[0].birth_date || null, // Already in YYYY-MM-DD format
+    user_profile: user[0].user_profile ? '/' + user[0].user_profile.replace(/\\/g, '/') : null
   };
 },
+
 
 updateUserProfile: async (userId, data, file) => {
   try {

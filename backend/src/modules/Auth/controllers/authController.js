@@ -192,7 +192,7 @@ login: async (req, res) => {
 
       // console.log("User Data:", userData.status !== '1');
       // ✅ Validate status
-      if (userData.status !== '1') {
+      if (userData.status !== 1) {
           return res.status(403).json({
               message: "तुमचे प्रोफाइल सध्या मंजुरीसाठी प्रलंबित आहे. कृपया प्रशासकाशी संपर्क साधा.",
           });
