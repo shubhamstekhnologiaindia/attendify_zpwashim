@@ -26,7 +26,7 @@ export const BirthdayService = {
                 full_name: fullName,
                 birth_date: moment(user.birth_date).format("YYYY-MM-DD"),
                 user_profile: user.user_profile ? `/${user.user_profile.replace(/\\/g, "/")}` : null
- 
+
             };
         });
     }

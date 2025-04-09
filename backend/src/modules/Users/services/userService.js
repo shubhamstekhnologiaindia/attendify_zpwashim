@@ -83,62 +83,9 @@ RegisterUser: async (userData) => {
 },
 
 
-
-  // getUserProfileById: async (id) => {
-  //   const user = await query(
-  //     "SELECT id, first_name, middle_name, last_name, mob_no, email FROM users WHERE id = ?",
-  //     [id]
-  //   );
-
-  //   if (user.length === 0) {
-  //     return null;
-  //   }
-
-  //   return {
-  //     id: user[0].id,
-  //     first_name: decrypt(user[0].first_name),
-  //     middle_name: user[0].middle_name ? decrypt(user[0].middle_name) : null,
-  //     last_name: decrypt(user[0].last_name),
-  //     mob_no: decryptDeterministic(user[0].mob_no), 
-  //     email: user[0].email ? decrypt(user[0].email) : null,
-  //   };
-  // },
-
-  SendOtp: async (phoneNumber, otp) => {
-   
-    try {
-        const apiUrl = 'http://bulksms.saakshisoftware.com/api/mt/SendSMS';
-
-        const params = {
-            user: 'Tekhnologia',
-            password: 'Tech%40123%23',
-            senderid: 'SNILKT',
-            channel: 'Trans',
-            DCS: '04',
-            flashsms: '0',
-            number: phoneNumber,
-            text: `आपला ओटीपी क्रमांक आहे: ${otp} कृपया हा ओटीपी पुढील प्रक्रियेसाठी वापरा. - झेडपी वाशिम SHRI NILKANTHESHWAR`,
-            route: '04',
-            DLTTemplateId: '1707174402037894471',
-            PEID: '1701172491385434035'
-        };
-
-        const response = await axios.get(apiUrl, { params });
-      
-
-        if (response.status === 200) {
-            return response.data; // Return the response data if needed
-        } else {
-            throw new Error("Failed to send OTP");
-        }
-    } catch (error) {
-        console.error("Error in SendOtp service:", error);
-        throw new Error("Failed to send OTP");
-    }
-},
 getUserProfileById: async (id) => {
   const user = await query(
-    "SELECT id, first_name, middle_name, last_name, mob_no, email, birth_date, user_profile FROM users WHERE id = ?",
+    "SELECT id, first_name, middle_name, last_name, mob_no, email,user_profile,DATE_FORMAT(birth_date, '%Y-%m-%d') AS birth_date FROM users WHERE id = ?",
     [id]
   );
 
@@ -151,13 +98,12 @@ getUserProfileById: async (id) => {
     first_name: decrypt(user[0].first_name),
     middle_name: user[0].middle_name ? decrypt(user[0].middle_name) : null,
     last_name: decrypt(user[0].last_name),
-    mob_no: decryptDeterministic(user[0].mob_no),
+    mob_no: decryptDeterministic(user[0].mob_no), 
     email: user[0].email ? decrypt(user[0].email) : null,
-    birth_date: user[0].birth_date || null, // Already in YYYY-MM-DD format
-    user_profile: user[0].user_profile ? '/' + user[0].user_profile.replace(/\\/g, '/') : null
-  };
+    birth_date: user[0].birth_date ,
+    user_profile: user[0].user_profile ? `/` + user[0].user_profile.replace(/\\/g, "/") : null
+  }
 },
-
 
 updateUserProfile: async (userId, data, file) => {
   try {
@@ -203,10 +149,52 @@ updateUserProfile: async (userId, data, file) => {
       birth_date || null,
       userId
     ]);
-
+    console.log("SQL values:", {
+      encryptedFirstName,
+      encryptedMiddleName,
+      encryptedLastName,
+      encryptedEmail,
+      user_profile,
+      birth_date,
+      userId
+    });
+    
   } catch (error) {
     console.error("Error updating user profile:", error.message);
     throw error;
   }
+},
+
+SendOtp: async (phoneNumber, otp) => {
+   
+    try {
+        const apiUrl = 'http://bulksms.saakshisoftware.com/api/mt/SendSMS';
+
+        const params = {
+            user: 'Tekhnologia',
+            password: 'Tech%40123%23',
+            senderid: 'SNILKT',
+            channel: 'Trans',
+            DCS: '04',
+            flashsms: '0',
+            number: phoneNumber,
+            text: `आपला ओटीपी क्रमांक आहे: ${otp} कृपया हा ओटीपी पुढील प्रक्रियेसाठी वापरा. - झेडपी वाशिम SHRI NILKANTHESHWAR`,
+            route: '04',
+            DLTTemplateId: '1707174402037894471',
+            PEID: '1701172491385434035'
+        };
+
+        const response = await axios.get(apiUrl, { params });
+      
+
+        if (response.status === 200) {
+            return response.data; // Return the response data if needed
+        } else {
+            throw new Error("Failed to send OTP");
+        }
+    } catch (error) {
+        console.error("Error in SendOtp service:", error);
+        throw new Error("Failed to send OTP");
+    }
 }
 };
