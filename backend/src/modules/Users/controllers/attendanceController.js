@@ -42,8 +42,7 @@ export const AttendanceController = {
         }
  
         let epochTime = getEpochTime();
-        console.log(epochTime)
-        epochTime=1744135200
+       
 
  
         const result = await AttendanceService.recordAttendance(user_id, in_out_id, epochTime);
@@ -103,21 +102,50 @@ export const AttendanceController = {
       });
     }
   },
-  recordOfflineAttendance: async (req, res) => {
-    try {
-      const { user_id, attendance } = req.body;
-  
-      // Validate required fields
-      if (!user_id || !attendance || typeof attendance !== 'object') {
-        return res.status(400).json({ status: false, message: "user_id and attendance object are required" });
-      }
-  
-      // Call the correct service function
-      const result = await AttendanceService.recordOfflineAttendance(user_id, attendance);
-      return res.status(200).json(result);
-    } catch (error) {
-      return res.status(500).json({ status: false, message: error.message });
-    }
-  },
 
-};
+  // recordOfflineAttendance: async (req, res) => {
+  //   try {
+  //     const { user_id, attendance } = req.body;
+  
+  //     // Validate required fields
+  //     if (!user_id || !attendance || typeof attendance !== 'object') {
+  //       return res.status(400).json({ status: false, message: "user_id and attendance object are required" });
+  //     }
+  
+  //     // Call the correct service function
+  //     const result = await AttendanceService.recordOfflineAttendance(user_id, attendance);
+  //     return res.status(200).json(result);
+  //   } catch (error) {
+  //     return res.status(500).json({ status: false, message: error.message });
+  //   }
+  // },
+
+
+  recordOfflineAttendance :async (req, res) => {
+    const { user_id, attendance } = req.body;
+    const { morning_in_time, afternoon_in_time, out_time } = attendance;
+
+
+    console.log(user_id)
+  
+    if (!user_id || (!morning_in_time && !afternoon_in_time && !out_time)) {
+      return res.status(400).json({ error: 'Invalid input data' });
+    }
+  
+    console.log( morning_in_time, afternoon_in_time, out_time )
+
+    try {
+      const result = await AttendanceService.recordOfflineAttendance(
+        user_id,
+        morning_in_time,
+        afternoon_in_time,
+        out_time
+      );
+      res.status(200).json({ message: 'Attendance managed successfully', data: result });
+    } catch (error) {
+      res.status(500).json({ error: 'An error occurred while managing attendance' });
+    }
+
+  }
+
+}

@@ -61,51 +61,152 @@ export const AttendanceService = {
         }
     },
 
-    recordOfflineAttendance: async (user_id, attendance) => {
-      const {
-        morning_in_time = null,
-        afternoon_in_time = null,
-        out_time = null
-      } = attendance;
+    // recordOfflineAttendance: async (user_id, attendance) => {
+    //   const {
+    //     morning_in_time = null,
+    //     afternoon_in_time = null,
+    //     out_time = null
+    //   } = attendance;
   
-      // 1) Type validation
-      if (morning_in_time !== null && typeof morning_in_time !== 'number') {
-        throw new Error('morning_in_time must be a number or null');
-      }
-      if (afternoon_in_time !== null && typeof afternoon_in_time !== 'number') {
-        throw new Error('afternoon_in_time must be a number or null');
-      }
-      if (out_time !== null && typeof out_time !== 'number') {
-        throw new Error('out_time must be a number or null');
-      }
+    //   // 1) Type validation
+    //   if (morning_in_time !== null && typeof morning_in_time !== 'number') {
+    //     throw new Error('morning_in_time must be a number or null');
+    //   }
+    //   if (afternoon_in_time !== null && typeof afternoon_in_time !== 'number') {
+    //     throw new Error('afternoon_in_time must be a number or null');
+    //   }
+    //   if (out_time !== null && typeof out_time !== 'number') {
+    //     throw new Error('out_time must be a number or null');
+    //   }
   
-      // 2) Adjust each epoch for IST‐day
-      const adjMorning   = convertEpochToIST(morning_in_time);
-      const adjAfternoon = adjustEpochForIST(afternoon_in_time);
-      const adjOut       = adjustEpochForIST(out_time);
 
-      console.log(adjMorning)
+
+    //   // 2) Adjust each epoch for IST‐day
+    //   // const adjMorning   = epochToIST(morning_in_time);
+    //   // const adjAfternoon = epochToIST(afternoon_in_time);
+    //   // const adjOut       = epochToIST(out_time);
+
+    //   // console.log(adjMorning)
       
-      console.log(adjAfternoon)
+    //   // console.log(adjAfternoon)
       
-      console.log(adjOut)
+    //   // console.log(adjOut)
   
-      // 3) Call your stored procedure
+    //   // 3) Call your stored procedure
+    //   try {
+    //     await query(
+    //       'CALL MarkofflineAttendance1(?, ?, ?, ?)',
+    //       [user_id, js, afternoon_in_time, out_time]
+    //     );
+    //     return { status: true, message: 'Attendance recorded successfully' };
+    //   } catch (err) {
+    //     if (err.sqlState === '45000') {
+    //       // SP signaled a business error
+    //       throw new Error(err.sqlMessage);
+    //     }
+    //     console.error(err);
+    //     throw new Error('Database error');
+    //   }
+    // }
+
+    recordOfflineAttendance: async (user_id, morning_in_time, afternoon_in_time, out_time) => {
       try {
-        await query(
-          'CALL MarkofflineAttendance1(?, ?, ?, ?)',
-          [user_id, adjMorning, adjAfternoon, adjOut]
-        );
-        return { status: true, message: 'Attendance recorded successfully' };
-      } catch (err) {
-        if (err.sqlState === '45000') {
-          // SP signaled a business error
-          throw new Error(err.sqlMessage);
+      
+        const insertQuery = `CALL MarkOfflineAttendance(?, ?, ?, ?)`;
+        const result = await query(insertQuery, [
+          user_id,
+          morning_in_time,
+          afternoon_in_time,
+          out_time
+        ]);
+    
+        return {
+          status: true,
+          message: "Attendance recorded successfully"
+        };
+      } catch (error) {
+        if (error.sqlState === '45000') {
+          throw new Error(error.sqlMessage);
         }
-        console.error(err);
-        throw new Error('Database error');
+        throw new Error("Database error");
       }
     }
     }
 
+// UTC to Epoch conversion
+export const utcToEpoch = (utcString) => {
+  return Math.floor(new Date(utcString).getTime() / 1000);
+};
 
+// Epoch to UTC conversion
+export const epochToUTC = (epoch) => {
+  return new Date(epoch * 1000).toISOString();
+};
+
+// IST to Epoch conversion
+export const istToEpoch = (istString) => {
+  const date = new Date(`${istString} +05:30`);
+  return Math.floor(date.getTime() / 1000);
+};
+
+// Epoch to IST conversion
+export const epochToIST = (epoch) => {
+  const date = new Date(epoch * 1000);
+  return date.toLocaleString('en-IN', { 
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
+};
+
+// Get current IST epoch
+export const getCurrentISTEpoch = () => {
+  // Get current date in IST
+  const istDate = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+  // Convert IST string to Date object
+  const date = new Date(istDate);
+  // Convert to epoch (seconds since Unix epoch)
+  return Math.floor(date.getTime() / 1000);
+};
+
+// Get current time in all formats
+export const getCurrentTime = () => {
+  const now = getCurrentISTEpoch(); // Current IST epoch
+  
+  return {
+    epoch: now,
+    utc: epochToUTC(now),
+    ist: epochToIST(now)
+  };
+};
+
+// Example usage
+const example = () => {
+  console.log('\n--- Current IST Epoch ---\n');
+  
+  const istEpoch = getCurrentISTEpoch();
+  console.log('Current IST Epoch:', istEpoch);
+  console.log('IST Time:', epochToIST(istEpoch));
+  
+  console.log('\n--- Time Conversion Examples ---\n');
+
+  // Current time in all formats
+  const current = getCurrentTime();
+  console.log('Current Time:');
+  console.log('Epoch:', current.epoch);
+  console.log('UTC:', current.utc);
+  console.log('IST:', current.ist);
+
+  // The relationship:
+  console.log('\n--- Time Zone Relationship ---');
+  console.log('IST is UTC+5:30');
+  console.log('When it\'s midnight UTC, it\'s 5:30 AM IST');
+  console.log('Epoch is seconds since Jan 1, 1970 00:00:00 UTC');
+};
+
+example();
