@@ -16,7 +16,7 @@ export const UserService = {
       
         const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-        console.log("results")
+     
 
         const results = await query(sql, [
             encrypt(first_name),

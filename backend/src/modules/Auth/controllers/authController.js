@@ -12,91 +12,91 @@ import {
 dotenv.config();
 
 export const AuthController = {
-  register: async (req, res) => {
-    try {
-      const {
-        first_name,
-        middle_name,
-        last_name,
-        mob_no,
-        birth_date,
-        email,
-        department_id,
-        office_location_id,
-        taluka_id,
-        village_id,
-        cader_id,
-        password,
-        role_id,
-        device_id,
-      } = req.body;
+//   register: async (req, res) => {
+//     try {
+//       const {
+//         first_name,
+//         middle_name,
+//         last_name,
+//         mob_no,
+//         birth_date,
+//         email,
+//         department_id,
+//         office_location_id,
+//         taluka_id,
+//         village_id,
+//         cader_id,
+//         password,
+//         role_id,
+//         device_id,
+//       } = req.body;
 
-      // Encrypt mob_no deterministically for consistent lookup
-      const encryptedMobNo = encryptDeterministic(mob_no);
-      if (!encryptedMobNo) {
-        return res.status(400).json({ message: "Invalid mobile number" });
-      }
+//       // Encrypt mob_no deterministically for consistent lookup
+//       const encryptedMobNo = encryptDeterministic(mob_no);
+//       if (!encryptedMobNo) {
+//         return res.status(400).json({ message: "Invalid mobile number" });
+//       }
 
-      // Check for existing user
-      const existingUser = await query(
-        "SELECT id FROM users WHERE mob_no = ?",
-        [encryptedMobNo]
-      );
+//       // Check for existing user
+//       const existingUser = await query(
+//         "SELECT id FROM users WHERE mob_no = ?",
+//         [encryptedMobNo]
+//       );
 
-      if (existingUser.length > 0) {
-        return res.status(400).json({
-          message: "User already exists with this mobile number",
-        });
-      }
+//       if (existingUser.length > 0) {
+//         return res.status(400).json({
+//           message: "User already exists with this mobile number",
+//         });
+//       }
 
-      // Hash the password
-      const hashedPassword = await bcrypt.hash(password, 8);
+//       // Hash the password
+//       const hashedPassword = await bcrypt.hash(password, 8);
 
-      // Encrypt other fields with random IV
-      const encryptedData = {
-        first_name: encrypt(first_name),
-        middle_name: middle_name ? encrypt(middle_name) : null,
-        last_name: encrypt(last_name),
-        mob_no: encryptedMobNo, // Deterministic encryption
-        email: email ? encrypt(email) : null,
-      };
+//       // Encrypt other fields with random IV
+//       const encryptedData = {
+//         first_name: encrypt(first_name),
+//         middle_name: middle_name ? encrypt(middle_name) : null,
+//         last_name: encrypt(last_name),
+//         mob_no: encryptedMobNo, // Deterministic encryption
+//         email: email ? encrypt(email) : null,
+//       };
 
-      // Insert user into the database
-      const result = await query(
-        "INSERT INTO users (first_name, middle_name, last_name, mob_no, email, department_id, office_location_id, taluka_id, village_id, cader_id, password, role_id, device_id,birth_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, NOW())",
-        [
-          encryptedData.first_name,
-          encryptedData.middle_name,
-          encryptedData.last_name,
-          encryptedData.mob_no,
-          encryptedData.email,
-          department_id,
-          office_location_id,
-          taluka_id,
-          village_id,
-          cader_id,
-          hashedPassword,
-          role_id,
-          device_id,
-          birth_date
-        ]
-      );
+//       // Insert user into the database
+//       const result = await query(
+//         "INSERT INTO users (first_name, middle_name, last_name, mob_no, email, department_id, office_location_id, taluka_id, village_id, cader_id, password, role_id, device_id,birth_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, NOW())",
+//         [
+//           encryptedData.first_name,
+//           encryptedData.middle_name,
+//           encryptedData.last_name,
+//           encryptedData.mob_no,
+//           encryptedData.email,
+//           department_id,
+//           office_location_id,
+//           taluka_id,
+//           village_id,
+//           cader_id,
+//           hashedPassword,
+//           role_id,
+//           device_id,
+//           birth_date
+//         ]
+//       );
 
-      if (result.affectedRows > 0) {
-        return res
-          .status(201)
-          .json({ message: "User registered successfully" });
-      } else {
-        return res.status(400).json({ message: "Failed to register user" });
-      }
-    } catch (err) {
-      console.error("Registration Error:", err.message);
-      return res.status(500).json({
-        message: "Error registering user",
-        error: err.message,
-      });
-    }
-  },
+//       if (result.affectedRows > 0) {
+//         return res
+//           .status(201)
+//           .json({ message: "User registered successfully" });
+//       } else {
+//         return res.status(400).json({ message: "Failed to register user" });
+//       }
+//     } catch (err) {
+//       console.error("Registration Error:", err.message);
+//       return res.status(500).json({
+//         message: "Error registering user",
+//         error: err.message,
+//       });
+//     }
+//   },
 
   login: async (req, res) => {
     try {
