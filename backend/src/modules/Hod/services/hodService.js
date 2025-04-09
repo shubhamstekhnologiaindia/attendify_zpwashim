@@ -53,22 +53,22 @@ export const hodService = {
   updateEmployeeStatus: async (hod_id, employee_id, status) => {
     try {
       // Check if the HOD ID is valid by querying the taluka table
-      const checkHodQuery = `SELECT id FROM taluka WHERE hod_id = ?`;
-      const checkHod = await query(checkHodQuery, [hod_id]);
+      // const checkHodQuery = `SELECT id FROM taluka WHERE hod_id = ?`;
+      // const checkHod = await query(checkHodQuery, [hod_id]);
   
-      if (!checkHod || checkHod.length === 0) {
-        return { message: "This user is not a valid HOD" };
-      }
+      // if (!checkHod || checkHod.length === 0) {
+      //   return { message: "This user is not a valid HOD" };
+      // }
   
       // Check if employee belongs to the specified HOD (via taluka_id)
-      const checkEmployeeQuery = `
-        SELECT id FROM users WHERE id = ? AND taluka_id IN (SELECT id FROM taluka WHERE hod_id = ?)
-      `;
-      const checkEmployee = await query(checkEmployeeQuery, [employee_id, hod_id]);
+      // const checkEmployeeQuery = `
+      //   SELECT id FROM users WHERE id = ? AND taluka_id IN (SELECT id FROM taluka WHERE hod_id = ?)
+      // `;
+      // const checkEmployee = await query(checkEmployeeQuery, [employee_id, hod_id]);
   
-      if (!checkEmployee || checkEmployee.length === 0) {
-        return { message: "Employee not found or doesn't belong to the HOD" };
-      }
+      // if (!checkEmployee || checkEmployee.length === 0) {
+      //   return { message: "Employee not found or doesn't belong to the HOD" };
+      // }
   
       // Update employee status (1 = approved, 2 = rejected)
       const updateStatusQuery = `
@@ -76,7 +76,8 @@ export const hodService = {
       `;
       console.log("Checking",updateStatusQuery); // Log the HOD ID for debugging
 
-      await query(updateStatusQuery);
+      const response = await query(updateStatusQuery);
+      console.log("Response:", response); // Log the response for debugging
   
       return { message: status === 1 ? "Employee status approved successfully" : "Employee status rejected successfully" };
     } catch (err) {

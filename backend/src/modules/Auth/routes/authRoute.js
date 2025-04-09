@@ -1,13 +1,13 @@
 import express from "express";
 // import {authMiddleware} from "../../../Middleware/authMiddleware.js";
-import { AuthController} from "../controllers/AuthController.js";
+import { AuthController} from "../controllers/authController.js";
 
 const router = express.Router();
 
 
-router.post("/login",AuthController .login);
+router.post("/login",AuthController.login);
 
-router.post("/register",AuthController.register);
+// router.post("/register",AuthController.register);
 
 
 

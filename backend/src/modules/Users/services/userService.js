@@ -1,70 +1,108 @@
 import { query } from "../../../../utils/database.js"; 
 import { decrypt, decryptDeterministic,encrypt,encryptDeterministic } from "../../../../utils/crypto.js"; 
 import axios from "axios";
-
+import bcrypt from 'bcrypt';
+import path from "path";
 
 export const UserService = {
 
-  RegisterUser: async (userData) => {
-    try {
-        const {
-            first_name, middle_name, last_name,
-            mob_no, email, department_id, office_location_id,
-            taluka_id, village_id, cader_id,
-            password, role_id, device_id
-        } = userData;
+//   RegisterUser: async (userData) => {
+//     try {
+//         const {
+//             first_name, middle_name, last_name,
+//             mob_no, email, department_id, office_location_id,
+//             taluka_id, village_id, cader_id,
+//             password, role_id, device_id
+//         } = userData;
       
-        const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+//         const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-        console.log("results")
+     
 
-        const results = await query(sql, [
-            encrypt(first_name),
-            encrypt(middle_name),
-            encrypt(last_name),
-            encryptDeterministic(mob_no),
-            encrypt(email),
-            department_id,
-            office_location_id,
-            taluka_id,
-            village_id,
-            cader_id,
-            encrypt(password),
-            role_id,
-            device_id
-        ]);
+//         const results = await query(sql, [
+//             encrypt(first_name),
+//             encrypt(middle_name),
+//             encrypt(last_name),
+//             encryptDeterministic(mob_no),
+//             encrypt(email),
+//             department_id,
+//             office_location_id,
+//             taluka_id,
+//             village_id,
+//             cader_id,
+//             encrypt(password),
+//             role_id,
+//             device_id
+//         ]);
 
-        console.log(results)
+//         console.log(results)
 
-        return results;
-    } catch (error) {
-        console.error("Error in RegisterUser service:", error);
-        throw new Error("Failed to register user");
-    }
+//         return results;
+//     } catch (error) {
+//         console.error("Error in RegisterUser service:", error);
+//         throw new Error("Failed to register user");
+//     }
+// },
+
+
+RegisterUser: async (userData) => {
+  try {
+      const {
+          first_name, middle_name, last_name,
+          mob_no, email,birth_date, department_id, office_location_id,
+          taluka_id, village_id, cader_id,
+          password, role_id, device_id
+      } = userData;
+
+      const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+      const hashedPassword = await bcrypt.hash(password, 10); // ✅ Bcrypt hash
+
+      const results = await query(sql, [
+          encrypt(first_name),
+          encrypt(middle_name),
+          encrypt(last_name),
+          encryptDeterministic(mob_no),
+          encrypt(email),
+          birth_date,
+          department_id,
+          office_location_id,
+          taluka_id,
+          village_id,
+          cader_id,
+          hashedPassword, // ✅ Use hashed password
+          role_id,
+          device_id
+      ]);
+
+      return results;
+  } catch (error) {
+      console.error("Error in RegisterUser service:", error);
+      throw new Error("Failed to register user");
+  }
 },
 
 
 
+  // getUserProfileById: async (id) => {
+  //   const user = await query(
+  //     "SELECT id, first_name, middle_name, last_name, mob_no, email FROM users WHERE id = ?",
+  //     [id]
+  //   );
 
-  getUserProfileById: async (id) => {
-    const user = await query(
-      "SELECT id, first_name, middle_name, last_name, mob_no, email FROM users WHERE id = ?",
-      [id]
-    );
+  //   if (user.length === 0) {
+  //     return null;
+  //   }
 
-    if (user.length === 0) {
-      return null;
-    }
-
-    return {
-      id: user[0].id,
-      first_name: decrypt(user[0].first_name),
-      middle_name: user[0].middle_name ? decrypt(user[0].middle_name) : null,
-      last_name: decrypt(user[0].last_name),
-      mob_no: decryptDeterministic(user[0].mob_no), 
-      email: user[0].email ? decrypt(user[0].email) : null,
-    };
-  },
+  //   return {
+  //     id: user[0].id,
+  //     first_name: decrypt(user[0].first_name),
+  //     middle_name: user[0].middle_name ? decrypt(user[0].middle_name) : null,
+  //     last_name: decrypt(user[0].last_name),
+  //     mob_no: decryptDeterministic(user[0].mob_no), 
+  //     email: user[0].email ? decrypt(user[0].email) : null,
+  //   };
+  // },
 
   SendOtp: async (phoneNumber, otp) => {
    
@@ -97,5 +135,78 @@ export const UserService = {
         console.error("Error in SendOtp service:", error);
         throw new Error("Failed to send OTP");
     }
+},
+getUserProfileById: async (id) => {
+  const user = await query(
+    "SELECT id, first_name, middle_name, last_name, mob_no, email, birth_date, user_profile FROM users WHERE id = ?",
+    [id]
+  );
+
+  if (user.length === 0) {
+    return null;
+  }
+
+  return {
+    id: user[0].id,
+    first_name: decrypt(user[0].first_name),
+    middle_name: user[0].middle_name ? decrypt(user[0].middle_name) : null,
+    last_name: decrypt(user[0].last_name),
+    mob_no: decryptDeterministic(user[0].mob_no),
+    email: user[0].email ? decrypt(user[0].email) : null,
+    birth_date: user[0].birth_date || null, // Already in YYYY-MM-DD format
+    user_profile: user[0].user_profile ? '/' + user[0].user_profile.replace(/\\/g, '/') : null
+  };
+},
+
+
+updateUserProfile: async (userId, data, file) => {
+  try {
+    let user_profile = null;
+    if (file) {
+      // Normalize file path and store it correctly
+      user_profile = `uploads/user_profiles/${path.basename(file.path)}`;
+    }
+
+    const {
+      first_name,
+      middle_name,
+      last_name,
+      email,
+      birth_date
+    } = data;
+
+    // Encrypt fields if provided
+    const encryptedFirstName = first_name ? encrypt(first_name) : null;
+    const encryptedMiddleName = middle_name ? encrypt(middle_name) : null;
+    const encryptedLastName = last_name ? encrypt(last_name) : null;
+    const encryptedEmail = email ? encrypt(email) : null;
+
+    const sql = `
+      UPDATE users
+      SET
+        first_name = COALESCE(?, first_name),
+        middle_name = COALESCE(?, middle_name),
+        last_name = COALESCE(?, last_name),
+        email = COALESCE(?, email),
+        user_profile = COALESCE(?, user_profile),
+        birth_date = COALESCE(?, birth_date),
+        updated_at = NOW()
+      WHERE id = ?
+    `;
+
+    await query(sql, [
+      encryptedFirstName,
+      encryptedMiddleName,
+      encryptedLastName,
+      encryptedEmail,
+      user_profile,
+      birth_date || null,
+      userId
+    ]);
+
+  } catch (error) {
+    console.error("Error updating user profile:", error.message);
+    throw error;
+  }
 }
 };

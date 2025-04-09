@@ -16,12 +16,10 @@ export const hodController = {
     }
   },
   updateEmployeeStatus: async (req, res) => {
-      const { employee_id, status } = req.body; // status = 1 for accept, 2 for reject
-      const { hod_id } = req.params; // HOD ID should be passed in params
+      const { employee_id, status } = req.body; 
+      const { hod_id } = req.params;
 
-      console.log("HOD ID:", status ); // Log the HOD ID for debugging
     
-      // Check if status is valid (1 or 2)
       if (![1, 2].includes(status)) {
         return res.status(400).json({ error: "Invalid status value. Use 1 for accept, 2 for reject." });
       }
@@ -31,12 +29,12 @@ export const hodController = {
     
         if (result.message) {
           if (result.message === "This user is not a valid HOD") {
-            return res.status(400).json({ error: result.message }); // If the HOD is invalid, return 400
+            return res.status(400).json({ error: result.message }); 
           }
-          return res.status(200).json({ message: result.message }); // Successful status update
+          return res.status(200).json({ message: result.message }); 
         }
     
-        res.status(400).json({ error: "Failed to update employee status" }); // If something goes wrong
+        res.status(400).json({ error: "Failed to update employee status" }); 
       } catch (err) {
         console.error("Error updating employee status:", err);
         res.status(500).json({ error: "Database error", details: err.message });
