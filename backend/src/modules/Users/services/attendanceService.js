@@ -1,6 +1,34 @@
 import { query } from "../../../../utils/database.js"; 
 
 import moment from "moment-timezone";
+
+function adjustEpochForIST(epoch) {
+  if (epoch === null) return null;
+  const IST_OFFSET = 5.5 * 3600;      // 19800 seconds
+  const SECONDS_IN_DAY = 86400;
+
+  // Shift into IST
+  const istTime = epoch + IST_OFFSET;
+  // Find IST‐midnight epoch
+  const istMidnight = istTime - (istTime % SECONDS_IN_DAY);
+  // Convert back to UTC epoch for that IST‐midnight
+  const utcMidnightForIST = istMidnight - IST_OFFSET;
+
+  // If original epoch is before that UTC‐midnight, it belongs to the *previous* IST day
+  if (epoch < utcMidnightForIST) return epoch + SECONDS_IN_DAY;
+  // If it’s past the next IST day boundary, shift back
+  if (epoch >= utcMidnightForIST + SECONDS_IN_DAY) return epoch - SECONDS_IN_DAY;
+  return epoch;
+}
+
+function convertEpochToIST(epoch) {
+  if (epoch === null) return null;
+  const IST_OFFSET = 5.5 * 3600; // 19800 seconds
+  return epoch + IST_OFFSET;
+}
+
+
+
 export const AttendanceService = {
 
 
@@ -34,67 +62,50 @@ export const AttendanceService = {
     },
 
     recordOfflineAttendance: async (user_id, attendance) => {
-      const { morning_in_time = null, afternoon_in_time = null, out_time = null } = attendance;
-    
+      const {
+        morning_in_time = null,
+        afternoon_in_time = null,
+        out_time = null
+      } = attendance;
+  
+      // 1) Type validation
       if (morning_in_time !== null && typeof morning_in_time !== 'number') {
-        throw new Error("morning_in_time must be a number");
+        throw new Error('morning_in_time must be a number or null');
       }
       if (afternoon_in_time !== null && typeof afternoon_in_time !== 'number') {
-        throw new Error("afternoon_in_time must be a number");
+        throw new Error('afternoon_in_time must be a number or null');
       }
       if (out_time !== null && typeof out_time !== 'number') {
-        throw new Error("out_time must be a number");
+        throw new Error('out_time must be a number or null');
       }
-    
-      // IST offset in seconds (UTC+5:30)
-      const IST_OFFSET = 19800; // 5 hours * 3600 + 30 minutes * 60
-      const SECONDS_IN_DAY = 86400;
-    
-      // Function to adjust epoch time for IST day
-      const adjustEpochForIST = (epoch) => {
-        if (epoch === null) return null;
-        // Convert to IST by adding offset
-        const istTime = epoch + IST_OFFSET;
-        // Get IST midnight (start of IST day)
-        const istMidnight = istTime - (istTime % SECONDS_IN_DAY);
-        // Convert back to UTC (start of IST day in UTC)
-        const utcMidnightForISTDay = istMidnight - IST_OFFSET;
-        // Calculate original UTC midnight
-        const utcMidnight = epoch - (epoch % SECONDS_IN_DAY);
-        // If original epoch is before the IST day's UTC start, shift it forward
-        if (epoch < utcMidnightForISTDay) {
-          return epoch + SECONDS_IN_DAY;
-        }
-        // If after, shift it back (rare case, but for consistency)
-        else if (epoch >= utcMidnightForISTDay + SECONDS_IN_DAY) {
-          return epoch - SECONDS_IN_DAY;
-        }
-        return epoch; // Already in the correct day
-      };
-    
-      // Adjust all epoch times
-      const adjustedMorningInTime = adjustEpochForIST(morning_in_time);
-      const adjustedAfternoonInTime = adjustEpochForIST(afternoon_in_time);
-      const adjustedOutTime = adjustEpochForIST(out_time);
-    
+  
+      // 2) Adjust each epoch for IST‐day
+      const adjMorning   = convertEpochToIST(morning_in_time);
+      const adjAfternoon = adjustEpochForIST(afternoon_in_time);
+      const adjOut       = adjustEpochForIST(out_time);
+
+      console.log(adjMorning)
+      
+      console.log(adjAfternoon)
+      
+      console.log(adjOut)
+  
+      // 3) Call your stored procedure
       try {
-        await query("CALL MarkOfflineAttendance1(?, ?, ?, ?)", [
-          user_id,
-          adjustedMorningInTime,
-          adjustedAfternoonInTime,
-          adjustedOutTime,
-        ]);
-    
-        return {
-          status: true,
-          message: "Attendance recorded successfully",
-        };
-      } catch (error) {
-        if (error.sqlState === "45000") {
-          throw new Error(error.sqlMessage);
+        await query(
+          'CALL MarkofflineAttendance1(?, ?, ?, ?)',
+          [user_id, adjMorning, adjAfternoon, adjOut]
+        );
+        return { status: true, message: 'Attendance recorded successfully' };
+      } catch (err) {
+        if (err.sqlState === '45000') {
+          // SP signaled a business error
+          throw new Error(err.sqlMessage);
         }
-        throw new Error("Database error");
+        console.error(err);
+        throw new Error('Database error');
       }
-    }}
+    }
+    }
 
 

@@ -1,6 +1,7 @@
 import moment from "moment-timezone";
 import { UserService } from "../services/userService.js";
 import { getEpochTime } from "../../../../utils/epochTime.js";
+import axios from "axios";
 import { encrypt, encryptDeterministic } from "../../../../utils/crypto.js";
 import fs from "fs";
 import path from "path";
@@ -8,6 +9,26 @@ import multer from "multer";
 
 
 export const UserController = {
+
+
+  RegisterUser: async (req, res) => {
+    try {
+
+        const result = await UserService.RegisterUser(req.body);
+
+        return res.status(201).json({
+            status: true,
+            message: "User registered successfully",
+            data: result
+        });
+    } catch (error) {
+        console.error("Error in RegisterUser controller:", error);
+        return res.status(500).json({
+            status: false,
+            message: "Failed to register user"
+        });
+    }
+},
     
     getUserProfile: async (req, res) => {
       try {
@@ -25,6 +46,30 @@ export const UserController = {
       }
     },
 
+    SendOtp: async (req, res) => {
+      try {
+          const { phoneNumber, otp } = req.body; // Expecting phoneNumber and otp in the request body
+
+          const result = await UserService.SendOtp(phoneNumber, otp);
+
+          return res.status(200).json({
+              status: true,
+              message: "OTP sent successfully",
+              data: result
+          });
+      } catch (error) {
+          console.error("Error in SendOtp controller:", error);
+          return res.status(500).json({
+              status: false,
+              message: "Failed to send OTP"
+          });
+      }
+  },
+
+  } 
+
+
+
     updateUserProfile: async (req, res) => {
       try {
         const userId = req.params.id;
@@ -35,7 +80,4 @@ export const UserController = {
         console.error("Update error:", err);
         res.status(500).json({ success: false, message: "Something went wrong" });
       }
-    }
-
-
-  }; 
+    };

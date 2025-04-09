@@ -41,8 +41,10 @@ export const AttendanceController = {
             return res.status(400).json({ status: false, message: "user_id and inOutId are required" });
         }
  
-        const epochTime = getEpochTime();
+        let epochTime = getEpochTime();
         console.log(epochTime)
+        epochTime=1744135200
+
  
         const result = await AttendanceService.recordAttendance(user_id, in_out_id, epochTime);
         return res.status(200).json(result);
