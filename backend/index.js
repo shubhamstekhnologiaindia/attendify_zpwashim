@@ -16,6 +16,7 @@ import SendmsgRoute from "./src/modules/Admin/routes/msgRoute.js";
 import  HqRoutes from "./src/modules/Admin/routes/hqRoute.js";
 import  holidayRoute from "./src/modules/WebDashboard/routes/holidayRoute.js";
 import  birthdayRoute from "./src/modules/WebDashboard/routes/birthdayRoute.js";
+import  attendanceCountRoute from "./src/modules/WebDashboard/routes/attendanceCountRoute.js";
 
 import loginPermissionRoutes from "./src/modules/Hod/routes/loginPermissionRoute.js";
 import UserRoute from "./src/modules/Users/routes/userRoute.js";
@@ -34,8 +35,9 @@ app.use(express.json());
 const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', AuthRoute);
+// app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,UserRoutes, notificationRoutes, holidayRoute, birthdayRoute,forgotPasswordRoute,attendanceCountRoute);
 // app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,userRoute,loginPermissionRoutes);
-app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserRoute,otpRoute,loginPermissionRoutes,reportsRoute);
+app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserRoute,otpRoute,loginPermissionRoutes,reportsRoute,attendanceCountRoute);
 
 const PORT = 3001
  
