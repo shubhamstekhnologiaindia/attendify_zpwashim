@@ -63,7 +63,7 @@ updateUserProfile: async (req, res) => {
 
 SendOtp: async (req, res) => {
       try {
-          const { phoneNumber, otp } = req.body; // Expecting phoneNumber and otp in the request body
+          const { phoneNumber, otp } = req.body; 
 
           const result = await UserService.SendOtp(phoneNumber, otp);
 
