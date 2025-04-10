@@ -2,6 +2,8 @@ import moment from "moment-timezone";
 import { AttendanceService } from "../services/attendanceService.js";
 import { getEpochTime } from "../../../../utils/epochTime.js";
 
+
+
 const convertEpochToIST = (epochTime) => {
   if (!epochTime || epochTime == "0") return null;
   return moment
@@ -35,22 +37,26 @@ const calculateWorkingHours = (
 export const AttendanceController = {
   recordAttendance: async (req, res) => {
     try {
-        const { user_id, in_out_id } = req.body;
- 
-        if (!user_id || !in_out_id) {
-            return res.status(400).json({ status: false, message: "user_id and inOutId are required" });
-        }
- 
-        let epochTime = getEpochTime();
-       
+      const { user_id, in_out_id } = req.body;
 
- 
-        const result = await AttendanceService.recordAttendance(user_id, in_out_id, epochTime);
-        return res.status(200).json(result);
+      if (!user_id || !in_out_id) {
+        return res.status(400).json({ status: false, message: "user_id and inOutId are required" });
+      }
+
+      // Generate current IST time (UTC + 5:30)
+      const istOffset = 5.5 * 60 * 60 * 1000; // 5 hours 30 minutes in milliseconds
+      const istTime = new Date(Date.now() + istOffset)
+        .toISOString()
+        .replace('T', ' ')
+        .substring(0, 19); // 'YYYY-MM-DD HH:mm:ss'
+
+      const result = await AttendanceService.recordAttendance(user_id, in_out_id, istTime);
+      return res.status(200).json(result);
     } catch (error) {
-        return res.status(400).json({ status: false, message: error.message });
+      return res.status(400).json({ status: false, message: error.message });
     }
-},
+  },
+  
 
   getUserAttendance: async (req, res) => {
     try {
@@ -146,6 +152,11 @@ export const AttendanceController = {
       res.status(500).json({ error: 'An error occurred while managing attendance' });
     }
 
-  }
+  },
+
+
+
+
+
 
 }

@@ -24,6 +24,9 @@ import forgotPasswordRoute from "./src/modules/Users/routes/forgotPasswordRoute.
 
 import notificationRoutes from "./src/modules/BirthdayNotification/routes/notificationRoute.js";
 
+
+import reportsRoute from "./src/modules/Reports/routes/reportRoute.js";
+
 const app = express();
  
 app.use(cors());
@@ -32,8 +35,7 @@ const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', AuthRoute);
 // app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,userRoute,loginPermissionRoutes);
-app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserRoute,otpRoute,loginPermissionRoutes,forgotPasswordRoute);
-// app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,UserRoutes, notificationRoutes, holidayRoute, birthdayRoute,forgotPasswordRoute);
+app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserRoute,otpRoute,loginPermissionRoutes,reportsRoute);
 
 const PORT = 3001
  
