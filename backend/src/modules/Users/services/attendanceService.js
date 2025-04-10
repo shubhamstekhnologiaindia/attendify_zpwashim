@@ -1,5 +1,7 @@
 import { query } from "../../../../utils/database.js"; 
 
+
+
 import moment from "moment-timezone";
 
 function adjustEpochForIST(epoch) {
@@ -32,21 +34,24 @@ function convertEpochToIST(epoch) {
 export const AttendanceService = {
 
 
-    recordAttendance: async (user_id, inOutId, epochTime) => {
-        try {
-            await query("CALL MarkAttendance(?, ?, ?)", [user_id, inOutId, epochTime]);
- 
-            return {
-                status: true,
-                message: inOutId === 3 ? "Out time recorded successfully" : "In time recorded successfully"
-            };
-        } catch (error) {
-            if (error.sqlState === '45000') {
-                throw { status: false, message: error.sqlMessage };
-            }
-            throw { status: false, message: "Database error" };
-        }
-    },
+  recordAttendance: async (user_id, inOutId, istTime) => {
+    try {
+      console.log(istTime); // Log the IST time for debugging
+
+      await query("CALL MarkAttendance(?, ?, ?)", [user_id, inOutId, istTime]);
+
+      return {
+        status: true,
+        message: inOutId === 3 ? "Out time recorded successfully" : "In time recorded successfully",
+      };
+    } catch (error) {
+      if (error.sqlState === '45000') {
+        throw { status: false, message: error.sqlMessage };
+      }
+      throw { status: false, message: "Database error" };
+    }
+  },
+
 
     getUserAttendance: async (employee_id) => {
         try {
@@ -130,7 +135,43 @@ export const AttendanceService = {
         }
         throw new Error("Database error");
       }
+    },
+
+
+
+
+
+    getAttendanceReport: async (date, department_id, cader_id) => {
+      try {
+        console.log(`Fetching report for date: ${date}, department_id: ${department_id}, cader_id: ${cader_id}`);
+  
+        // Execute the stored procedure
+        const [result] = await query("CALL GetAttendanceReport(?, ?, ?)", [date, department_id, cader_id]);
+  
+        // The result is an array of rows; take the first row since the SP returns one row
+        const report = result[0];
+  
+        return {
+          total_users: report.total_users,
+          morning_present: report.morning_present,
+          afternoon_present: report.afternoon_present,
+          evening_present: report.evening_present
+        };
+      } catch (error) {
+        if (error.sqlState === '45000') {
+          throw { status: false, message: error.sqlMessage };
+        }
+        throw { status: false, message: "Database error while fetching attendance report" };
+      }
     }
+
+
+
+
+
+
+
+
     }
 
 // UTC to Epoch conversion
