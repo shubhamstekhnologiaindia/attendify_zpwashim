@@ -9,25 +9,29 @@ import multer from "multer";
 
 
 export const UserController = {
-
   RegisterUser: async (req, res) => {
     try {
-
-        const result = await UserService.RegisterUser(req.body);
-
-        return res.status(201).json({
-            status: true,
-            message: "User registered successfully",
-            data: result
+      const result = await UserService.RegisterUser(req.body);
+  
+      if (result.alreadyExists) {
+        return res.status(409).json({
+          status: false,
+          message: "User already exists with this mobile number"
         });
+      }
+  
+      return res.status(201).json({
+        status: true,
+        message: "User registered successfully"
+      });
     } catch (error) {
-        console.error("Error in RegisterUser controller:", error);
-        return res.status(500).json({
-            status: false,
-            message: "Failed to register user"
-        });
+      console.error("Error in RegisterUser controller:", error);
+      return res.status(500).json({
+        status: false,
+        message: "Failed to register user"
+      });
     }
-},
+  },
     
 getUserProfile: async (req, res) => {
   try {

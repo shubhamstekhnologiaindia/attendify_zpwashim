@@ -215,10 +215,10 @@ login: async (req, res) => {
       }
 
        // ✅ Decrypt name fields
-    const middleName = decrypt(userData.middle_name);
+    const firstName = decrypt(userData.first_name);
     const lastName = decrypt(userData.last_name);
 
-    const fullName = `${middleName} ${lastName}`;
+    const fullName = `${firstName} ${lastName}`;
 
     // ✅ JWT token with decrypted data
     const token = jwt.sign(
