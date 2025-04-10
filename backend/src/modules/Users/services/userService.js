@@ -161,20 +161,20 @@ SendOtp: async (phoneNumber, otp) => {
     }
 },
 
-getUserCountsByOfficeLocation: async () => {
-  try {
-    const [hqResult] = await query("SELECT COUNT(*) AS count FROM users WHERE office_location_id = 1");
-    const [districtResult] = await query("SELECT COUNT(*) AS count FROM users WHERE office_location_id != 1");
+// getUserCountsByOfficeLocation: async () => {
+//   try {
+//     const [hqResult] = await query("SELECT COUNT(*) AS count FROM users WHERE office_location_id = 1");
+//     // const [districtResult] = await query("SELECT COUNT(*) AS count FROM users WHERE office_location_id != 1");
 
-    const headquarterArray = { title: "Headquarter Count", count: hqResult.count };
-    const districtArray = { title: "District Count", count: districtResult.count };
+//     const headquarterArray = { title: "Headquarter Count", count: hqResult.count };
+//     // const districtArray = { title: "District Count", count: districtResult.count };
 
-      return [headquarterArray, districtArray];
+//       return [headquarterArray];
 
-  } catch (err) {
-    console.error("Error fetching user counts:", err);
-    throw err;
-  }
-}
+//   } catch (err) {
+//     console.error("Error fetching user counts:", err);
+//     throw err;
+//   }
+// }
 
 };
