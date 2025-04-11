@@ -10,6 +10,8 @@ const router = express.Router();
 
 
 router.get("/Get_Reports_For_Day/", AttendanceReports.getAttendanceReportForDay);
+router.get("/Get_Reports_For_Year/", AttendanceReports.getAttendanceReportForYear);
+
 
 
 export default router;

@@ -21,4 +21,26 @@ export const AttendanceReports = {
         } catch (error) {
           return res.status(400).json({ status: false, message: error.message });
         }
-      }}
+      },
+  
+    getAttendanceReportForYear: async (req, res) => {
+      try {
+          const { year, department_id, cader_id } = req.query;
+
+          // Validate required fields
+          if (!year || !department_id) {
+              return res.status(400).json({ status: false, message: "year and department_id are required" });
+          }
+
+          // Call the service with year, department_id, and optional cader_id
+          const result = await reportService.getAttendanceReportForYear(year, department_id, cader_id || null);
+          return res.status(200).json({
+              status: true,
+              data: result,
+              message: "Yearly attendance report retrieved successfully"
+          });
+      } catch (error) {
+          return res.status(400).json({ status: false, message: error.message });
+      }
+  }
+};
