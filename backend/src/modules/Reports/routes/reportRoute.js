@@ -7,6 +7,7 @@ const router = express.Router();
 
 
 
+router.get('/get-reports-for-month', AttendanceReports.getAttendanceReportForMonth);
 
 
 router.get("/Get_Reports_For_Day/", AttendanceReports.getAttendanceReportForDay);
