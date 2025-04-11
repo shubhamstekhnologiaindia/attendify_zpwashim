@@ -6,6 +6,9 @@ import {AttendanceReports} from "../controllers/reportController.js";
 const router = express.Router();
 
 
+router.get("/Get_Reports_For_Day", AttendanceReports.getAttendanceReportForDay);
+// In your routes file:
+// router.get("/Get_Reports_For_Day", AttendanceReports.getAttendanceReportForDay);
 
 
 

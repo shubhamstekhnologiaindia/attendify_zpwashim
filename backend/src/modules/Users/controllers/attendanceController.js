@@ -72,34 +72,10 @@ export const AttendanceController = {
         return res.status(404).json({ message: "No attendance records found" });
       }
 
-      const formattedData = attendanceData.map((record) => {
-        const att_morning_in_time = record.att_morning_in_time
-          ? record.att_morning_in_time
-          : null;
-        const att_afternoon_in_time = record.att_afternoon_in_time
-          ? record.att_afternoon_in_time
-          : null;
-        const att_out_time = record.att_out_time ? record.att_out_time : null;
-
-        return {
-          attendance_date:
-            record.attendance_date ||
-            moment().tz("Asia/Kolkata").format("YYYY-MM-DD"),
-          att_morning_in_time: convertEpochToIST(att_morning_in_time),
-          att_afternoon_in_time: convertEpochToIST(att_afternoon_in_time),
-          att_out_time: convertEpochToIST(att_out_time),
-          total_working_hours: calculateWorkingHours(
-            att_morning_in_time,
-            att_afternoon_in_time,
-            att_out_time
-          ),
-        };
-      });
-
       res.status(200).json({
         success: true,
         message: "Attendance records fetched successfully",
-        data: formattedData,
+        data: attendanceData,
       });
     } catch (error) {
       res.status(500).json({

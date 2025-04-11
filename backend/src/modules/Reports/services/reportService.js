@@ -2,8 +2,8 @@ import { query } from "../../../../utils/database.js";
 
 
 export const reportService = {
-    
-    getAttendanceReport: async (date, department_id, cader_id) => {
+
+    getAttendanceReportForDay: async (date, department_id, cader_id) => {
         try {
           console.log(`Fetching report for date: ${date}, department_id: ${department_id}, cader_id: ${cader_id}`);
     
