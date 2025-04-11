@@ -42,5 +42,24 @@ export const AttendanceReports = {
       } catch (error) {
           return res.status(400).json({ status: false, message: error.message });
       }
-  }
+  },
+  // New endpoint for monthly report
+  getAttendanceReportForMonth: async (req, res) => {
+    try {
+        const { year, month, department_id, cader_id } = req.body;
+        // Validate required fields
+        if (!year || !month || !department_id) {
+            return res.status(400).json({ status: false, message: "year, month, and department_id are required" });
+        }
+        // Call the service
+        const result = await reportService.getAttendanceReportForMonth(year, month, department_id, cader_id || null);
+        return res.status(200).json({
+            status: true,
+            data: result,
+            message: "Monthly attendance report retrieved successfully"
+        });
+    } catch (error) {
+        return res.status(400).json({ status: false, message: error.message });
+    }
+},
 };

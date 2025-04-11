@@ -51,6 +51,26 @@ export const reportService = {
               throw { status: false, message: error.sqlMessage };
           }
           throw { status: false, message: "Database error while fetching yearly attendance report" };
-      }
-  }
+       }
+   },
+
+   getAttendanceReportForMonth: async (year, month, department_id, cader_id) => {
+    try {
+        console.log(`Fetching monthly report for year: ${year}, month: ${month}, department_id: ${department_id}, cader_id: ${cader_id}`);
+        const [results] = await query("CALL GetAttendanceReportForMonth(?, ?, ?, ?)", [year, month, department_id, cader_id]);
+        const report = results.map(row => ({
+            date: row.date,
+            total_users: row.total_users,
+            morning_present: row.morning_present,
+            afternoon_present: row.afternoon_present,
+            evening_present: row.evening_present
+        }));
+        return report;
+    } catch (error) {
+        if (error.sqlState === '45000') {
+            throw { status: false, message: error.sqlMessage };
+        }
+        throw { status: false, message: "Database error while fetching monthly attendance report" };
+    }
+}
   };
