@@ -21,4 +21,37 @@ export const AttendanceReports = {
         } catch (error) {
           return res.status(400).json({ status: false, message: error.message });
         }
-      }}
+      },
+      getAttendanceReportForWeek: async (req, res) => {
+        try {
+            const { start_date, department_id, cader_id } = req.query;
+
+            // Validate required fields
+            if (!start_date || !department_id) {
+                return res.status(400).json({ 
+                    status: false, 
+                    message: "start_date and department_id are required" 
+                });
+            }
+
+            // Call the service
+            const result = await reportService.getWeeklyAttendanceReport(
+                start_date, 
+                department_id, 
+                cader_id || null
+            );
+
+            return res.status(200).json({
+                status: true,
+                data: result,
+                message: "Weekly attendance report retrieved successfully"
+            });
+        } catch (error) {
+            return res.status(400).json({ 
+                status: false, 
+                message: error.message 
+            });
+        }
+    }
+    
+    }

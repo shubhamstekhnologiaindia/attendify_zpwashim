@@ -128,11 +128,6 @@ export const AttendanceController = {
       res.status(500).json({ error: 'An error occurred while managing attendance' });
     }
 
-  },
-
-
-
-
-
+  }
 
 }

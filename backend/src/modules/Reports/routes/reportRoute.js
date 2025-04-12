@@ -7,8 +7,9 @@ const router = express.Router();
 
 
 router.get("/Get_Reports_For_Day", AttendanceReports.getAttendanceReportForDay);
-// In your routes file:
-// router.get("/Get_Reports_For_Day", AttendanceReports.getAttendanceReportForDay);
+
+router.get("/Get_Reports_For_Week", AttendanceReports.getAttendanceReportForWeek)
+
 
 
 
