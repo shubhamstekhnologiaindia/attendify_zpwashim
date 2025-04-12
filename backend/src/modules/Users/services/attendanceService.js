@@ -60,119 +60,74 @@ export const AttendanceService = {
         [employee_id]
       );
 
-            console.log(attendanceRecords)
+      console.log(attendanceRecords);
 
-            return attendanceRecords
-        } catch (error) {
-            throw error;
-        }
-    },
-
-  // recordOfflineAttendance: async (user_id, attendance) => {
-  //   const {
-  //     morning_in_time = null,
-  //     afternoon_in_time = null,
-  //     out_time = null
-  //   } = attendance;
-
-  //   // 1) Type validation
-  //   if (morning_in_time !== null && typeof morning_in_time !== 'number') {
-  //     throw new Error('morning_in_time must be a number or null');
-  //   }
-  //   if (afternoon_in_time !== null && typeof afternoon_in_time !== 'number') {
-  //     throw new Error('afternoon_in_time must be a number or null');
-  //   }
-  //   if (out_time !== null && typeof out_time !== 'number') {
-  //     throw new Error('out_time must be a number or null');
-  //   }
-
-  //   // 2) Adjust each epoch for IST‐day
-  //   // const adjMorning   = epochToIST(morning_in_time);
-  //   // const adjAfternoon = epochToIST(afternoon_in_time);
-  //   // const adjOut       = epochToIST(out_time);
-
-  //   // console.log(adjMorning)
-
-  //   // console.log(adjAfternoon)
-
-  //   // console.log(adjOut)
-
-  //   // 3) Call your stored procedure
-  //   try {
-  //     await query(
-  //       'CALL MarkofflineAttendance1(?, ?, ?, ?)',
-  //       [user_id, js, afternoon_in_time, out_time]
-  //     );
-  //     return { status: true, message: 'Attendance recorded successfully' };
-  //   } catch (err) {
-  //     if (err.sqlState === '45000') {
-  //       // SP signaled a business error
-  //       throw new Error(err.sqlMessage);
-  //     }
-  //     console.error(err);
-  //     throw new Error('Database error');
-  //   }
-  // }
-
-    recordOfflineAttendance: async (user_id, morning_in_time, afternoon_in_time, out_time) => {
-      try {
-      
-        const insertQuery = `CALL MarkOfflineAttendance(?, ?, ?, ?)`;
-        const result = await query(insertQuery, [
-          user_id,
-          morning_in_time,
-          afternoon_in_time,
-          out_time
-        ]);
-    
-        return {
-          status: true,
-          message: "Attendance recorded successfully"
-        };
-      } catch (error) {
-        if (error.sqlState === '45000') {
-          throw new Error(error.sqlMessage);
-        }
-        throw new Error("Database error");
-      }
-    },
-
-
-
-
-
-    getAttendanceReport: async (date, department_id, cader_id) => {
-      try {
-        console.log(`Fetching report for date: ${date}, department_id: ${department_id}, cader_id: ${cader_id}`);
-  
-        // Execute the stored procedure
-        const [result] = await query("CALL GetAttendanceReport(?, ?, ?)", [date, department_id, cader_id]);
-  
-        // The result is an array of rows; take the first row since the SP returns one row
-        const report = result[0];
-  
-        return {
-          total_users: report.total_users,
-          morning_present: report.morning_present,
-          afternoon_present: report.afternoon_present,
-          evening_present: report.evening_present
-        };
-      } catch (error) {
-        if (error.sqlState === '45000') {
-          throw { status: false, message: error.sqlMessage };
-        }
-        throw { status: false, message: "Database error while fetching attendance report" };
-      }
+      return attendanceRecords;
+    } catch (error) {
+      throw error;
     }
+  },
 
+  recordOfflineAttendance: async (
+    user_id,
+    morning_in_time,
+    afternoon_in_time,
+    out_time
+  ) => {
+    try {
+      const insertQuery = `CALL MarkOfflineAttendance(?, ?, ?, ?)`;
+      const result = await query(insertQuery, [
+        user_id,
+        morning_in_time,
+        afternoon_in_time,
+        out_time,
+      ]);
 
-
-
-
-
-
-
+      return {
+        status: true,
+        message: "Attendance recorded successfully",
+      };
+    } catch (error) {
+      if (error.sqlState === "45000") {
+        throw new Error(error.sqlMessage);
+      }
+      throw new Error("Database error");
     }
+  },
+
+  getAttendanceReport: async (date, department_id, cader_id) => {
+    try {
+      console.log(
+        `Fetching report for date: ${date}, department_id: ${department_id}, cader_id: ${cader_id}`
+      );
+
+      // Execute the stored procedure
+      const [result] = await query("CALL GetAttendanceReport(?, ?, ?)", [
+        date,
+        department_id,
+        cader_id,
+      ]);
+
+      // The result is an array of rows; take the first row since the SP returns one row
+      const report = result[0];
+
+      return {
+        total_users: report.total_users,
+        morning_present: report.morning_present,
+        afternoon_present: report.afternoon_present,
+        evening_present: report.evening_present,
+      };
+    } catch (error) {
+      if (error.sqlState === "45000") {
+        throw { status: false, message: error.sqlMessage };
+      }
+      throw {
+        status: false,
+        message: "Database error while fetching attendance report",
+      };
+    }
+  },
+};
 
 // UTC to Epoch conversion
 export const utcToEpoch = (utcString) => {
@@ -231,6 +186,7 @@ export const getCurrentTime = () => {
 // Example usage
 const example = () => {
   const istEpoch = getCurrentISTEpoch();
+
   // Current time in all formats
   const current = getCurrentTime();
 };

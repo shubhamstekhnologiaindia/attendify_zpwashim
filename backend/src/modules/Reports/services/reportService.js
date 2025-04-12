@@ -27,6 +27,36 @@ export const reportService = {
         }
         
     },
+    getWeeklyAttendanceReport: async (start_date, department_id, cader_id) => {
+      try {
+          console.log(`Fetching weekly report from: ${start_date}, department: ${department_id}, cader: ${cader_id}`);
+
+          // Execute the stored procedure
+          const [result] = await query("CALL GetWeeklyAttendanceReport(?, ?, ?)", [
+              start_date,
+              department_id,
+              cader_id
+          ]);
+
+          // The result is an array of rows - map to desired format
+          return result.map(row => ({
+              date: row.date,
+              total_users: row.total_users,
+              morning_present: row.morning_present,
+              afternoon_present: row.afternoon_present,
+              evening_present: row.evening_present
+          }));
+      } catch (error) {
+          if (error.sqlState === '45000') {
+              throw { status: false, message: error.sqlMessage };
+          }
+          throw { 
+              status: false, 
+              message: "Database error while fetching weekly attendance report" 
+          };
+      }
+  },
+ 
 
 
     getAttendanceReportForYear: async (year, department_id, cader_id) => {

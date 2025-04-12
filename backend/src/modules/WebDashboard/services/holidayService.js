@@ -19,9 +19,15 @@ export const HolidayService = {
         return results.map(holiday => ({
             id: holiday.id,
             date: moment(holiday.holiday_date).format("YYYY-MM-DD"),
-            // day: moment(holiday.holiday_date).format("dddd"),
             name_english: holiday.holiday_name_eng,
             name_marathi: holiday.holiday_name_mr
         }));
+    },
+
+    getRadius: async () => {
+        const sql = `SELECT radius FROM tbl_loc_radius ORDER BY id DESC LIMIT 1`;
+        const results = await query(sql);
+        return results.length > 0 ? results[0].radius : null;
     }
 };
+
