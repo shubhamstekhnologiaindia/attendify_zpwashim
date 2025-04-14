@@ -16,6 +16,9 @@ router.get("/Get_Reports_For_Year/", AttendanceReports.getAttendanceReportForYea
 router.get("/Get_Reports_For_Month", AttendanceReports.getAttendanceReportForMonth);
 
 router.get("/mob_no_reports", AttendanceReports.getAttendanceForUser);
+router.get("/Get_Reports_For_Day_SecondScreen", AttendanceReports.GetAttReportForDaySecondScreen);
+
+router.get("/Get_Reports_For_Week_SecondScreen", AttendanceReports.GetAttReportForWeekSecondScreen);
 
 
 export default router;
