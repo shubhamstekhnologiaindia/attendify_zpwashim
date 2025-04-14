@@ -124,7 +124,7 @@ export const AttendanceReports = {
     }
   },
 
-  getAttendanceForUser: async (req, res) => {
+  getAttendanceReportMobno: async (req, res) => {
     try {
       const { mobile_no, date, week, month, year } = req.body;
 
@@ -159,7 +159,7 @@ export const AttendanceReports = {
       }
 
       // Call service
-      const result = await reportService.getAttendanceForUser({ mobile_no, date, week, month, year });
+      const result = await reportService.getAttendanceReportMobno({ mobile_no, date, week, month, year });
 
       return res.status(200).json({
         status: true,

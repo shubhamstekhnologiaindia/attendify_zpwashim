@@ -131,7 +131,7 @@ export const reportService = {
     }
   },
 
-  getAttendanceForUser: async ({ mobile_no, date, week, month, year }) => {
+  getAttendanceReportMobno: async ({ mobile_no, date, week, month, year }) => {
     try {
       console.log(
         `Fetching attendance for mobile: ${mobile_no}, date: ${date}, week: ${week}, month: ${month}, year: ${year}`
