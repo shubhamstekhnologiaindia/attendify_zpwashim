@@ -114,7 +114,7 @@ export const AttendanceReports = {
   
         return res.status(200).json({
           status: true,
-          data: result.report,
+          data: result,
           message: "Attendance report retrieved successfully"
         });
       } catch (error) {

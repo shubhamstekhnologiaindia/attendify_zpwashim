@@ -89,10 +89,10 @@ return{report}
 
   GetAttReportForWeekSecondScreen: async (start_date, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
     try {
-      console.log(`Fetching report for date: ${start_date}, department_id: ${department_id}, attendance_period: ${attendance_period}, filters:`, { headquarter_id, taluka_id, sanstha_id, cader_id });
+     // console.log(`Fetching report for date: ${start_date}, department_id: ${department_id}, attendance_period: ${attendance_period}, filters:`, { headquarter_id, taluka_id, sanstha_id, cader_id });
 
       // Execute the stored procedure
-      const [result] = await query("CALL GetAttReportForDaySecondScreen(?, ?, ?, ?, ?, ?, ?)", [
+      const [result] = await query("CALL GetAttReportForWeekSecondScreen(?, ?, ?, ?, ?, ?, ?)", [
         start_date,
         department_id,
         attendance_period,
@@ -102,9 +102,20 @@ return{report}
         cader_id
       ]);
 
-      const report = result[0];
+      // const report = result[0];
 
-return{report}
+      // console.log(result)
+
+      return result.map(row => ({
+        date: row.date,
+        total_users: row.total_users,
+        morning_present: row.morning_present,
+        afternoon_present: row.afternoon_present,
+        evening_present: row.evening_present
+    }));
+
+
+// return{result}
 
     } catch (error) {
       if (error.sqlState === '45000') {
