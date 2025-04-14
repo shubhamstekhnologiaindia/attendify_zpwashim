@@ -16,6 +16,8 @@ router.get("/Get_Reports_For_Day_SecondScreen", AttendanceReports.GetAttReportFo
 router.get("/Get_Reports_For_Week_SecondScreen", AttendanceReports.GetAttReportForWeekSecondScreen);
 
 
+router.get("/Get_Reports_For_Month_SecondScreen", AttendanceReports.GetAttReportFormonthSecondScreen)
+
 export default router;
 
 
