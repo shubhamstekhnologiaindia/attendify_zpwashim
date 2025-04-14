@@ -7,10 +7,10 @@ dotenv.config();
 import AuthRoute from "./src/modules/Auth/routes/authRoute.js";
 import masterDataRoute from "./src/modules/MasterData/routes/masterDataRoute.js";
 import attendanceRoute from "./src/modules/Users/routes/attendanceRoute.js";
-import userRoute from "./src/modules/Users/routes/userRoute.js";
+// import userRoute from "./src/modules/Users/routes/userRoute.js";
 import hodRoutes from "./src/modules/Hod/routes/hodRoute.js";
 import GrRoutes from "./src/modules/Admin/routes/GrRoute.js";
-import UserRoutes from "./src/modules/Users/routes/userRoute.js";
+// import UserRoutes from "./src/modules/Users/routes/userRoute.js";
 
 import SendmsgRoute from "./src/modules/Admin/routes/msgRoute.js";
 import  HqRoutes from "./src/modules/Admin/routes/hqRoute.js";
@@ -37,7 +37,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', AuthRoute);
 // app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,UserRoutes, notificationRoutes, holidayRoute, birthdayRoute,forgotPasswordRoute,attendanceCountRoute);
 // app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,userRoute,loginPermissionRoutes);
-app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserRoute,otpRoute,loginPermissionRoutes,reportsRoute,attendanceCountRoute);
+app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserRoute,otpRoute,
+  loginPermissionRoutes,reportsRoute,attendanceCountRoute,forgotPasswordRoute);
 
 const PORT = 3001
  
