@@ -303,9 +303,72 @@ export const AttendanceReports = {
       console.error(error);  // Log the error for debugging
       return res.status(400).json({ status: false, message: error.message });
     }
-}
+},
 
-  
+GetAttendanceReportForWeekDateForthScreen: async (req, res) => {
+  try {
+      const { date, cader_id, location_id, attendance_period } = req.query;
+      console.log(req.query);
+      if (!date || !cader_id || !location_id || !attendance_period) {
+          return res.status(400).json({
+              status: false,
+              message: "date, cader_id, location_id, and attendance_period are required"
+          });
+      }
+
+      const result = await reportService.GetAttendanceReportForWeekDateForthScreen(
+          date,
+          cader_id,
+          location_id,
+          attendance_period
+      );
+
+      return res.status(200).json({
+          status: true,
+          data: result,
+          message: "Attendance report fetched successfully"
+      });
+
+  } catch (error) {
+      return res.status(500).json({
+          status: false,
+          message: error.message || "Error fetching attendance data"
+      });
+  }
+},
+
+
+GetAttendanceReportForYearForthScreen: async (req, res) => {
+  try {
+      const { year, cader_id, location_id, attendance_period } = req.query;
+      console.log(req.query);
+      if (!year || !cader_id || !location_id || !attendance_period) {
+          return res.status(400).json({
+              status: false,
+              message: "year, cader_id, location_id, and attendance_period are required"
+          });
+      }
+
+      const result = await reportService.GetAttendanceReportForYearForthScreen(
+          year,
+          cader_id,
+          location_id,
+          attendance_period
+      );
+
+      return res.status(200).json({
+          status: true,
+          data: result,
+          message: "Attendance report fetched successfully"
+      });
+
+  } catch (error) {
+      return res.status(500).json({
+          status: false,
+          message: error.message || "Error fetching attendance data"
+      });
+  }
+},
   
   
 
