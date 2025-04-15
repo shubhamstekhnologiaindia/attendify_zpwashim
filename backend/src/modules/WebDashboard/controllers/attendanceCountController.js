@@ -29,7 +29,7 @@ export const AttendanceCountController = {
         }
       },
 
-      getUserDistrictCounts: async (req, res) => {
+    getUserDistrictCounts: async (req, res) => {
         try {
           const counts = await AttendanceCountService.getUserCountsForDistrict();
       
