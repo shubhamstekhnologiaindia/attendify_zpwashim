@@ -273,6 +273,38 @@ export const reportService = {
       };
     }
   },
+
+
+  GetAttReportFormonthSecondScreen: async (month, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
+    try {
+   
+      const [result] = await query("CALL GetAttReportForMonthSecondScreen(?, ?, ?, ?, ?, ?, ?)", [
+        month,
+        department_id,
+        attendance_period,
+        headquarter_id,
+        taluka_id,
+        sanstha_id,
+        cader_id
+      ]);
+ 
+      return result.map(row => ({
+        date: row.date,
+        total_users: row.total_users,
+        present_users: row.present_count,
+        absent_users:row.total_users-row.present_count,
+    }));
+ 
+    } catch (error) {
+      if (error.sqlState === '45000') {
+        throw { status: false, message: error.sqlMessage };
+      }
+      throw { status: false, message: "Database error while fetching attendance report" };
+    }
+  },
+
+
+
   GetAttendanceReportForYearSecondScreen: async (year, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
     try {
       const [result] = await query(
@@ -329,8 +361,6 @@ export const reportService = {
         throw { status: false, message: error.message || "Database error while fetching attendance report" };
     }
 }
-
-
   
   
 };
