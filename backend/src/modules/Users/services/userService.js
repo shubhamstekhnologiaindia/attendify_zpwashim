@@ -6,139 +6,56 @@ import path from "path";
 
 export const UserService = {
 
-//   RegisterUser: async (userData) => {
-//     try {
-//         const {
-//             first_name, middle_name, last_name,
-//             mob_no, email, department_id, office_location_id,
-//             taluka_id, village_id, cader_id,
-//             password, role_id, device_id
-//         } = userData;
-      
-//         const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-     
-
-//         const results = await query(sql, [
-//             encrypt(first_name),
-//             encrypt(middle_name),
-//             encrypt(last_name),
-//             encryptDeterministic(mob_no),
-//             encrypt(email),
-//             department_id,
-//             office_location_id,
-//             taluka_id,
-//             village_id,
-//             cader_id,
-//             encrypt(password),
-//             role_id,
-//             device_id
-//         ]);
-
-//         console.log(results)
-
-//         return results;
-//     } catch (error) {
-//         console.error("Error in RegisterUser service:", error);
-//         throw new Error("Failed to register user");
-//     }
-// },
-
-
 RegisterUser: async (userData) => {
   try {
-      const {
-          first_name, middle_name, last_name,
-          mob_no, email,birth_date, department_id, office_location_id,
-          taluka_id, village_id, cader_id,
-          password, role_id, device_id
-      } = userData;
+    const {
+      first_name, middle_name, last_name,
+      mob_no, email, birth_date, department_id, office_location_id,
+      taluka_id, village_id, cader_id,
+      password, role_id, device_id
+    } = userData;
 
-      const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    // ✅ Check if user exists with encrypted deterministic mobile number
+    const encryptedMobNo = encryptDeterministic(mob_no);
+    const checkUserSql = `SELECT * FROM users WHERE mob_no = ? LIMIT 1`;
+    const existingUser = await query(checkUserSql, [encryptedMobNo]);
 
-      const hashedPassword = await bcrypt.hash(password, 10); // ✅ Bcrypt hash
+    if (existingUser.length > 0) {
+      // User already exists
+      return { alreadyExists: true };
+    }
 
-      const results = await query(sql, [
-          encrypt(first_name),
-          encrypt(middle_name),
-          encrypt(last_name),
-          encryptDeterministic(mob_no),
-          encrypt(email),
-          birth_date,
-          department_id,
-          office_location_id,
-          taluka_id,
-          village_id,
-          cader_id,
-          hashedPassword, // ✅ Use hashed password
-          role_id,
-          device_id
-      ]);
+    // Continue registration
+    const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-      return results;
+    const results = await query(sql, [
+      encrypt(first_name),
+      encrypt(middle_name),
+      encrypt(last_name),
+      encryptedMobNo,
+      encrypt(email),
+      birth_date,
+      department_id,
+      office_location_id,
+      taluka_id,
+      village_id,
+      cader_id,
+      hashedPassword,
+      role_id,
+      device_id
+    ]);
+
+    return { success: true, data: results };
   } catch (error) {
-      console.error("Error in RegisterUser service:", error);
-      throw new Error("Failed to register user");
+    console.error("Error in RegisterUser service:", error);
+    throw new Error("Failed to register user");
   }
 },
 
-
-
-  // getUserProfileById: async (id) => {
-  //   const user = await query(
-  //     "SELECT id, first_name, middle_name, last_name, mob_no, email FROM users WHERE id = ?",
-  //     [id]
-  //   );
-
-  //   if (user.length === 0) {
-  //     return null;
-  //   }
-
-  //   return {
-  //     id: user[0].id,
-  //     first_name: decrypt(user[0].first_name),
-  //     middle_name: user[0].middle_name ? decrypt(user[0].middle_name) : null,
-  //     last_name: decrypt(user[0].last_name),
-  //     mob_no: decryptDeterministic(user[0].mob_no), 
-  //     email: user[0].email ? decrypt(user[0].email) : null,
-  //   };
-  // },
-
-  SendOtp: async (phoneNumber, otp) => {
-   
-    try {
-        const apiUrl = 'http://bulksms.saakshisoftware.com/api/mt/SendSMS';
-
-        const params = {
-            user: 'Tekhnologia',
-            password: 'Tech%40123%23',
-            senderid: 'SNILKT',
-            channel: 'Trans',
-            DCS: '04',
-            flashsms: '0',
-            number: phoneNumber,
-            text: `आपला ओटीपी क्रमांक आहे: ${otp} कृपया हा ओटीपी पुढील प्रक्रियेसाठी वापरा. - झेडपी वाशिम SHRI NILKANTHESHWAR`,
-            route: '04',
-            DLTTemplateId: '1707174402037894471',
-            PEID: '1701172491385434035'
-        };
-
-        const response = await axios.get(apiUrl, { params });
-      
-
-        if (response.status === 200) {
-            return response.data; // Return the response data if needed
-        } else {
-            throw new Error("Failed to send OTP");
-        }
-    } catch (error) {
-        console.error("Error in SendOtp service:", error);
-        throw new Error("Failed to send OTP");
-    }
-},
 getUserProfileById: async (id) => {
   const user = await query(
-    "SELECT id, first_name, middle_name, last_name, mob_no, email, birth_date, user_profile FROM users WHERE id = ?",
+    "SELECT id, first_name, middle_name, last_name, mob_no, email,user_profile,DATE_FORMAT(birth_date, '%Y-%m-%d') AS birth_date FROM users WHERE id = ?",
     [id]
   );
 
@@ -151,13 +68,12 @@ getUserProfileById: async (id) => {
     first_name: decrypt(user[0].first_name),
     middle_name: user[0].middle_name ? decrypt(user[0].middle_name) : null,
     last_name: decrypt(user[0].last_name),
-    mob_no: decryptDeterministic(user[0].mob_no),
+    mob_no: decryptDeterministic(user[0].mob_no), 
     email: user[0].email ? decrypt(user[0].email) : null,
-    birth_date: user[0].birth_date || null, // Already in YYYY-MM-DD format
-    user_profile: user[0].user_profile ? '/' + user[0].user_profile.replace(/\\/g, '/') : null
-  };
+    birth_date: user[0].birth_date ,
+    user_profile: user[0].user_profile ? `/` + user[0].user_profile.replace(/\\/g, "/") : null
+  }
 },
-
 
 updateUserProfile: async (userId, data, file) => {
   try {
@@ -203,10 +119,52 @@ updateUserProfile: async (userId, data, file) => {
       birth_date || null,
       userId
     ]);
-
+    console.log("SQL values:", {
+      encryptedFirstName,
+      encryptedMiddleName,
+      encryptedLastName,
+      encryptedEmail,
+      user_profile,
+      birth_date,
+      userId
+    });
+    
   } catch (error) {
     console.error("Error updating user profile:", error.message);
     throw error;
   }
+},
+
+SendOtp: async (phoneNumber, otp) => {
+   
+    try {
+        const apiUrl = 'http://bulksms.saakshisoftware.com/api/mt/SendSMS';
+
+        const params = {
+            user: 'Tekhnologia',
+            password: 'Tech%40123%23',
+            senderid: 'SNILKT',
+            channel: 'Trans',
+            DCS: '04',
+            flashsms: '0',
+            number: phoneNumber,
+            text: `आपला ओटीपी क्रमांक आहे: ${otp} कृपया हा ओटीपी पुढील प्रक्रियेसाठी वापरा. - झेडपी वाशिम SHRI NILKANTHESHWAR`,
+            route: '04',
+            DLTTemplateId: '1707174402037894471',
+            PEID: '1701172491385434035'
+        };
+
+        const response = await axios.get(apiUrl, { params });
+      
+
+        if (response.status === 200) {
+            return response.data; // Return the response data if needed
+        } else {
+            throw new Error("Failed to send OTP");
+        }
+    } catch (error) {
+        console.error("Error in SendOtp service:", error);
+        throw new Error("Failed to send OTP");
+    }
 }
 };
