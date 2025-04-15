@@ -123,53 +123,92 @@ export const AttendanceReports = {
       return res.status(400).json({ status: false, message: error.message });
     }
   },
-
   getAttendanceReportMobno: async (req, res) => {
     try {
       const { mobile_no, date, week, month, year } = req.body;
-
-      // Validate required fields
+  
       if (!mobile_no) {
         return res.status(400).json({ status: false, message: "mobile_no is required" });
       }
-
-      // Validate that at least one time period is provided
+  
       if (!date && !week && !month && !year) {
         return res.status(400).json({ status: false, message: "At least one of date, week, month, or year must be provided" });
       }
-
-      // Validate date format if provided
+  
       if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
         return res.status(400).json({ status: false, message: "Invalid date format: Use YYYY-MM-DD" });
       }
-
-      // Validate week if provided
-      if (week !== undefined && (week < 1 || week > 53)) {
+  
+      if (week && (week < 1 || week > 53)) {
         return res.status(400).json({ status: false, message: "week must be between 1 and 53" });
       }
-
-      // Validate month if provided
-      if (month !== undefined && (month < 1 || month > 12)) {
+  
+      if (month && (month < 1 || month > 12)) {
         return res.status(400).json({ status: false, message: "month must be between 1 and 12" });
       }
-
-      // Validate year requirement for week or month
-      if ((week !== undefined || month !== undefined) && !year) {
+  
+      if ((week || month) && !year) {
         return res.status(400).json({ status: false, message: "year is required when week or month is provided" });
       }
-
-      // Call service
+  
       const result = await reportService.getAttendanceReportMobno({ mobile_no, date, week, month, year });
-
+  
       return res.status(200).json({
         status: true,
         data: result,
         message: "Attendance retrieved successfully"
       });
+  
     } catch (error) {
-      return res.status(400).json({ status: false, message: error.message });
+      return res.status(400).json({ status: false, message: error.message || "Something went wrong" });
     }
   },
+  // getAttendanceReportMobno: async (req, res) => {
+  //   try {
+  //     const { mobile_no, date, week, month, year } = req.body;
+
+  //     // Validate required fields
+  //     if (!mobile_no) {
+  //       return res.status(400).json({ status: false, message: "mobile_no is required" });
+  //     }
+
+  //     // Validate that at least one time period is provided
+  //     if (!date && !week && !month && !year) {
+  //       return res.status(400).json({ status: false, message: "At least one of date, week, month, or year must be provided" });
+  //     }
+
+  //     // Validate date format if provided
+  //     if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+  //       return res.status(400).json({ status: false, message: "Invalid date format: Use YYYY-MM-DD" });
+  //     }
+
+  //     // Validate week if provided
+  //     if (week !== undefined && (week < 1 || week > 53)) {
+  //       return res.status(400).json({ status: false, message: "week must be between 1 and 53" });
+  //     }
+
+  //     // Validate month if provided
+  //     if (month !== undefined && (month < 1 || month > 12)) {
+  //       return res.status(400).json({ status: false, message: "month must be between 1 and 12" });
+  //     }
+
+  //     // Validate year requirement for week or month
+  //     if ((week !== undefined || month !== undefined) && !year) {
+  //       return res.status(400).json({ status: false, message: "year is required when week or month is provided" });
+  //     }
+
+  //     // Call service
+  //     const result = await reportService.getAttendanceReportMobno({ mobile_no, date, week, month, year });
+
+  //     return res.status(200).json({
+  //       status: true,
+  //       data: result,
+  //       message: "Attendance retrieved successfully"
+  //     });
+  //   } catch (error) {
+  //     return res.status(400).json({ status: false, message: error.message });
+  //   }
+  // },
 
 
   GetAttReportForDaySecondScreen: async (req, res) => {

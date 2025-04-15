@@ -7,17 +7,12 @@ const router = express.Router();
 
 
 router.get("/Get_Reports_For_Day", AttendanceReports.getAttendanceReportForDay);
-
 router.get("/Get_Reports_For_Week", AttendanceReports.getAttendanceReportForWeek)
-
-
-// router.get("/Get_Reports_For_Day/", AttendanceReports.getAttendanceReportForDay);
 router.get("/Get_Reports_For_Year/", AttendanceReports.getAttendanceReportForYear);
 router.get("/Get_Reports_For_Month", AttendanceReports.getAttendanceReportForMonth);
-
 router.get("/Get_Reports_Mob_no", AttendanceReports.getAttendanceReportMobno);
-router.get("/Get_Reports_For_Day_SecondScreen", AttendanceReports.GetAttReportForDaySecondScreen);
 
+router.get("/Get_Reports_For_Day_SecondScreen", AttendanceReports.GetAttReportForDaySecondScreen);
 router.get("/Get_Reports_For_Week_SecondScreen", AttendanceReports.GetAttReportForWeekSecondScreen);
 
 
