@@ -94,7 +94,7 @@ export const AttendanceReports = {
       return res.status(400).json({ status: false, message: error.message });
     }
   },
-  // New endpoint for monthly report
+ 
   getAttendanceReportForMonth: async (req, res) => {
     try {
       const { year, month, department_id, cader_id } = req.query;
@@ -337,10 +337,5 @@ export const AttendanceReports = {
       return res.status(400).json({ status: false, message: error.message });
     }
   },
-
-    
-
-
-
 
     }

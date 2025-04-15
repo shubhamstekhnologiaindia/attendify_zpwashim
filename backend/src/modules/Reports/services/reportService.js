@@ -259,12 +259,11 @@ export const reportService = {
     }
   },
 
-
-  GetAttReportFormonthSecondScreen: async (month, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
+  GetAttReportFormonthSecondScreen: async (start_date, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
     try {
    
-      const [result] = await query("CALL GetAttReportForMonthSecondScreen(?, ?, ?, ?, ?, ?, ?)", [
-        month,
+      const [result] = await query("CALL GetAttReportForWeekSecondScreen(?, ?, ?, ?, ?, ?, ?)", [
+        start_date,
         department_id,
         attendance_period,
         headquarter_id,
@@ -287,8 +286,6 @@ export const reportService = {
       throw { status: false, message: "Database error while fetching attendance report" };
     }
   },
-
-
 
   GetAttendanceReportForYearSecondScreen: async (year, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
     try {
@@ -331,7 +328,7 @@ export const reportService = {
         }
 
         return result.map(row => {
-            const dateObj = new Date(row.date ); // Fix time zone parsing
+            const dateObj = new Date(row.date ); 
             const formattedDate = dateObj.toISOString().split('T')[0]; // yyyy-mm-dd
             return {
                 date: formattedDate,
@@ -346,6 +343,5 @@ export const reportService = {
         throw { status: false, message: error.message || "Database error while fetching attendance report" };
     }
 }
-  
-  
+
 };
