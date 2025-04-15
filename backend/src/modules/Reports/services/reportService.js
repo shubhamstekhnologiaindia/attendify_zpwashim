@@ -274,7 +274,6 @@ export const reportService = {
     }
   },
 
-
   GetAttReportFormonthSecondScreen: async (month, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
     try {
    
@@ -302,8 +301,6 @@ export const reportService = {
       throw { status: false, message: "Database error while fetching attendance report" };
     }
   },
-
-
 
   GetAttendanceReportForYearSecondScreen: async (year, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
     try {
@@ -360,7 +357,70 @@ export const reportService = {
         console.error("Error occurred in GetAttendanceReportForWeekThirdScreen:", error);  // Log full error for debugging
         throw { status: false, message: error.message || "Database error while fetching attendance report" };
     }
-}
-  
-  
+},
+
+GetAttReportForMonthUserDetails: async (
+  year,
+  month,
+  cader_id,
+  location_id,
+  attendance_period
+) => {
+  try {
+    // Validate required fields
+    if (!year || !month || !cader_id || !location_id || !attendance_period) {
+      throw new Error(
+        "year, month, cader_id, location_id, and attendance_period are required"
+      );
+    }
+
+    // Ensure attendance_period is valid
+    if (![1, 2, 3].includes(parseInt(attendance_period))) {
+      throw new Error("attendance_period must be 1, 2, or 3");
+    }
+
+    // Validate month
+    const monthNum = parseInt(month);
+    if (monthNum < 1 || monthNum > 12) {
+      throw new Error("month must be between 1 and 12");
+    }
+
+    // Validate year (basic check for reasonable values)
+    const yearNum = parseInt(year);
+    if (yearNum < 2000 || yearNum > 2100) {
+      throw new Error("year must be between 2000 and 2100");
+    }
+
+    const [result] = await query(
+      "CALL GetAttReportForMonthForthScreen(?, ?, ?, ?, ?)",
+      [
+        yearNum,
+        monthNum,
+        parseInt(cader_id),
+        parseInt(location_id),
+        parseInt(attendance_period),
+      ]
+    );
+
+    // Decrypt first_name and last_name for each record
+    const decryptedResult = result.map((record) => ({
+      ...record,
+      first_name: record.first_name ? decrypt(record.first_name) : null,
+      middle_name: record.middle_name ? decrypt(record.middle_name) : null,
+      last_name: record.last_name ? decrypt(record.last_name) : null,
+
+      // Optionally decrypt mob_no if it's not already handled deterministically
+      // mob_no: record.mob_no ? decryptDeterministic(record.mob_no) : null,
+    }));
+
+    return decryptedResult;
+  } catch (error) {
+    throw new Error(error.message || "Error fetching attendance report");
+  }
+},
+
 };
+
+  
+  
+

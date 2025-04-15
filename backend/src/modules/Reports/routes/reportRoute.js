@@ -25,7 +25,10 @@ router.get('/Get_Reports_For_Year_SecondScreen', AttendanceReports.GetAttendance
 
 router.get('/Get_Reports_For_Week_ThirdScreen', AttendanceReports.GetAttendanceReportForWeekThirdScreen);
 
-router.get("/Get_Reports_For_Month_SecondScreen", AttendanceReports.GetAttReportFormonthSecondScreen)
+router.get("/Get_Reports_For_Month_SecondScreen", AttendanceReports.GetAttReportFormonthSecondScreen);
+
+router.get("/GetAttReportForMonthUserDetails", AttendanceReports.GetAttReportForMonthUserDetails);
+
 
 export default router;
 
