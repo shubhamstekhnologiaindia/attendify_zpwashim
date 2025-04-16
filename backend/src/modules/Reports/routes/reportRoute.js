@@ -14,8 +14,8 @@ router.get('/get-reports-for-month', AttendanceReports.getAttendanceReportForMon
 
 // router.get("/Get_Reports_For_Day/", AttendanceReports.getAttendanceReportForDay);
 router.get("/Get_Reports_For_Year/", AttendanceReports.getAttendanceReportForYear);
-router.get("/Get_Reports_For_Month", AttendanceReports.getAttendanceReportForMonth);
-
+router.get("/Get_Reports_For_Month_SecondScreen", AttendanceReports.GetAttReportFormonthSecondScreen);
+ 
 router.get("/Get_Reports_Mob_no", AttendanceReports.getAttendanceReportMobno);
 router.get("/Get_Reports_For_Day_SecondScreen", AttendanceReports.GetAttReportForDaySecondScreen);
 

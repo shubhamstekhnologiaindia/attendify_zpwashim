@@ -315,7 +315,50 @@ export const AttendanceReports = {
     }
   },
 
-
+  GetAttReportFormonthSecondScreen: async (req, res) => {
+    try {
+      const {
+        month,
+        department_id,
+        attendance_period,
+        headquarter_id,
+        taluka_id,
+        sanstha_id,
+        cader_id,
+      } = req.query;
+ 
+      console.log(req.query);
+ 
+      // Validate required fields
+      if (!month || !department_id || !attendance_period) {
+        return res
+          .status(400)
+          .json({
+            status: false,
+            message: "date, department_id, and attendance_period are required",
+          });
+      }
+ 
+      // Call the service with the parameters
+      const result = await reportService.GetAttReportFormonthSecondScreen(
+        month,
+        department_id,
+        attendance_period,
+        headquarter_id || null,
+        taluka_id || null,
+        sanstha_id || null,
+        cader_id || null
+      );
+ 
+      return res.status(200).json({
+        status: true,
+        data: result,
+        message: "Attendance report retrieved successfully",
+      });
+    } catch (error) {
+      return res.status(400).json({ status: false, message: error.message });
+    }
+  },
 
 
  GetAttendanceReportForWeekThirdScreen: async (req, res) => {
