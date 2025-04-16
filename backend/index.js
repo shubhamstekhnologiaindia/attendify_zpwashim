@@ -2,8 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import dotenv from "dotenv";
-dotenv.config();
 
+dotenv.config();
+import './utils/cronJobs.js';
 import AuthRoute from "./src/modules/Auth/routes/authRoute.js";
 import masterDataRoute from "./src/modules/MasterData/routes/masterDataRoute.js";
 import attendanceRoute from "./src/modules/Users/routes/attendanceRoute.js";
