@@ -259,11 +259,11 @@ export const reportService = {
     }
   },
 
-  GetAttReportFormonthSecondScreen: async (start_date, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
+  GetAttReportFormonthSecondScreen: async (month, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
     try {
    
-      const [result] = await query("CALL GetAttReportForWeekSecondScreen(?, ?, ?, ?, ?, ?, ?)", [
-        start_date,
+      const [result] = await query("CALL GetAttReportForMonthSecondScreen(?, ?, ?, ?, ?, ?, ?)", [
+        month,
         department_id,
         attendance_period,
         headquarter_id,
@@ -271,7 +271,7 @@ export const reportService = {
         sanstha_id,
         cader_id
       ]);
- 
+
       return result.map(row => ({
         date: row.date,
         total_users: row.total_users,
