@@ -408,5 +408,28 @@ GetAttendanceReportForYearForthScreen:async(year,cader_id,location_id,attendance
     throw { status: false, message: error.message || "Database error" };
   }
 },
+GetAttendanceReportForDayThirdScreen: async (start_date, department_id, office_location_id, attendance_period) => {
+  try {
+    const [result] = await query(
+      "CALL GetAttReportForDayThirdScreen(?, ?, ?, ?)",
+      [start_date, department_id, attendance_period, office_location_id]
+    );
 
+    if (!result || result.length === 0) {
+      throw new Error("No data returned from the database.");
+    }
+
+    // Format and add absent count
+    return result.map(row => ({
+      cader_name: row.cader_name,
+      total_users: row.total_users,
+      present_users: row.present_count,
+      absent_users: row.total_users - row.present_count
+    }));
+
+  } catch (error) {
+    console.error("Error in GetAttendanceReportForDayThirdScreen:", error);
+    throw { status: false, message: error.message || "Database error while fetching attendance report" };
+  }
+}
 };

@@ -413,6 +413,38 @@ GetAttendanceReportForYearForthScreen: async (req, res) => {
   }
 },
   
-  
+GetAttendanceReportForDayThirdScreen: async (req, res) => {
+  try {
+    const { start_date, department_id, office_location_id, attendance_period } = req.query;
+
+    // Validate input
+    if (!start_date || !department_id || !office_location_id || !attendance_period) {
+      return res.status(400).json({
+        status: false,
+        message: "date, department_id, office_location_id, and attendance_period are required",
+      });
+    }
+
+    const result = await reportService.GetAttendanceReportForDayThirdScreen(
+      start_date,
+      parseInt(department_id),
+      parseInt(office_location_id),
+      parseInt(attendance_period)
+    );
+
+    return res.status(200).json({
+      status: true,
+      data: result,
+      message: "Day attendance report retrieved successfully",
+    });
+
+  } catch (error) {
+    console.error("Controller Error:", error);
+    return res.status(400).json({
+      status: false,
+      message: error.message || "Something went wrong",
+    });
+  }
+}
 
 };

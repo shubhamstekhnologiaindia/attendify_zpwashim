@@ -26,6 +26,7 @@ router.get('/Get_Reports_For_Year_SecondScreen', AttendanceReports.GetAttendance
 router.get('/Get_Reports_For_Week_ThirdScreen', AttendanceReports.GetAttendanceReportForWeekThirdScreen);
 router.get('/Get_Reports_For_Week_Date_FourthScreen', AttendanceReports.GetAttendanceReportForWeekDateForthScreen);
 router.get('/Get_Reports_For_Year_FourthScreen', AttendanceReports.GetAttendanceReportForYearForthScreen);
+router.get('/Get_Reports_For_Day_ThirdScreen', AttendanceReports.GetAttendanceReportForDayThirdScreen);
 
 
 export default router;
