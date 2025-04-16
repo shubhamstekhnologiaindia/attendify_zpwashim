@@ -315,11 +315,11 @@ export const reportService = {
     }
 },
 
-GetAttendanceReportForWeekDateForthScreen: async (date, cader_id, location_id, attendance_period) => {
+GetAttendanceReportForWeekDateForthScreen: async (start_date, cader_id, location_id, attendance_period) => {
   try {
     const [result] = await query(
       "CALL GetAttReportForWeekDateForthScreen(?, ?, ?, ?)",
-      [date, cader_id, location_id, attendance_period]
+      [start_date, cader_id, location_id, attendance_period]
     );
 
     if (!result || result.length === 0) {
@@ -343,7 +343,7 @@ GetAttendanceReportForWeekDateForthScreen: async (date, cader_id, location_id, a
 
       return {
         // emp_id: row.emp_id,  // <-- Return emp_id here
-        date: row.date,
+        start_date: row.date,
         location_name: row.location_name,
         first_name,
         middle_name,
@@ -421,6 +421,7 @@ GetAttendanceReportForDayThirdScreen: async (start_date, department_id, office_l
 
     // Format and add absent count
     return result.map(row => ({
+      cader_id: row.cader_id,            
       cader_name: row.cader_name,
       total_users: row.total_users,
       present_users: row.present_count,
@@ -431,5 +432,36 @@ GetAttendanceReportForDayThirdScreen: async (start_date, department_id, office_l
     console.error("Error in GetAttendanceReportForDayThirdScreen:", error);
     throw { status: false, message: error.message || "Database error while fetching attendance report" };
   }
-}
+},
+
+
+
+GetAttendanceReportForDayForSanstha : async (start_date, attendance_period, department_id, location_type) => {
+  try {
+    const [result] = await query(
+      'CALL GetAttReportForDayForSanstha(?, ?, ?, ?)',
+      [start_date, attendance_period, department_id, location_type]
+    );
+
+    if (!result || result.length === 0) {
+      throw new Error("No data returned from the database.");
+    }
+
+    // Format result to include absent count
+    return result.map(row => ({
+      loc_id:row.loc_id,
+      sanstha_name: row.sanstha_name,
+      total_users: row.total_users,
+      present_users: row.present_count,
+      absent_users: row.total_users - row.present_count
+    }));
+
+  } catch (error) {
+    console.error("Service Error - GetAttendanceReportForDayForSanstha:", error);
+    throw {
+      status: false,
+      message: error.message || "Database error while fetching attendance report"
+    };
+  }
+},
 };
