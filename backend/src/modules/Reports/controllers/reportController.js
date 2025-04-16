@@ -305,6 +305,7 @@ export const AttendanceReports = {
         return res.status(400).json({ status: false, message: error.message });
       }
   },
+  
    GetAttReportFormonthSecondScreen: async (req, res) => {
     try {
       const { month, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id } = req.query;
