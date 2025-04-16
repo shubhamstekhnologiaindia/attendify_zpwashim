@@ -342,6 +342,100 @@ export const reportService = {
         console.error("Error occurred in GetAttendanceReportForWeekThirdScreen:", error);  // Log full error for debugging
         throw { status: false, message: error.message || "Database error while fetching attendance report" };
     }
-}
+},
+
+GetAttendanceReportForWeekDateForthScreen: async (date, cader_id, location_id, attendance_period) => {
+  try {
+    const [result] = await query(
+      "CALL GetAttReportForWeekDateForthScreen(?, ?, ?, ?)",
+      [date, cader_id, location_id, attendance_period]
+    );
+
+    if (!result || result.length === 0) {
+      throw new Error("No attendance data found for the given filters.");
+    }
+
+    return result.map(row => {
+      let first_name = "Decryption Failed";
+      let middle_name = "Decryption Failed";
+      let last_name = "Decryption Failed";
+      let mobile_no = "Hidden";
+
+      try {
+        first_name = decrypt(row.first_name);
+        middle_name = decrypt(row.middle_name);
+        last_name = decrypt(row.last_name);
+        mobile_no = decryptDeterministic(row.mob_no); 
+      } catch (decryptionError) {
+        console.error("Decryption error:", decryptionError);
+      }
+
+      return {
+        // emp_id: row.emp_id,  // <-- Return emp_id here
+        date: row.date,
+        location_name: row.location_name,
+        first_name,
+        middle_name,
+        last_name,
+        mobile_no,
+        cader_name: row.cader_name,
+        attendance_status: row.attendance_status, 
+        total_hours: row.total_hours || null 
+        // user_profile: row.user_profile || null
+      };
+    });
+
+  } catch (error) {
+    console.error("Error in GetAttendanceReportForWeekDateForthScreen:", error);
+    throw { status: false, message: error.message || "Database error" };
+  }
+},
+
+GetAttendanceReportForYearForthScreen:async(year,cader_id,location_id,attendance_period)=>{
+  try {
+    const [result] = await query(
+      "CALL GetAttReportForYearForthScreen(?, ?, ?, ?)",
+      [year, cader_id, location_id, attendance_period]
+    );
+
+    if (!result || result.length === 0) {
+      throw new Error("No attendance data found for the given filters.");
+    }
+
+    return result.map(row => {
+      let first_name = "Decryption Failed";
+      let middle_name = "Decryption Failed";
+      let last_name = "Decryption Failed";
+      let mobile_no = "Hidden";
+
+      try {
+        first_name = decrypt(row.first_name);
+        middle_name = decrypt(row.middle_name);
+        last_name = decrypt(row.last_name);
+        mobile_no = decryptDeterministic(row.mob_no); 
+      } catch (decryptionError) {
+        console.error("Decryption error:", decryptionError);
+      }
+
+      return {
+        // emp_id: row.emp_id,  // <-- Return emp_id here
+        date: row.date,
+        location_name: row.location_name,
+        first_name,
+        middle_name,
+        last_name,
+        mobile_no,
+        cader_name: row.cader_name,
+        attendance_status: row.attendance_status, 
+        total_hours: row.total_hours || null 
+        // user_profile: row.user_profile || null
+      };
+    });
+
+  } catch (error) {
+    console.error("Error in GetAttendanceReportForWeekDateForthScreen:", error);
+    throw { status: false, message: error.message || "Database error" };
+  }
+},
 
 };
