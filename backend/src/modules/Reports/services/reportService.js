@@ -286,7 +286,7 @@ export const reportService = {
         sanstha_id,
         cader_id
       ]);
- 
+
       return result.map(row => ({
         date: row.date,
         total_users: row.total_users,
@@ -343,7 +343,7 @@ export const reportService = {
         }
 
         return result.map(row => {
-            const dateObj = new Date(row.date ); // Fix time zone parsing
+            const dateObj = new Date(row.date ); 
             const formattedDate = dateObj.toISOString().split('T')[0]; // yyyy-mm-dd
             return {
                 date: formattedDate,
@@ -358,6 +358,157 @@ export const reportService = {
         throw { status: false, message: error.message || "Database error while fetching attendance report" };
     }
 },
+
+GetAttendanceReportForWeekDateForthScreen: async (start_date, cader_id, location_id, attendance_period) => {
+  try {
+    const [result] = await query(
+      "CALL GetAttReportShowEmpDetailsByDate(?, ?, ?, ?)",
+      [start_date, cader_id, location_id, attendance_period]
+    );
+
+    if (!result || result.length === 0) {
+      throw new Error("No attendance data found for the given filters.");
+    }
+
+    return result.map(row => {
+      let first_name = "Decryption Failed";
+      let middle_name = "Decryption Failed";
+      let last_name = "Decryption Failed";
+      let mobile_no = "Hidden";
+
+      try {
+        first_name = decrypt(row.first_name);
+        middle_name = decrypt(row.middle_name);
+        last_name = decrypt(row.last_name);
+        mobile_no = decryptDeterministic(row.mob_no); 
+      } catch (decryptionError) {
+        console.error("Decryption error:", decryptionError);
+      }
+
+      return {
+        // emp_id: row.emp_id,  // <-- Return emp_id here
+        start_date: row.date,
+        location_name: row.location_name,
+        first_name,
+        middle_name,
+        last_name,
+        mobile_no,
+        cader_name: row.cader_name,
+        attendance_status: row.attendance_status, 
+        total_hours: row.total_hours || null 
+        // user_profile: row.user_profile || null
+      };
+    });
+
+  } catch (error) {
+    console.error("Error in GetAttendanceReportForWeekDateForthScreen:", error);
+    throw { status: false, message: error.message || "Database error" };
+  }
+},
+
+GetAttendanceReportForYearForthScreen:async(year,cader_id,location_id,attendance_period)=>{
+  try {
+    const [result] = await query(
+      "CALL GetAttReportShowEmpDetailsForYear(?, ?, ?, ?)",
+      [year, cader_id, location_id, attendance_period]
+    );
+
+    if (!result || result.length === 0) {
+      throw new Error("No attendance data found for the given filters.");
+    }
+
+    return result.map(row => {
+      let first_name = "Decryption Failed";
+      let middle_name = "Decryption Failed";
+      let last_name = "Decryption Failed";
+      let mobile_no = "Hidden";
+
+      try {
+        first_name = decrypt(row.first_name);
+        middle_name = decrypt(row.middle_name);
+        last_name = decrypt(row.last_name);
+        mobile_no = decryptDeterministic(row.mob_no); 
+      } catch (decryptionError) {
+        console.error("Decryption error:", decryptionError);
+      }
+
+      return {
+        // emp_id: row.emp_id,  // <-- Return emp_id here
+        date: row.date,
+        location_name: row.location_name,
+        first_name,
+        middle_name,
+        last_name,
+        mobile_no,
+        cader_name: row.cader_name,
+        attendance_status: row.attendance_status, 
+        total_hours: row.total_hours || null 
+        // user_profile: row.user_profile || null
+      };
+    });
+
+  } catch (error) {
+    console.error("Error in GetAttendanceReportForWeekDateForthScreen:", error);
+    throw { status: false, message: error.message || "Database error" };
+  }
+},
+GetAttendanceReportForDayThirdScreen: async (start_date, department_id, office_location_id, attendance_period) => {
+  try {
+    const [result] = await query(
+      "CALL GetAttReportForShowCaderName(?, ?, ?, ?)",
+      [start_date, department_id, attendance_period, office_location_id]
+    );
+
+    if (!result || result.length === 0) {
+      throw new Error("No data returned from the database.");
+    }
+
+    // Format and add absent count
+    return result.map(row => ({
+      cader_id: row.cader_id,            
+      cader_name: row.cader_name,
+      total_users: row.total_users,
+      present_users: row.present_count,
+      absent_users: row.total_users - row.present_count
+    }));
+
+  } catch (error) {
+    console.error("Error in GetAttendanceReportForDayThirdScreen:", error);
+    throw { status: false, message: error.message || "Database error while fetching attendance report" };
+  }
+},
+
+
+
+GetAttendanceReportForDayForSanstha : async (start_date, attendance_period, department_id, location_type) => {
+  try {
+    const [result] = await query(
+      'CALL GetAttReportForDayForSanstha(?, ?, ?, ?)',
+      [start_date, attendance_period, department_id, location_type]
+    );
+
+    if (!result || result.length === 0) {
+      throw new Error("No data returned from the database.");
+    }
+
+    // Format result to include absent count
+    return result.map(row => ({
+      loc_id:row.loc_id,
+      sanstha_name: row.sanstha_name,
+      total_users: row.total_users,
+      present_users: row.present_count,
+      absent_users: row.total_users - row.present_count
+    }));
+
+  } catch (error) {
+    console.error("Service Error - GetAttendanceReportForDayForSanstha:", error);
+    throw {
+      status: false,
+      message: error.message || "Database error while fetching attendance report"
+    };
+  }
+},
+
 
 GetAttReportForMonthUserDetails: async (
   year,
@@ -418,7 +569,6 @@ GetAttReportForMonthUserDetails: async (
     throw new Error(error.message || "Error fetching attendance report");
   }
 },
-
 };
 
   
