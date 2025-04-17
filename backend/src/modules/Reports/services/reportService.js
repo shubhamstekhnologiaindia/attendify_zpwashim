@@ -478,8 +478,6 @@ GetAttendanceReportForDayThirdScreen: async (start_date, department_id, office_l
   }
 },
 
-
-
 GetAttendanceReportForDayForSanstha : async (start_date, attendance_period, department_id, location_type) => {
   try {
     const [result] = await query(
@@ -508,7 +506,6 @@ GetAttendanceReportForDayForSanstha : async (start_date, attendance_period, depa
     };
   }
 },
-
 
 GetAttReportForMonthUserDetails: async (
   year,
@@ -569,4 +566,6 @@ GetAttReportForMonthUserDetails: async (
     throw new Error(error.message || "Error fetching attendance report");
   }
 },
+
+
 };
