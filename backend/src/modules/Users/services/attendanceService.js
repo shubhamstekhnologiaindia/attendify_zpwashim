@@ -68,33 +68,31 @@ export const AttendanceService = {
     }
   },
 
-  recordOfflineAttendance: async (
-    user_id,
-    morning_in_time,
-    afternoon_in_time,
-    out_time
-  ) => {
+  recordOfflineAttendance: async (user_id, morning_in_time, afternoon_in_time, out_time) => {
     try {
-      const insertQuery = `CALL MarkOfflineAttendance(?, ?, ?, ?)`;
-      const result = await query(insertQuery, [
+      // Handle NULL values for optional time fields
+      const morning_in_time_sql = morning_in_time || null;
+      const afternoon_in_time_sql = afternoon_in_time || null;
+      const out_time_sql = out_time || null;
+
+      await query("CALL MarkOfflineAttendance(?, ?, ?, ?)", [
         user_id,
-        morning_in_time,
-        afternoon_in_time,
-        out_time,
+        morning_in_time_sql,
+        afternoon_in_time_sql,
+        out_time_sql,
       ]);
 
       return {
         status: true,
-        message: "Attendance recorded successfully",
+        message: "Offline attendance recorded successfully",
       };
     } catch (error) {
       if (error.sqlState === "45000") {
-        throw new Error(error.sqlMessage);
+        throw { status: false, message: error.sqlMessage };
       }
-      throw new Error("Database error");
+      throw { status: false, message: "Database error" };
     }
   },
-
   getAttendanceReport: async (date, department_id, cader_id) => {
     try {
       console.log(

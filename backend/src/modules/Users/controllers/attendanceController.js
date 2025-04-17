@@ -103,31 +103,24 @@ export const AttendanceController = {
   // },
 
 
-  recordOfflineAttendance :async (req, res) => {
-    const { user_id, attendance } = req.body;
-    const { morning_in_time, afternoon_in_time, out_time } = attendance;
-
-
-    console.log(user_id)
-  
-    if (!user_id || (!morning_in_time && !afternoon_in_time && !out_time)) {
-      return res.status(400).json({ error: 'Invalid input data' });
-    }
-  
-    console.log( morning_in_time, afternoon_in_time, out_time )
-
+  recordOfflineAttendance: async (req, res) => {
     try {
+      const { user_id, morning_in_time, afternoon_in_time, out_time } = req.body;
+
+      if (!user_id) {
+        return res.status(400).json({ status: false, message: "user_id is required" });
+      }
+
       const result = await AttendanceService.recordOfflineAttendance(
         user_id,
         morning_in_time,
         afternoon_in_time,
         out_time
       );
-      res.status(200).json({ message: 'Attendance managed successfully', data: result });
+      return res.status(200).json(result);
     } catch (error) {
-      res.status(500).json({ error: 'An error occurred while managing attendance' });
+      return res.status(400).json({ status: false, message: error.message });
     }
-
-  }
+  },
 
 }
