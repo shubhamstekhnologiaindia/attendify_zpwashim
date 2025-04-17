@@ -318,7 +318,7 @@ export const reportService = {
 GetAttendanceReportForWeekDateForthScreen: async (start_date, cader_id, location_id, attendance_period) => {
   try {
     const [result] = await query(
-      "CALL GetAttReportForWeekDateForthScreen(?, ?, ?, ?)",
+      "CALL GetAttReportShowEmpDetailsByDate(?, ?, ?, ?)",
       [start_date, cader_id, location_id, attendance_period]
     );
 
@@ -365,7 +365,7 @@ GetAttendanceReportForWeekDateForthScreen: async (start_date, cader_id, location
 GetAttendanceReportForYearForthScreen:async(year,cader_id,location_id,attendance_period)=>{
   try {
     const [result] = await query(
-      "CALL GetAttReportForYearForthScreen(?, ?, ?, ?)",
+      "CALL GetAttReportShowEmpDetailsForYear(?, ?, ?, ?)",
       [year, cader_id, location_id, attendance_period]
     );
 
@@ -411,7 +411,7 @@ GetAttendanceReportForYearForthScreen:async(year,cader_id,location_id,attendance
 GetAttendanceReportForDayThirdScreen: async (start_date, department_id, office_location_id, attendance_period) => {
   try {
     const [result] = await query(
-      "CALL GetAttReportForDayThirdScreen(?, ?, ?, ?)",
+      "CALL GetAttReportForShowCaderName(?, ?, ?, ?)",
       [start_date, department_id, attendance_period, office_location_id]
     );
 
