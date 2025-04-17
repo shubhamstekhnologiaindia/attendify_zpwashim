@@ -465,6 +465,8 @@ GetAttendanceReportForDayThirdScreen: async (start_date, department_id, office_l
 
     // Format and add absent count
     return result.map(row => ({
+      start_date: row.date,
+
       cader_id: row.cader_id,            
       cader_name: row.cader_name,
       total_users: row.total_users,
@@ -477,8 +479,6 @@ GetAttendanceReportForDayThirdScreen: async (start_date, department_id, office_l
     throw { status: false, message: error.message || "Database error while fetching attendance report" };
   }
 },
-
-
 
 GetAttendanceReportForDayForSanstha : async (start_date, attendance_period, department_id, location_type) => {
   try {
@@ -508,7 +508,6 @@ GetAttendanceReportForDayForSanstha : async (start_date, attendance_period, depa
     };
   }
 },
-
 
 GetAttReportForMonthUserDetails: async (
   year,
@@ -569,8 +568,70 @@ GetAttReportForMonthUserDetails: async (
     throw new Error(error.message || "Error fetching attendance report");
   }
 },
+
+
+GetAttendanceReportForWeekCaderWise: async (start_date, department_id, cader_id, attendance_period, office_location_id) => {
+  try {
+    const [result] = await query(
+      "CALL GetAttReportForWeekCaderWise(?, ?, ?, ?, ?)",
+      [start_date, department_id, cader_id, attendance_period, office_location_id]
+    );
+
+    if (!result || result.length === 0) {
+      throw new Error("No data returned from the database.");
+    }
+
+    return result.map(row => ({
+      date: row.date,
+      cader_id: row.cader_id,
+      cader_name: row.cader_name,
+      total_users: row.total_users,
+      present_users: row.present_users || row.present_count,
+      absent_users: row.total_users - (row.present_users || row.present_count)
+    }));
+
+  } catch (error) {
+    console.error("Error in GetAttendanceReportForWeekCaderWise:", error);
+    throw { status: false, message: error.message || "Database error while fetching weekly attendance report" };
+  }
+},
+
+
+
+GetAttendanceReportForWeekSansthaWise: async (
+  start_date,
+  attendance_period,
+  department_id,
+  office_location_id
+) => {
+  try {
+    const [result] = await query(
+      "CALL GetAttReportForWeekForSanstha(?, ?, ?, ?)",
+      [start_date, attendance_period, department_id, office_location_id]
+    );
+
+    console.log("Sanstha Report Result:", result);
+
+    if (!result || result.length === 0) {
+      throw new Error("No data returned from the database.");
+    }
+
+    // Format and add absent count
+    return result.map(row => ({
+      date: row.date,
+      sanstha_id: row.sanstha_id,
+      sanstha_name: row.sanstha_name,
+      total_users: row.total_users,
+      present_users: row.present_count,
+      absent_users: row.total_users - row.present_count
+    }));
+
+  } catch (error) {
+    console.error("Error in GetAttendanceReportForWeekSansthaWise:", error);
+    throw {
+      status: false,
+      message: error.message || "Database error while fetching sanstha-wise weekly attendance report"
+    };
+  }
+}
 };
-
-  
-  
-

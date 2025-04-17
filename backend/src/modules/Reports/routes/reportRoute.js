@@ -30,12 +30,11 @@ router.get('/Get_Reports_For_CadersName', AttendanceReports.GetAttendanceReportF
 
 router.get('/Get_Reports_For_All_Sanstha_For_Day', AttendanceReports.GetAttendanceReportForDayForSanstha);
 
-router.get('/Get_Reports_For_Week_ThirdScreen', AttendanceReports.GetAttendanceReportForWeekThirdScreen);
+router.get('/Get_Reports_For_Year_ThirdScreen', AttendanceReports.GetAttendanceReportForWeekThirdScreen);
 
-router.get("/Get_Reports_For_Month_SecondScreen", AttendanceReports.GetAttReportFormonthSecondScreen);
+router.get('/Get_Reports_For_Week_Sanstha', AttendanceReports.GetWeeklyAttendanceBySanstha);
 
-router.get("/GetAttReportForMonthUserDetails", AttendanceReports.GetAttReportForMonthUserDetails);
-
+router.get("/Get_Reports_For_Week_Cader_Wise", AttendanceReports.GetWeeklyAttendanceByCader);
 
 export default router;
 

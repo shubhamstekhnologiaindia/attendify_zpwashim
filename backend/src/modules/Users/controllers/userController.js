@@ -41,7 +41,11 @@ export const UserController = {
         office_location_id, taluka_id, village_id,
         cader_id, password
       } = req.body;
+<<<<<<< HEAD
  
+=======
+  
+>>>>>>> 8f9baa11cca4fa0fbb707a54c0e78cb6a1b342c9
       // List of mandatory fields
       const requiredFields = {
         first_name,
@@ -58,19 +62,31 @@ export const UserController = {
         joining_date,
         password
       };
+<<<<<<< HEAD
  
+=======
+  
+>>>>>>> 8f9baa11cca4fa0fbb707a54c0e78cb6a1b342c9
       // Check for missing or undefined/null fields
       const missingFields = Object.entries(requiredFields)
         .filter(([key, value]) => value === undefined || value === null || value === "")
         .map(([key]) => key);
+<<<<<<< HEAD
  
+=======
+  
+>>>>>>> 8f9baa11cca4fa0fbb707a54c0e78cb6a1b342c9
       if (missingFields.length > 0) {
         return res.status(400).json({
           status: false,
           message: `Missing mandatory fields: ${missingFields.join(", ")}`
         });
       }
+<<<<<<< HEAD
  
+=======
+  
+>>>>>>> 8f9baa11cca4fa0fbb707a54c0e78cb6a1b342c9
       const result = await UserService.RegisterUser(req.body);
  
       if (result.alreadyExists) {
@@ -92,6 +108,7 @@ export const UserController = {
       });
     }
   },
+  
     
 getUserProfile: async (req, res) => {
   try {

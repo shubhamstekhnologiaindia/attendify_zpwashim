@@ -6,6 +6,17 @@ import path from "path";
 
 export const UserService = {
 
+<<<<<<< HEAD
+=======
+RegisterUser: async (userData) => {
+  try {
+    const {
+      first_name, middle_name, last_name,
+      mob_no, email, birth_date,joining_date, department_id, office_location_id,
+      taluka_id, village_id, cader_id,
+      password, role_id, device_id,
+    } = userData;
+>>>>>>> 8f9baa11cca4fa0fbb707a54c0e78cb6a1b342c9
 
   RegisterUser: async (userData) => {
     try {
@@ -63,6 +74,7 @@ export const UserService = {
 //       password, role_id, device_id
 //     } = userData;
 
+<<<<<<< HEAD
 //     // ✅ Check if user exists with encrypted deterministic mobile number
 //     const encryptedMobNo = encryptDeterministic(mob_no);
 //     const checkUserSql = `SELECT * FROM users WHERE mob_no = ? LIMIT 1`;
@@ -72,6 +84,29 @@ export const UserService = {
 //       // User already exists
 //       return { alreadyExists: true };
 //     }
+=======
+    // Continue registration
+    const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?)`;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const results = await query(sql, [
+      encrypt(first_name),
+      encrypt(middle_name),
+      encrypt(last_name),
+      encryptedMobNo,
+      encrypt(email),
+      birth_date,
+      joining_date,
+      department_id,
+      office_location_id,
+      taluka_id,
+      village_id,
+      cader_id,
+      hashedPassword,
+      role_id,
+      device_id
+    ]);
+>>>>>>> 8f9baa11cca4fa0fbb707a54c0e78cb6a1b342c9
 
 //     // Continue registration
 //     const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
