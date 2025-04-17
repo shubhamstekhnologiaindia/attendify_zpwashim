@@ -130,13 +130,10 @@ export const reportService = {
       };
     }
   },
-
   getAttendanceReportMobno: async ({ mobile_no, date, week, month, year }) => {
     try {
-      console.log(
-        `Fetching attendance for mobile: ${mobile_no}, date: ${date}, week: ${week}, month: ${month}, year: ${year}`
-      );
-
+      console.log(`Fetching attendance for mobile: ${mobile_no}, date: ${date}, week: ${week}, month: ${month}, year: ${year}`);
+  
       const encrypted_mobile = encryptDeterministic(mobile_no);
       const params = [
         encrypted_mobile,
@@ -145,46 +142,38 @@ export const reportService = {
         month || null,
         year || null,
       ];
-
-      const [results] = await query(
-        "CALL GetAttendanceForUserByPeriod(?, ?, ?, ?, ?)",
-        params
-      );
-
+  
+      const [results] = await query("CALL GetAttendanceReportOnMobno(?, ?, ?, ?, ?)", params);
+  
       const report = results.map((row) => {
-        // Decrypt names
         const firstName = row.first_name ? decrypt(row.first_name) : "";
         const middleName = row.middle_name ? decrypt(row.middle_name) : "";
         const lastName = row.last_name ? decrypt(row.last_name) : "";
-
-        // Join names
-        const name = [firstName, middleName, lastName]
-          .filter((part) => part.trim())
-          .join(" ");
-
+  
+        const fullName = [firstName, middleName, lastName].filter(Boolean).join(" ");
+  
         const isPresent = row.att_morning_in_time !== null;
         let total_hours = 0;
+  
         if (isPresent && row.att_out_time) {
-          const start = new Date(row.att_morning_in_time);
-          const end = new Date(row.att_out_time);
-          total_hours = Math.round((end - start) / (1000 * 60 * 60));
+          const inTime = new Date(row.att_morning_in_time);
+          const outTime = new Date(row.att_out_time);
+          total_hours = Math.round((outTime - inTime) / (1000 * 60 * 60));
         }
-
+  
         return {
-          name: name || null,
+          name: fullName,
           user_profile: row.user_profile,
           date: row.att_attendance_date
             ? row.att_attendance_date.toISOString().split("T")[0]
             : row.report_date.toISOString().split("T")[0],
           cader_name: row.cader_id,
-          mob_no: row.encrypted_mob_no
-            ? decryptDeterministic(row.encrypted_mob_no)
-            : null,
+          mob_no: row.encrypted_mob_no ? decryptDeterministic(row.encrypted_mob_no) : null,
           total_hours,
           status: isPresent ? "Present" : "Absent",
         };
       });
-
+  
       return report;
     } catch (error) {
       if (error.sqlState === "45000") {
@@ -197,10 +186,21 @@ export const reportService = {
     }
   },
 
-  GetAttReportForDaySecondScreen: async (start_date, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
+  GetAttReportForDaySecondScreen: async (
+    start_date,
+    department_id,
+    attendance_period,
+    headquarter_id,
+    taluka_id,
+    sanstha_id,
+    cader_id
+  ) => {
     try {
-      console.log(`Fetching report for date: ${start_date}, department_id: ${department_id}, attendance_period: ${attendance_period}, filters:`, { headquarter_id, taluka_id, sanstha_id, cader_id });
- 
+      console.log(
+        `Fetching report for date: ${start_date}, department_id: ${department_id}, attendance_period: ${attendance_period}, filters:`,
+        { headquarter_id, taluka_id, sanstha_id, cader_id }
+      );
+
       // Execute the stored procedure
       const [result] = await query("CALL GetAttReportForDaySecondScreen(?, ?, ?, ?, ?, ?, ?)", [
         start_date,
@@ -224,18 +224,61 @@ export const reportService = {
       return{report}
  
     } catch (error) {
-      if (error.sqlState === '45000') {
+      if (error.sqlState === "45000") {
         throw { status: false, message: error.sqlMessage };
       }
-      throw { status: false, message: "Database error while fetching attendance report" };
+      throw {
+        status: false,
+        message: "Database error while fetching attendance report",
+      };
     }
   },
- 
-  GetAttReportForWeekSecondScreen: async (start_date, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
+
+  GetAttReportForWeekSecondScreen: async (
+    start_date,
+    department_id,
+    attendance_period,
+    headquarter_id,
+    taluka_id,
+    sanstha_id,
+    cader_id
+  ) => {
+    try {
+      const [result] = await query(
+        "CALL GetAttReportForWeekSecondScreen(?, ?, ?, ?, ?, ?, ?)",
+        [
+          start_date,
+          department_id,
+          attendance_period,
+          headquarter_id,
+          taluka_id,
+          sanstha_id,
+          cader_id,
+        ]
+      );
+
+      return result.map((row) => ({
+        date: row.date,
+        total_users: row.total_users,
+        present_users: row.present_count,
+        absent_users: row.total_users - row.present_count,
+      }));
+    } catch (error) {
+      if (error.sqlState === "45000") {
+        throw { status: false, message: error.sqlMessage };
+      }
+      throw {
+        status: false,
+        message: "Database error while fetching attendance report",
+      };
+    }
+  },
+
+  GetAttReportFormonthSecondScreen: async (month, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
     try {
    
-      const [result] = await query("CALL GetAttReportForWeekSecondScreen(?, ?, ?, ?, ?, ?, ?)", [
-        start_date,
+      const [result] = await query("CALL GetAttReportForMonthSecondScreen(?, ?, ?, ?, ?, ?, ?)", [
+        month,
         department_id,
         attendance_period,
         headquarter_id,
@@ -258,6 +301,7 @@ export const reportService = {
       throw { status: false, message: "Database error while fetching attendance report" };
     }
   },
+
   GetAttendanceReportForYearSecondScreen: async (year, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
     try {
       const [result] = await query(
