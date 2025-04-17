@@ -398,9 +398,9 @@ export const AttendanceReports = {
 
 GetAttendanceReportForWeekDateForthScreen: async (req, res) => {
   try {
-      const { date, cader_id, location_id, attendance_period } = req.query;
+      const { start_date, cader_id, location_id, attendance_period } = req.query;
       console.log(req.query);
-      if (!date || !cader_id || !location_id || !attendance_period) {
+      if (!start_date || !cader_id || !location_id || !attendance_period) {
           return res.status(400).json({
               status: false,
               message: "date, cader_id, location_id, and attendance_period are required"
@@ -408,7 +408,7 @@ GetAttendanceReportForWeekDateForthScreen: async (req, res) => {
       }
 
       const result = await reportService.GetAttendanceReportForWeekDateForthScreen(
-          date,
+        start_date,
           cader_id,
           location_id,
           attendance_period
@@ -461,6 +461,72 @@ GetAttendanceReportForYearForthScreen: async (req, res) => {
   }
 },
   
-  
+GetAttendanceReportForDayThirdScreen: async (req, res) => {
+  try {
+    const { start_date, department_id, office_location_id, attendance_period } = req.query;
 
+    // Validate input
+    if (!start_date || !department_id || !office_location_id || !attendance_period) {
+      return res.status(400).json({
+        status: false,
+        message: "date, department_id, office_location_id, and attendance_period are required",
+      });
+    }
+
+    const result = await reportService.GetAttendanceReportForDayThirdScreen(
+      start_date,
+      parseInt(department_id),
+      parseInt(office_location_id),
+      parseInt(attendance_period)
+    );
+
+    return res.status(200).json({
+      status: true,
+      data: result,
+      message: "Day attendance report retrieved successfully",
+    });
+
+  } catch (error) {
+    console.error("Controller Error:", error);
+    return res.status(400).json({
+      status: false,
+      message: error.message || "Something went wrong",
+    });
+  }
+},
+
+
+GetAttendanceReportForDayForSanstha :async (req, res) => {
+  try {
+    const { start_date, attendance_period, department_id, location_type } = req.query;
+
+    // Validate input
+    if (!start_date || !attendance_period || !department_id || !location_type) {
+      return res.status(400).json({
+        status: false,
+        message: "date, attendance_period, department_id, and location_type are required"
+      });
+    }
+
+    const result = await reportService.GetAttendanceReportForDayForSanstha(
+      start_date,
+      parseInt(attendance_period),
+      parseInt(department_id),
+      location_type
+    );
+
+    return res.status(200).json({
+      status: true,
+      data: result,
+      message: "Sanstha-wise attendance report retrieved successfully"
+    });
+
+  } catch (error) {
+    console.error("Controller Error - GetAttendanceReportForDayForSanstha:", error);
+    return res.status(400).json({
+      status: false,
+      message: error.message || "Something went wrong"
+    });
+  }
+},
 };
