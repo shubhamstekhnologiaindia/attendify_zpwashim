@@ -6,52 +6,100 @@ import path from "path";
 
 export const UserService = {
 
-RegisterUser: async (userData) => {
-  try {
-    const {
-      first_name, middle_name, last_name,
-      mob_no, email, birth_date, department_id, office_location_id,
-      taluka_id, village_id, cader_id,
-      password, role_id, device_id
-    } = userData;
 
-    // ✅ Check if user exists with encrypted deterministic mobile number
-    const encryptedMobNo = encryptDeterministic(mob_no);
-    const checkUserSql = `SELECT * FROM users WHERE mob_no = ? LIMIT 1`;
-    const existingUser = await query(checkUserSql, [encryptedMobNo]);
-
-    if (existingUser.length > 0) {
-      // User already exists
-      return { alreadyExists: true };
+  RegisterUser: async (userData) => {
+    try {
+      const {
+        first_name, middle_name, last_name,
+        mob_no, email, birth_date,joining_date, department_id, office_location_id,
+        taluka_id, village_id, cader_id,
+        password, role_id, device_id,
+      } = userData;
+   
+      // ✅ Check if user exists with encrypted deterministic mobile number
+      const encryptedMobNo = encryptDeterministic(mob_no);
+      const checkUserSql = `SELECT * FROM users WHERE mob_no = ? LIMIT 1`;
+      const existingUser = await query(checkUserSql, [encryptedMobNo]);
+   
+      if (existingUser.length > 0) {
+        // User already exists
+        return { alreadyExists: true };
+      }
+   
+      // Continue registration
+      const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?)`;
+      const hashedPassword = await bcrypt.hash(password, 10);
+   
+      const results = await query(sql, [
+        encrypt(first_name),
+        encrypt(middle_name),
+        encrypt(last_name),
+        encryptedMobNo,
+        encrypt(email),
+        birth_date,
+        joining_date,
+        department_id,
+        office_location_id,
+        taluka_id,
+        village_id,
+        cader_id,
+        hashedPassword,
+        role_id,
+        device_id
+      ]);
+   
+      return { success: true, data: results };
+    } catch (error) {
+      console.error("Error in RegisterUser service:", error);
+      throw new Error("Failed to register user");
     }
+  },
+// RegisterUser: async (userData) => {
+//   try {
+//     const {
+//       first_name, middle_name, last_name,
+//       mob_no, email, birth_date, department_id, office_location_id,
+//       taluka_id, village_id, cader_id,
+//       password, role_id, device_id
+//     } = userData;
 
-    // Continue registration
-    const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    const hashedPassword = await bcrypt.hash(password, 10);
+//     // ✅ Check if user exists with encrypted deterministic mobile number
+//     const encryptedMobNo = encryptDeterministic(mob_no);
+//     const checkUserSql = `SELECT * FROM users WHERE mob_no = ? LIMIT 1`;
+//     const existingUser = await query(checkUserSql, [encryptedMobNo]);
 
-    const results = await query(sql, [
-      encrypt(first_name),
-      encrypt(middle_name),
-      encrypt(last_name),
-      encryptedMobNo,
-      encrypt(email),
-      birth_date,
-      department_id,
-      office_location_id,
-      taluka_id,
-      village_id,
-      cader_id,
-      hashedPassword,
-      role_id,
-      device_id
-    ]);
+//     if (existingUser.length > 0) {
+//       // User already exists
+//       return { alreadyExists: true };
+//     }
 
-    return { success: true, data: results };
-  } catch (error) {
-    console.error("Error in RegisterUser service:", error);
-    throw new Error("Failed to register user");
-  }
-},
+//     // Continue registration
+//     const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     const results = await query(sql, [
+//       encrypt(first_name),
+//       encrypt(middle_name),
+//       encrypt(last_name),
+//       encryptedMobNo,
+//       encrypt(email),
+//       birth_date,
+//       department_id,
+//       office_location_id,
+//       taluka_id,
+//       village_id,
+//       cader_id,
+//       hashedPassword,
+//       role_id,
+//       device_id
+//     ]);
+
+//     return { success: true, data: results };
+//   } catch (error) {
+//     console.error("Error in RegisterUser service:", error);
+//     throw new Error("Failed to register user");
+//   }
+// },
 
 getUserProfileById: async (id) => {
   const user = await query(
