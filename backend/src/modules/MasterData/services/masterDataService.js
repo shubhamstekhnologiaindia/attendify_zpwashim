@@ -219,4 +219,55 @@ export const masterDataService = {
       };
     }
   },
+  GetPanchayatSamitiLocations: async () => {
+    try {
+      const locations = await query(
+        `SELECT loc_id, loc_name_marathi, loc_name_eng, location_type 
+         FROM office_location 
+         WHERE location_type = ?`,
+        ['panchayat_samiti']
+      );
+  
+      console.log("Panchayat Samiti Locations:", locations);
+  
+      return {
+        status: true,
+        data: locations,
+      };
+    } catch (error) {
+      console.error("Service Error:", error);
+      throw {
+        status: false,
+        message: "Database error while fetching Panchayat Samiti location details",
+      };
+    }
+  },
+// services/masterDataService.js
+
+GetSansthaLocations: async () => {
+  try {
+    const fetchSanstha = await query(
+      `SELECT *
+       FROM office_location 
+       WHERE location_type = ?`,
+      ['sanstha']
+    );
+
+    console.log("Sanstha Locations:", fetchSanstha);
+
+    return {
+      status: true,
+      data: fetchSanstha,
+    };
+  } catch (error) {
+    console.error("Service Error:", error);
+    throw {
+      status: false,
+      message: "Database error while fetching Sanstha locations",
+    };
+  }
+}
+
+
+  
 };

@@ -598,5 +598,81 @@ GetAttReportForMonthUserDetails: async (req, res) => {
       message: error.message || "Error fetching attendance report",
     });
   }
-}
+},
+
+GetWeeklyAttendanceByCader: async (req, res) => {
+  const { start_date, department_id, cader_id, attendance_period, office_location_id } = req.query;
+  console.log(req.query);
+
+  if (!start_date || !department_id || !attendance_period || !office_location_id) {
+    return res.status(400).json({
+      status: false,
+      message: "start_date, department_id, attendance_period, and office_location_id are required"
+    });
+  }
+
+  try {
+    const data = await reportService.GetAttendanceReportForWeekCaderWise(
+      start_date,
+      department_id,
+      cader_id || null,
+      attendance_period,
+      office_location_id
+    );
+
+    res.status(200).json({
+      status: true,
+      message: "Weekly attendance report fetched successfully",
+      data,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: error.message || "Something went wrong",
+    });
+  }
+},
+
+
+GetWeeklyAttendanceBySanstha: async (req, res) => {
+  const { start_date, attendance_period, department_id, office_location_id } = req.query;
+
+  console.log("Query Params:", req.query);
+
+  if (!start_date || !attendance_period || !department_id || !office_location_id) {
+    return res.status(400).json({
+      status: false,
+      message: "start_date, attendance_period, department_id, and office_location_id are required",
+    });
+  }
+
+  const validPeriods = [1, 2, 3];
+  if (!validPeriods.includes(Number(attendance_period))) {
+    return res.status(400).json({
+      status: false,
+      message: "Invalid attendance_period; must be 1 (Morning), 2 (Afternoon), or 3 (Full)",
+    });
+  }
+
+  try {
+    const data = await reportService.GetAttendanceReportForWeekSansthaWise(
+      start_date,
+      attendance_period,
+      department_id,
+      office_location_id
+    );
+
+    res.status(200).json({
+      status: true,
+      message: "Weekly attendance report (Sanstha-wise) fetched successfully",
+      data,
+    });
+  } catch (error) {
+    console.error("Error fetching Sanstha-wise report:", error);
+    res.status(500).json({
+      status: false,
+      message: error.message || "Something went wrong",
+    });
+  }
+},
 };
