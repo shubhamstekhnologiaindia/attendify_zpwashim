@@ -14,6 +14,7 @@ router.get("/office-locations/:departmentId", MasterData.getHeadquartersZpSansth
 router.get('/Get_Panchayat_Samiti_Locations', MasterData.GetPanchayatSamitiLocations);
 
 router.get("/Get_Caders_By_DeptId/:deptId", MasterData.getCadresByDeptId);
-router.get('/sanstha-locations', MasterData.GetSansthaLocations);
+router.get('/sanstha-locations', MasterData.GetSansthaLocations)
+
 
 export default router;

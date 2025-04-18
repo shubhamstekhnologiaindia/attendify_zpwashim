@@ -22,15 +22,15 @@ export const AuthController = {
             return res.status(400).json({ message: "Mobile number and password are required" });
           }
       
-          if (!fcm_token) {
-            return res.status(400).json({ message: "FCM token is required for login" });
-          }
+          // if (!fcm_token) {
+          //   return res.status(400).json({ message: "FCM token is required for login" });
+          // }
       
           const encryptedMobNo = encryptDeterministic(mob_no);
       
-          console.log("Login Encrypted Mobile Number:", encryptedMobNo);
+          console.log("Login Encrypted Mobile Number:", encryptedMobNo)
       
-          // Fetch user data
+
           const user = await query("SELECT * FROM users WHERE mob_no = ?", [
             encryptedMobNo,
           ]);
