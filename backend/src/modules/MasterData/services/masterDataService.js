@@ -121,22 +121,22 @@ export const masterDataService = {
   //       throw error;
   //     }
   //   },
-  getCadresByOfficeLocationId: async (officeLocationId) => {
+  getCadresByOfficeLocationId: async (officeLocationId, dept_id) => {
     try {
       const sql = `
-        SELECT c.id, c.cader_name 
+        SELECT DISTINCT c.id, c.cader_name
         FROM tbl_cader c
         JOIN office_cadres oc ON c.id = oc.cadre_id
-        WHERE oc.office_location_id = ?
+        JOIN users u ON u.cader_id = c.id AND u.office_location_id = oc.office_location_id
+        WHERE oc.office_location_id = ? AND u.department_id = ?
       `;
-      const results = await query(sql, [officeLocationId]);
+      const results = await query(sql, [officeLocationId, dept_id]);
       return results;
     } catch (error) {
       console.error("Error in OfficeCadreService - getCadresByOfficeLocationId:", error);
       throw error;
     }
-  },
-  
+  },  
 
   getDepartments: async () => {
     try {
