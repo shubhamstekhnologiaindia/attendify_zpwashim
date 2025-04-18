@@ -311,3 +311,419 @@ export const getBirthdayMessages = async (receiverId) => {
     };
   }
 };
+
+// export const sendAnnouncement = async (caderId, departmentId, talukaId, sansthaId, allUsers, subject, message) => {
+//   try {
+//     // Validate inputs
+//     if (!allUsers && 
+//         (caderId === null || caderId === undefined) && 
+//         (departmentId === null || departmentId === undefined) && 
+//         (talukaId === null || talukaId === undefined) && 
+//         (sansthaId === null || sansthaId === undefined)) {
+//       return {
+//         success: false,
+//         message: "At least one of Cader ID, Department ID, Taluka ID, or Sanstha ID must be provided when allUsers is not 1"
+//       };
+//     }
+
+//     // Validate allUsers
+//     if (allUsers !== null && allUsers !== 1) {
+//       return {
+//         success: false,
+//         message: "allUsers must be 1 or null"
+//       };
+//     }
+
+//     // Validate caderId if provided
+//     if (caderId !== null && (!Number.isInteger(caderId) || caderId <= 0)) {
+//       return {
+//         success: false,
+//         message: "Cader ID must be a positive integer or null"
+//       };
+//     }
+
+//     // Validate departmentId if provided
+//     if (departmentId !== null && (!Number.isInteger(departmentId) || departmentId <= 0)) {
+//       return {
+//         success: false,
+//         message: "Department ID must be a positive integer or null"
+//       };
+//     }
+
+//     // Validate talukaId if provided
+//     if (talukaId !== null && (!Number.isInteger(talukaId) || talukaId <= 0)) {
+//       return {
+//         success: false,
+//         message: "Taluka ID must be a positive integer or null"
+//       };
+//     }
+
+//     // Validate sansthaId if provided
+//     if (sansthaId !== null && (!Number.isInteger(sansthaId) || sansthaId <= 0)) {
+//       return {
+//         success: false,
+//         message: "Sanstha ID must be a positive integer or null"
+//       };
+//     }
+
+//     // Build user query based on allUsers and provided IDs
+//     let usersSql = `
+//       SELECT id, first_name, last_name, fcm_token
+//       FROM users
+//       WHERE fcm_token IS NOT NULL
+//       AND status = '1'
+//     `;
+//     const queryParams = [];
+
+//     if (!allUsers) {
+//       if (caderId !== null) {
+//         usersSql += ` AND cader_id = ?`;
+//         queryParams.push(caderId);
+//       }
+
+//       if (departmentId !== null) {
+//         usersSql += ` AND department_id = ?`;
+//         queryParams.push(departmentId);
+//       }
+
+//       if (talukaId !== null) {
+//         usersSql += ` AND taluka_id = ?`;
+//         queryParams.push(talukaId);
+//       }
+
+//       if (sansthaId !== null) {
+//         usersSql += ` AND sanstha_id = ?`;
+//         queryParams.push(sansthaId);
+//       }
+//     }
+
+//     const users = await query(usersSql, queryParams);
+
+//     if (!users || users.length === 0) {
+//       return {
+//         success: true,
+//         message: allUsers 
+//           ? "No active users found" 
+//           : "No active users found for the specified cader, department, taluka, and/or sanstha",
+//         notificationsSent: 0
+//       };
+//     }
+
+//     // Send notifications and collect results
+//     const notifications = users.map(async (user) => {
+//       const firstName = decryptName(user.first_name);
+//       const lastName = decryptName(user.last_name);
+//       const fullName = `${firstName} ${lastName}`.trim();
+
+//       if (!fullName) {
+//         console.warn("⚠️ Could not decrypt name for user ID:", user.id);
+//         return null;
+//       }
+
+//       const personalizedMessage = `Dear ${fullName}, ${message}`;
+//       return sendPushNotification(user.fcm_token, subject, personalizedMessage);
+//     });
+
+//     const results = await Promise.all(notifications);
+//     const validNotifications = results.filter(result => result !== null && result.success);
+//     const failedNotifications = results.filter(result => result !== null && !result.success);
+
+//     // Store announcement in tbl_announcement
+//     const insertAnnouncementSql = `
+//       INSERT INTO tbl_announcement (cader_id, dept_id, taluka_id, sanstha_id, all_users, subject, description)
+//       VALUES (?, ?, ?, ?, ?, ?, ?)
+//     `;
+//     await query(insertAnnouncementSql, [
+//       allUsers ? null : caderId, 
+//       allUsers ? null : departmentId, 
+//       allUsers ? null : talukaId, 
+//       allUsers ? null : sansthaId, 
+//       allUsers, 
+//       subject, 
+//       message
+//     ]);
+
+//     return {
+//       success: true,
+//       message: `Notifications sent to ${validNotifications.length} users${
+//         allUsers 
+//           ? " for all users" 
+//           : ` for ${caderId ? `cader ${caderId}` : ''}${
+//               caderId && (departmentId || talukaId || sansthaId) ? ', ' : ''
+//             }${departmentId ? `department ${departmentId}` : ''}${
+//               departmentId && (talukaId || sansthaId) ? ' and ' : ''
+//             }${talukaId ? `taluka ${talukaId}` : ''}${
+//               talukaId && sansthaId ? ' and ' : ''
+//             }${sansthaId ? `sanstha ${sansthaId}` : ''}`
+//       }`,
+//       notificationsSent: validNotifications.length,
+//       failedNotifications: failedNotifications.length,
+//       caderId: allUsers ? null : caderId,
+//       departmentId: allUsers ? null : departmentId,
+//       talukaId: allUsers ? null : talukaId,
+//       sansthaId: allUsers ? null : sansthaId,
+//       allUsers
+//     };
+//   } catch (error) {
+//     console.error("❌ Error sending announcement:", error);
+//     return {
+//       success: false,
+//       message: "Error sending announcement",
+//       error: error.message
+//     };
+//   }
+// };
+
+export const sendAnnouncement = async (senderUserId, caderId, departmentId, talukaId, sansthaId, allUsers, subject, message) => {
+  try {
+    // Validate inputs
+    if (!senderUserId || !Number.isInteger(senderUserId) || senderUserId <= 0) {
+      return {
+        success: false,
+        message: "Sender User ID must be a positive integer"
+      };
+    }
+
+    if (!allUsers && 
+        (caderId === null || caderId === undefined) && 
+        (departmentId === null || departmentId === undefined) && 
+        (talukaId === null || talukaId === undefined) && 
+        (sansthaId === null || sansthaId === undefined)) {
+      return {
+        success: false,
+        message: "At least one of Cader ID, Department ID, Taluka ID, or Sanstha ID must be provided when allUsers is not 1"
+      };
+    }
+
+    if (allUsers !== null && allUsers !== 1) {
+      return {
+        success: false,
+        message: "allUsers must be 1 or null"
+      };
+    }
+
+    if (caderId !== null && (!Number.isInteger(caderId) || caderId <= 0)) {
+      return {
+        success: false,
+        message: "Cader ID must be a positive integer or null"
+      };
+    }
+
+    if (departmentId !== null && (!Number.isInteger(departmentId) || departmentId <= 0)) {
+      return {
+        success: false,
+        message: "Department ID must be a positive integer or null"
+      };
+    }
+
+    if (talukaId !== null && (!Number.isInteger(talukaId) || talukaId <= 0)) {
+      return {
+        success: false,
+        message: "Taluka ID must be a positive integer or null"
+      };
+    }
+
+    if (sansthaId !== null && (!Number.isInteger(sansthaId) || sansthaId <= 0)) {
+      return {
+        success: false,
+        message: "Sanstha ID must be a positive integer or null"
+      };
+    }
+
+    if (!subject || !message) {
+      return {
+        success: false,
+        message: "Subject and message are required"
+      };
+    }
+
+    // Verify sender exists
+    const senderCheck = await query('SELECT id FROM users WHERE id = ? AND status = 1', [senderUserId]);
+    if (!senderCheck.length) {
+      return { success: false, message: "Sender not found or inactive" };
+    }
+
+    // Build user query
+    let usersSql = `
+      SELECT id, first_name, last_name, fcm_token
+      FROM users
+      WHERE fcm_token IS NOT NULL
+      AND status = '1'
+      AND id != ?
+    `;
+    const queryParams = [senderUserId];
+
+    if (!allUsers) {
+      if (caderId !== null) {
+        usersSql += ` AND cader_id = ?`;
+        queryParams.push(caderId);
+      }
+      if (departmentId !== null) {
+        usersSql += ` AND department_id = ?`;
+        queryParams.push(departmentId);
+      }
+      if (talukaId !== null) {
+        usersSql += ` AND taluka_id = ?`;
+        queryParams.push(talukaId);
+      }
+      if (sansthaId !== null) {
+        usersSql += ` AND user_sanstha_id = ?`;
+        queryParams.push(sansthaId);
+      }
+    }
+
+    const users = await query(usersSql, queryParams);
+
+    if (!users || users.length === 0) {
+      return {
+        success: true,
+        message: allUsers 
+          ? "No active users found" 
+          : "No active users found for the specified filters",
+        notificationsSent: 0
+      };
+    }
+
+    // Batch notifications and store announcements
+    const batchSize = 100;
+    const notifications = [];
+    const announcementEntries = [];
+
+    for (let i = 0; i < users.length; i += batchSize) {
+      const batch = users.slice(i, i + batchSize);
+      const batchNotifications = batch.map(async (user) => {
+        const firstName = decryptName(user.first_name);
+        const lastName = decryptName(user.last_name);
+        const fullName = `${firstName} ${lastName}`.trim();
+
+        if (!fullName) {
+          console.warn("⚠️ Could not decrypt name for user ID:", user.id);
+          return null;
+        }
+
+        const personalizedMessage = `Dear ${fullName}, ${message}`;
+        announcementEntries.push([
+          senderUserId,
+          user.id,
+          allUsers ? null : departmentId,
+          allUsers ? null : talukaId,
+          allUsers ? null : sansthaId,
+          allUsers ? null : caderId,
+          subject,
+          personalizedMessage,
+          allUsers
+        ]);
+
+        return sendPushNotification(user.fcm_token, subject, personalizedMessage);
+      });
+      notifications.push(...batchNotifications);
+    }
+
+    const results = await Promise.all(notifications);
+    const validNotifications = results.filter(result => result !== null && result.success);
+    const failedNotifications = results.filter(result => result !== null && !result.success);
+
+    // Store announcements
+    if (announcementEntries.length > 0) {
+      const insertAnnouncementSql = `
+        INSERT INTO tbl_announcement (sender_user_id, receiver_user_id, dept_id, taluka_id, sanstha_id, cader_id, subject, description, all_users)
+        VALUES ?
+      `;
+      await query(insertAnnouncementSql, [announcementEntries]);
+    }
+
+    return {
+      success: true,
+      message: `Notifications sent to ${validNotifications.length} users${
+        allUsers 
+          ? " for all users" 
+          : ` for ${departmentId ? `department ${departmentId}` : ''}${
+              departmentId && (caderId || talukaId || sansthaId) ? ', ' : ''
+            }${caderId ? `cader ${caderId}` : ''}${
+              caderId && (talukaId || sansthaId) ? ', ' : ''
+            }${talukaId ? `taluka ${talukaId}` : ''}${
+              talukaId && sansthaId ? ', ' : ''
+            }${sansthaId ? `sanstha ${sansthaId}` : ''}`
+      }`,
+      notificationsSent: validNotifications.length,
+      failedNotifications: failedNotifications.length,
+      caderId: allUsers ? null : caderId,
+      departmentId: allUsers ? null : departmentId,
+      talukaId: allUsers ? null : talukaId,
+      sansthaId: allUsers ? null : sansthaId,
+      allUsers
+    };
+  } catch (error) {
+    console.error("❌ Error sending announcement:", error);
+    return {
+      success: false,
+      message: "Error sending announcement",
+      error: error.message
+    };
+  }
+};
+
+export const getUserAnnouncements = async (userId) => {
+  try {
+    // Validate userId
+    if (!userId || !Number.isInteger(userId) || userId <= 0) {
+      return {
+        success: false,
+        message: "User ID must be a positive integer"
+      };
+    }
+
+    // Verify user exists
+    const userCheck = await query('SELECT id FROM users WHERE id = ? AND status = 1', [userId]);
+    if (!userCheck.length) {
+      return { success: false, message: "User not found or inactive" };
+    }
+
+    // Fetch announcements for the user
+    const announcementsSql = `
+      SELECT id, subject, description, created_at, dept_id, taluka_id, sanstha_id, cader_id, all_users
+      FROM tbl_announcement
+      WHERE receiver_user_id = ?
+      ORDER BY created_at DESC
+      LIMIT 100
+    `;
+    const announcements = await query(announcementsSql, [userId]);
+
+    if (!announcements || announcements.length === 0) {
+      return {
+        success: true,
+        message: "No announcements found for this user",
+        announcements: []
+      };
+    }
+
+    const formattedAnnouncements = announcements.map(announcement => ({
+      id: announcement.id,
+      subject: announcement.subject,
+      description: announcement.description,
+      createdAt: announcement.created_at,
+      matchedFilter: announcement.all_users === 1 
+        ? "all_users" 
+        : announcement.dept_id 
+          ? "department" 
+          : announcement.taluka_id 
+            ? "taluka" 
+            : announcement.sanstha_id 
+              ? "sanstha" 
+              : "cader"
+    }));
+
+    return {
+      success: true,
+      message: `${formattedAnnouncements.length} announcement(s) found`,
+      announcements: formattedAnnouncements
+    };
+  } catch (error) {
+    console.error("❌ Error fetching user announcements:", error);
+    return {
+      success: false,
+      message: "Error fetching announcements",
+      error: error.message
+    };
+  }
+};
