@@ -6,17 +6,6 @@ import path from "path";
 
 export const UserService = {
 
-<<<<<<< HEAD
-=======
-RegisterUser: async (userData) => {
-  try {
-    const {
-      first_name, middle_name, last_name,
-      mob_no, email, birth_date,joining_date, department_id, office_location_id,
-      taluka_id, village_id, cader_id,
-      password, role_id, device_id,
-    } = userData;
->>>>>>> 8f9baa11cca4fa0fbb707a54c0e78cb6a1b342c9
 
   RegisterUser: async (userData) => {
     try {
@@ -65,77 +54,8 @@ RegisterUser: async (userData) => {
       throw new Error("Failed to register user");
     }
   },
-// RegisterUser: async (userData) => {
-//   try {
-//     const {
-//       first_name, middle_name, last_name,
-//       mob_no, email, birth_date, department_id, office_location_id,
-//       taluka_id, village_id, cader_id,
-//       password, role_id, device_id
-//     } = userData;
 
-<<<<<<< HEAD
-//     // ✅ Check if user exists with encrypted deterministic mobile number
-//     const encryptedMobNo = encryptDeterministic(mob_no);
-//     const checkUserSql = `SELECT * FROM users WHERE mob_no = ? LIMIT 1`;
-//     const existingUser = await query(checkUserSql, [encryptedMobNo]);
-
-//     if (existingUser.length > 0) {
-//       // User already exists
-//       return { alreadyExists: true };
-//     }
-=======
-    // Continue registration
-    const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?)`;
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const results = await query(sql, [
-      encrypt(first_name),
-      encrypt(middle_name),
-      encrypt(last_name),
-      encryptedMobNo,
-      encrypt(email),
-      birth_date,
-      joining_date,
-      department_id,
-      office_location_id,
-      taluka_id,
-      village_id,
-      cader_id,
-      hashedPassword,
-      role_id,
-      device_id
-    ]);
->>>>>>> 8f9baa11cca4fa0fbb707a54c0e78cb6a1b342c9
-
-//     // Continue registration
-//     const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     const results = await query(sql, [
-//       encrypt(first_name),
-//       encrypt(middle_name),
-//       encrypt(last_name),
-//       encryptedMobNo,
-//       encrypt(email),
-//       birth_date,
-//       department_id,
-//       office_location_id,
-//       taluka_id,
-//       village_id,
-//       cader_id,
-//       hashedPassword,
-//       role_id,
-//       device_id
-//     ]);
-
-//     return { success: true, data: results };
-//   } catch (error) {
-//     console.error("Error in RegisterUser service:", error);
-//     throw new Error("Failed to register user");
-//   }
-// },
-
+ 
 getUserProfileById: async (id) => {
   const user = await query(
     "SELECT id, first_name, middle_name, last_name, mob_no, email,user_profile,DATE_FORMAT(birth_date, '%Y-%m-%d') AS birth_date FROM users WHERE id = ?",

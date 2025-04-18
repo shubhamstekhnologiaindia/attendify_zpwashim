@@ -121,26 +121,22 @@ export const masterDataService = {
   //       throw error;
   //     }
   //   },
-
   getCadresByOfficeLocationId: async (officeLocationId) => {
     try {
       const sql = `
-            SELECT c.id, c.cadre_name 
-            FROM cadres c
-            JOIN office_cadres oc ON c.id = oc.cadre_id
-            WHERE oc.office_location_id = ?
-          `;
-
+        SELECT c.id, c.cader_name 
+        FROM tbl_cader c
+        JOIN office_cadres oc ON c.id = oc.cadre_id
+        WHERE oc.office_location_id = ?
+      `;
       const results = await query(sql, [officeLocationId]);
       return results;
     } catch (error) {
-      console.error(
-        "Error in OfficeCadreService - getCadresByOfficeLocationId:",
-        error
-      );
+      console.error("Error in OfficeCadreService - getCadresByOfficeLocationId:", error);
       throw error;
     }
   },
+  
 
   getDepartments: async () => {
     try {
@@ -244,13 +240,13 @@ export const masterDataService = {
   },
 // services/masterDataService.js
 
-GetSansthaLocations: async () => {
+GetSansthaLocations: async (deptId) => {
   try {
     const fetchSanstha = await query(
       `SELECT *
        FROM office_location 
-       WHERE location_type = ?`,
-      ['sanstha']
+       WHERE location_type = ? AND dept_id = ?`,
+      ['sanstha',deptId]
     );
 
     console.log("Sanstha Locations:", fetchSanstha);

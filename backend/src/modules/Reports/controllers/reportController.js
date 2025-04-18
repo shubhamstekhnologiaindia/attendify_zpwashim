@@ -186,43 +186,40 @@ export const AttendanceReports = {
     try {
       const {
         start_date,
-        department_id,
         attendance_period,
-        headquarter_id,
-        taluka_id,
-        sanstha_id,
-        cader_id,
+        department_id,
+        location_id,
+        cader_id
       } = req.query;
-
-      console.log(req.query);
-
+ 
       // Validate required fields
-      if (!start_date || !department_id || !attendance_period) {
+      if (!start_date || !attendance_period || !department_id || !location_id) {
         return res.status(400).json({
           status: false,
           message:
-            "start_date, department_id, and attendance_period are required",
+            'start_date, attendance_period, department_id, and location_id are required'
         });
       }
-
-      // Call the service with the parameters
-      const result = await reportService.GetAttReportForDaySecondScreen(
+ 
+      const report = await reportService.GetAttReportForDaySecondScreen(
         start_date,
-        department_id,
-        attendance_period,
-        headquarter_id || null,
-        taluka_id || null,
-        sanstha_id || null,
-        cader_id || null
+        Number(attendance_period),
+        Number(department_id),
+        Number(location_id),
+        cader_id ? Number(cader_id) : null
       );
-
+ 
       return res.status(200).json({
         status: true,
-        data: result.report,
-        message: "Attendance report retrieved successfully",
+        data: report,
+        message: 'Attendance report retrieved successfully'
       });
     } catch (error) {
-      return res.status(400).json({ status: false, message: error.message });
+      const statusCode = error.status === false ? 400 : 500;
+      return res.status(statusCode).json({
+        status: false,
+        message: error.message || 'Failed to fetch attendance report'
+      });
     }
   },
 
@@ -232,40 +229,42 @@ export const AttendanceReports = {
         start_date,
         department_id,
         attendance_period,
-        headquarter_id,
-        taluka_id,
-        sanstha_id,
+        location_id,
         cader_id,
       } = req.query;
-
-      console.log(req.query)
-
+  
+      console.log(req.query);
+  
       // Validate required fields
       if (!start_date || !department_id || !attendance_period) {
-        return res.status(400).json({ status: false, message: "date, department_id, and attendance_period are required" });
+        return res.status(400).json({
+          status: false,
+          message: "start_date, department_id, and attendance_period are required",
+        });
       }
-
-
+  
       // Call the service with the parameters
       const result = await reportService.GetAttReportForWeekSecondScreen(
         start_date,
         department_id,
         attendance_period,
-        headquarter_id || null,
-        taluka_id || null,
-        sanstha_id || null,
+        location_id || null,
         cader_id || null
       );
-
+  
       return res.status(200).json({
         status: true,
         data: result,
-        message: "Attendance report retrieved successfully"
+        message: "Attendance report retrieved successfully",
       });
     } catch (error) {
-      return res.status(400).json({ status: false, message: error.message });
+      return res.status(400).json({
+        status: false,
+        message: error.message || "Something went wrong",
+      });
     }
   },
+  
 
   GetAttReportFormonthSecondScreen: async (req, res) => {
     try {

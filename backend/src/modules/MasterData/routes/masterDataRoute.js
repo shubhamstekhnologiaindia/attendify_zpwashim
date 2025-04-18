@@ -6,7 +6,7 @@ const router = express.Router();
 
 
 router.get("/show/departments",MasterData.getDepartments);
-router.get("/show-cadres/:officeLocationId",MasterData.getCadresByOfficeLocationId);
+router.get("/show-cadres",MasterData.getCadresByOfficeLocationId);
 router.get('/show/talukas', MasterData.getTalukas);
 router.get("/show/villages/:talukaId",  MasterData.getVillagesByTalukaId);
 router.get("/office-locations/:departmentId", MasterData.getHeadquartersZpSanstha);
