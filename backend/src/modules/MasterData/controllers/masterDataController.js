@@ -81,8 +81,7 @@ export const MasterData = {
 
   getCadresByOfficeLocationId: async (req, res) => {
     try {
-      const { officeLocationId } = req.query;
-      console.log(req.query);
+      const { officeLocationId, dept_id } = req.query;
   
       if (!officeLocationId || isNaN(officeLocationId)) {
         return res.status(400).json({
@@ -91,26 +90,20 @@ export const MasterData = {
         });
       }
   
-      const cadres = await masterDataService.getCadresByOfficeLocationId(
-        officeLocationId
-      );
+      const cadres = await masterDataService.getCadresByOfficeLocationId(officeLocationId, dept_id);
   
       res.status(200).json({
         success: true,
         data: cadres,
       });
     } catch (error) {
-      console.error(
-        "Error in OfficeCadreController - getCadresByOfficeLocationId:",
-        error
-      );
+      console.error("Error in OfficeCadreController - getCadresByOfficeLocationId:", error);
       res.status(500).json({
         success: false,
         message: "Internal server error",
       });
     }
-  },
-  
+  },   
 
   getTalukas: async (req, res) => {
     try {

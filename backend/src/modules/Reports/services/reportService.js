@@ -342,11 +342,63 @@ export const reportService = {
     }
 },
 
-GetAttendanceReportForWeekDateForthScreen: async (start_date, cader_id, location_id, attendance_period) => {
+// GetAttendanceReportForWeekDateForthScreen: async (start_date, cader_id, location_id, attendance_period) => {
+//   try {
+//     const [result] = await query(
+//       "CALL GetAttReportShowEmpDetailsByDate(?, ?, ?, ?)",
+//       [start_date, cader_id, location_id, attendance_period]
+//     );
+
+//     if (!result || result.length === 0) {
+//       throw new Error("No attendance data found for the given filters.");
+//     }
+
+//     return result.map(row => {
+//       let first_name = "Decryption Failed";
+//       let middle_name = "Decryption Failed";
+//       let last_name = "Decryption Failed";
+//       let mobile_no = "Hidden";
+
+//       try {
+//         first_name = decrypt(row.first_name);
+//         middle_name = decrypt(row.middle_name);
+//         last_name = decrypt(row.last_name);
+//         mobile_no = decryptDeterministic(row.mob_no); 
+//       } catch (decryptionError) {
+//         console.error("Decryption error:", decryptionError);
+//       }
+
+//       return {
+//         // emp_id: row.emp_id,  // <-- Return emp_id here
+//         start_date: row.date,
+//         location_name: row.location_name,
+//         first_name,
+//         middle_name,
+//         last_name,
+//         mobile_no,
+//         cader_name: row.cader_name,
+//         attendance_status: row.attendance_status, 
+//         total_hours: row.total_hours || null 
+//         // user_profile: row.user_profile || null
+//       };
+//     });
+
+//   } catch (error) {
+//     console.error("Error in GetAttendanceReportForWeekDateForthScreen:", error);
+//     throw { status: false, message: error.message || "Database error" };
+//   }
+// },
+GetAttendanceReportForWeekDateForthScreen: async (
+  start_date = null,
+  department_id = null,
+  cader_id = null,
+  attendance_period = null,
+  location_id = null
+) => {
   try {
     const [result] = await query(
-      "CALL GetAttReportShowEmpDetailsByDate(?, ?, ?, ?)",
-      [start_date, cader_id, location_id, attendance_period]
+      "CALL GetAttReportShowEmpDetailsByDate(?, ?, ?, ?, ?)",
+      [start_date, department_id, cader_id, attendance_period, location_id]
     );
 
     if (!result || result.length === 0) {
@@ -369,17 +421,18 @@ GetAttendanceReportForWeekDateForthScreen: async (start_date, cader_id, location
       }
 
       return {
-        // emp_id: row.emp_id,  // <-- Return emp_id here
-        start_date: row.date,
-        location_name: row.location_name,
+        emp_id: row.emp_id,
+        date: row.date,
+        dept_id: row.dept_id,
         first_name,
         middle_name,
         last_name,
         mobile_no,
         cader_name: row.cader_name,
-        attendance_status: row.attendance_status, 
-        total_hours: row.total_hours || null 
-        // user_profile: row.user_profile || null
+        attendance_status: row.attendance_status,
+        total_hours: row.total_hours,
+        user_profile: row.user_profile,
+        location_name: row.location_name
       };
     });
 
@@ -388,6 +441,7 @@ GetAttendanceReportForWeekDateForthScreen: async (start_date, cader_id, location
     throw { status: false, message: error.message || "Database error" };
   }
 },
+
 
 GetAttendanceReportForYearForthScreen:async(year,cader_id,location_id,attendance_period)=>{
   try {
@@ -553,11 +607,11 @@ GetAttReportForMonthUserDetails: async (
 },
 
 
-GetAttendanceReportForWeekCaderWise: async (start_date, department_id, cader_id, attendance_period, office_location_id) => {
+GetAttendanceReportForWeekCaderWise: async (start_date, department_id, cader_id, attendance_period, location_id) => {
   try {
     const [result] = await query(
       "CALL GetAttReportForWeekCaderWise(?, ?, ?, ?, ?)",
-      [start_date, department_id, cader_id, attendance_period, office_location_id]
+      [start_date, department_id, cader_id, attendance_period, location_id]
     );
 
     if (!result || result.length === 0) {
