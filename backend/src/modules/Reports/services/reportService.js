@@ -22,6 +22,8 @@ export const reportService = {
       // The result is an array of rows; take the first row since the SP returns one row
       const report = result[0];
 
+      console.log(result)
+
       return {
         total_users: report.total_users,
         morning_present: report.morning_present,
@@ -45,7 +47,7 @@ export const reportService = {
       );
 
       // Execute the stored procedure
-      const [result] = await query("CALL GetWeeklyAttendanceReport(?, ?, ?)", [
+      const [result] = await query("CALL GetAttendanceReportForWeek(?, ?, ?)", [
         start_date,
         department_id,
         cader_id,
@@ -186,50 +188,37 @@ export const reportService = {
     }
   },
 
-  GetAttReportForDaySecondScreen: async (
+  GetAttReportForDaySecondScreen:  async (
     start_date,
-    department_id,
     attendance_period,
-    headquarter_id,
-    taluka_id,
-    sanstha_id,
-    cader_id
+    department_id,
+    location_id,
+    cader_id = null
   ) => {
     try {
       console.log(
-        `Fetching report for date: ${start_date}, department_id: ${department_id}, attendance_period: ${attendance_period}, filters:`,
-        { headquarter_id, taluka_id, sanstha_id, cader_id }
+        `Fetching report for date: ${start_date}, period: ${attendance_period}, department: ${department_id}, location: ${location_id}, cader: ${cader_id}`
       );
 
-      // Execute the stored procedure
-      const [result] = await query("CALL GetAttReportForDaySecondScreen(?, ?, ?, ?, ?, ?, ?)", [
-        start_date,
-        department_id,
-        attendance_period,
-        headquarter_id,
-        taluka_id,
-        sanstha_id,
-        cader_id
-      ]);
- 
-     // const report = result[0];
- 
-      const report= result.map(row=>({
-        date:row.date,
-        total_users:row.total_users,
-        present_users : row.present_count,
-        absent_users: row.total_users- row.present_count
-      }))
- 
-      return{report}
- 
+      const [result] = await query(
+        'CALL GetAttReportForDaySecondScreen(?, ?, ?, ?, ?)',
+        [start_date, attendance_period, department_id, location_id, cader_id]
+      );
+
+      const report = result[0] || {};
+      return {
+        date: report.date,
+        total_users: report.total_users || 0,
+        present_users: report.present_users || 0,
+        absent_users: report.absent_users || 0
+      };
     } catch (error) {
-      if (error.sqlState === "45000") {
+      if (error.sqlState === '45000') {
         throw { status: false, message: error.sqlMessage };
       }
       throw {
         status: false,
-        message: "Database error while fetching attendance report",
+        message: 'Database error while fetching attendance report'
       };
     }
   },

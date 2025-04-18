@@ -202,6 +202,4 @@ GetSansthaLocations: async (req, res) => {
   }
 }
 
-
-
 }
