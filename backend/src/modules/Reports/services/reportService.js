@@ -103,15 +103,46 @@ export const reportService = {
     }
   },
 
+  // getAttendanceReportForMonth: async (year, month, department_id, cader_id) => {
+  //   try {
+  //     console.log(
+  //       `Fetching monthly report for year: ${year}, month: ${month}, department_id: ${department_id}, cader_id: ${cader_id}`
+  //     );
+  //     const [results] = await query(
+  //       "CALL GetAttendanceReportForMonth(?, ?, ?, ?)",
+  //       [year, month, department_id, cader_id]
+  //     );
+  //     const report = results.map((row) => ({
+  //       date: row.date,
+  //       total_users: row.total_users,
+  //       morning_present: row.morning_present,
+  //       afternoon_present: row.afternoon_present,
+  //       evening_present: row.evening_present,
+  //     }));
+  //     return report;
+  //   } catch (error) {
+  //     if (error.sqlState === "45000") {
+  //       throw { status: false, message: error.sqlMessage };
+  //     }
+  //     throw {
+  //       status: false,
+  //       message: "Database error while fetching monthly attendance report",
+  //     };
+  //   }
+  // },
+
   getAttendanceReportForMonth: async (year, month, department_id, cader_id) => {
     try {
       console.log(
         `Fetching monthly report for year: ${year}, month: ${month}, department_id: ${department_id}, cader_id: ${cader_id}`
       );
+  
+      // 🔁 Fix: Swap year and month in the parameter order
       const [results] = await query(
         "CALL GetAttendanceReportForMonth(?, ?, ?, ?)",
-        [year, month, department_id, cader_id]
+        [month, year, department_id, cader_id]
       );
+  
       const report = results.map((row) => ({
         date: row.date,
         total_users: row.total_users,
@@ -119,17 +150,19 @@ export const reportService = {
         afternoon_present: row.afternoon_present,
         evening_present: row.evening_present,
       }));
+  
       return report;
     } catch (error) {
       if (error.sqlState === "45000") {
         throw { status: false, message: error.sqlMessage };
       }
+      console.error("Error executing query:", error);
       throw {
         status: false,
         message: "Database error while fetching monthly attendance report",
       };
     }
-  },
+  },  
   getAttendanceReportMobno: async ({ mobile_no, date, week, month, year }) => {
     try {
       console.log(`Fetching attendance for mobile: ${mobile_no}, date: ${date}, week: ${week}, month: ${month}, year: ${year}`);
@@ -257,26 +290,27 @@ export const reportService = {
   },
   
 
-  GetAttReportFormonthSecondScreen: async (month, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
+  GetAttReportFormonthSecondScreen: async (month, year, department_id, attendance_period, location_id, cader_id) => {
     try {
-   
-      const [result] = await query("CALL GetAttReportForMonthSecondScreen(?, ?, ?, ?, ?, ?, ?)", [
-        month,
-        department_id,
-        attendance_period,
-        headquarter_id,
-        taluka_id,
-        sanstha_id,
-        cader_id
-      ]);
-
+      const [result] = await query(
+        "CALL GetAttReportForMonthSecondScreen(?, ?, ?, ?, ?, ?)",
+        [
+          month,
+          year,
+          department_id,
+          attendance_period,
+          location_id || null,
+          cader_id || null
+        ]
+      );
+  
       return result.map(row => ({
         date: row.date,
         total_users: row.total_users,
         present_users: row.present_count,
-        absent_users:row.total_users-row.present_count,
-    }));
- 
+        absent_users: row.total_users - row.present_count
+      }));
+      
     } catch (error) {
       if (error.sqlState === '45000') {
         throw { status: false, message: error.sqlMessage };
@@ -284,6 +318,7 @@ export const reportService = {
       throw { status: false, message: "Database error while fetching attendance report" };
     }
   },
+  
 
   GetAttendanceReportForYearSecondScreen: async (year, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
     try {
@@ -342,52 +377,6 @@ export const reportService = {
     }
 },
 
-// GetAttendanceReportForWeekDateForthScreen: async (start_date, cader_id, location_id, attendance_period) => {
-//   try {
-//     const [result] = await query(
-//       "CALL GetAttReportShowEmpDetailsByDate(?, ?, ?, ?)",
-//       [start_date, cader_id, location_id, attendance_period]
-//     );
-
-//     if (!result || result.length === 0) {
-//       throw new Error("No attendance data found for the given filters.");
-//     }
-
-//     return result.map(row => {
-//       let first_name = "Decryption Failed";
-//       let middle_name = "Decryption Failed";
-//       let last_name = "Decryption Failed";
-//       let mobile_no = "Hidden";
-
-//       try {
-//         first_name = decrypt(row.first_name);
-//         middle_name = decrypt(row.middle_name);
-//         last_name = decrypt(row.last_name);
-//         mobile_no = decryptDeterministic(row.mob_no); 
-//       } catch (decryptionError) {
-//         console.error("Decryption error:", decryptionError);
-//       }
-
-//       return {
-//         // emp_id: row.emp_id,  // <-- Return emp_id here
-//         start_date: row.date,
-//         location_name: row.location_name,
-//         first_name,
-//         middle_name,
-//         last_name,
-//         mobile_no,
-//         cader_name: row.cader_name,
-//         attendance_status: row.attendance_status, 
-//         total_hours: row.total_hours || null 
-//         // user_profile: row.user_profile || null
-//       };
-//     });
-
-//   } catch (error) {
-//     console.error("Error in GetAttendanceReportForWeekDateForthScreen:", error);
-//     throw { status: false, message: error.message || "Database error" };
-//   }
-// },
 GetAttendanceReportForWeekDateForthScreen: async (
   start_date = null,
   department_id = null,
@@ -441,7 +430,6 @@ GetAttendanceReportForWeekDateForthScreen: async (
     throw { status: false, message: error.message || "Database error" };
   }
 },
-
 
 GetAttendanceReportForYearForthScreen:async(year,cader_id,location_id,attendance_period)=>{
   try {
@@ -606,7 +594,6 @@ GetAttReportForMonthUserDetails: async (
   }
 },
 
-
 GetAttendanceReportForWeekCaderWise: async (start_date, department_id, cader_id, attendance_period, location_id) => {
   try {
     const [result] = await query(
@@ -633,18 +620,16 @@ GetAttendanceReportForWeekCaderWise: async (start_date, department_id, cader_id,
   }
 },
 
-
-
 GetAttendanceReportForWeekSansthaWise: async (
   start_date,
   attendance_period,
   department_id,
-  office_location_id
+  location_id
 ) => {
   try {
     const [result] = await query(
       "CALL GetAttReportForWeekForSanstha(?, ?, ?, ?)",
-      [start_date, attendance_period, department_id, office_location_id]
+      [start_date, attendance_period, department_id, location_id]
     );
 
     console.log("Sanstha Report Result:", result);
@@ -670,5 +655,43 @@ GetAttendanceReportForWeekSansthaWise: async (
       message: error.message || "Database error while fetching sanstha-wise weekly attendance report"
     };
   }
-}
+},
+
+
+GetAttendanceReportForMonthCaderWise: async (month, year, department_id, cader_id, attendance_period, location_id) => {
+  try {
+    const [result] = await query(
+      "CALL GetAttReportForMonthCaderWiseByLocation(?, ?, ?, ?, ?, ?)",
+      [
+        parseInt(month),
+        parseInt(year),
+        parseInt(department_id),
+        cader_id ? parseInt(cader_id) : null,
+        parseInt(attendance_period),
+        location_id !== undefined && location_id !== '' ? parseInt(location_id) : null
+      ]
+    );
+
+    if (!result || result.length === 0) {
+      throw new Error("No data returned from the database.");
+    }
+
+    return result.map(row => ({
+      date: row.date,
+      cader_id: row.cader_id,
+      cader_name: row.cader_name,
+      total_users: row.total_users,
+      present_users: row.present_users || row.present_count,
+      absent_users: row.total_users - (row.present_users || row.present_count)
+    }));
+  } catch (error) {
+    console.error("Error in GetAttendanceReportForMonthCaderWise:", error);
+    throw {
+      status: false,
+      message: error.message || "Database error while fetching monthly attendance report"
+    };
+  }
+},
+
+
 };
