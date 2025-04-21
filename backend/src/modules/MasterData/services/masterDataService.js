@@ -66,82 +66,24 @@ export const masterDataService = {
     }
   },
 
-  // getHeadquarters: async () => {
-  //     try {
-  //       const sql = `SELECT head_id, name FROM tbl_headquarter ORDER BY head_id ASC`;
-  //       const results = await query(sql);
-
-  //       return results.map(row => ({
-  //         head_id: row.head_id,
-  //         name: row.name,
-  //       }));
-  //     } catch (error) {
-  //       console.error("Error in masterDropdownService - getHeadquarters:", error);
-  //       throw error;
-  //     }
-  //   },
-
-  //   getAllSansthas: async () => {
-  //     try {
-  //       const sql = `
-  //         SELECT id, sanstha_name, taluka_id, sansta_location
-  //         FROM sanstha
-  //         ORDER BY id ASC
-  //       `;
-  //       const results = await query(sql);
-  //       return results.map(row => ({
-  //         id: row.id,
-  //         sanstha_name: row.sanstha_name,
-  //         taluka_id: row.taluka_id,
-  //         sansta_location: row.sansta_location,
-  //       }));
-  //     } catch (error) {
-  //       console.error("Error in masterDropdownService - getAllSansthas:", error);
-  //       throw error;
-  //     }
-  //   },
-
-  //   // Fetch office locations by department ID
-  //   getOfficeLocationsByDepartmentId: async (departmentId) => {
-  //     try {
-  //       const sql = `
-  //           SELECT id, loc_name_marathi
-  //           FROM office_location
-  //           WHERE dept_id = ?
-  //       `;
-
-  //       const results = await query(sql, [departmentId]);
-
-  //       return results.map(row => ({
-  //         id: row.id,
-  //         loc_name_marathi: row.loc_name_marathi,
-  //       }));
-  //     } catch (error) {
-  //       console.error("Error in masterDropdownService - getOfficeLocationsByDepartmentId:", error);
-  //       throw error;
-  //     }
-  //   },
-
-  getCadresByOfficeLocationId: async (officeLocationId) => {
+ 
+  getCadresByOfficeLocationId: async (officeLocationId, dept_id) => {
     try {
       const sql = `
-            SELECT c.id, c.cadre_name 
-            FROM cadres c
-            JOIN office_cadres oc ON c.id = oc.cadre_id
-            WHERE oc.office_location_id = ?
-          `;
-
-      const results = await query(sql, [officeLocationId]);
+        SELECT DISTINCT c.id AS cader_id, c.cader_name
+        FROM tbl_cader c
+        JOIN office_cadres oc ON c.id = oc.cadre_id
+        JOIN users u ON u.cader_id = c.id AND u.office_location_id = oc.office_location_id
+        WHERE oc.office_location_id = ? AND u.department_id = ?
+      `;
+      const results = await query(sql, [officeLocationId, dept_id]);
       return results;
     } catch (error) {
-      console.error(
-        "Error in OfficeCadreService - getCadresByOfficeLocationId:",
-        error
-      );
+      console.error("Error in OfficeCadreService - getCadresByOfficeLocationId:", error);
       throw error;
     }
   },
-
+  
   getDepartments: async () => {
     try {
       const sql = "SELECT id, dept_name_marathi FROM departments";
@@ -194,7 +136,7 @@ export const masterDataService = {
     try {
       const result = await query(
         `SELECT 
-          c.id AS cadre_id,
+          c.id AS cader_id,
           c.cader_name,
           c.cader_name
        FROM 
@@ -244,13 +186,13 @@ export const masterDataService = {
   },
 // services/masterDataService.js
 
-GetSansthaLocations: async () => {
+GetSansthaLocations: async (deptId) => {
   try {
     const fetchSanstha = await query(
       `SELECT *
        FROM office_location 
-       WHERE location_type = ?`,
-      ['sanstha']
+       WHERE location_type = ? AND dept_id = ?`,
+      ['sanstha',deptId]
     );
 
     console.log("Sanstha Locations:", fetchSanstha);

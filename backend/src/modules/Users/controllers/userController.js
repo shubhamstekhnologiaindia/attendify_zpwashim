@@ -41,7 +41,7 @@ export const UserController = {
         office_location_id, taluka_id, village_id,
         cader_id, password
       } = req.body;
-
+  
       // List of mandatory fields
       const requiredFields = {
         first_name,

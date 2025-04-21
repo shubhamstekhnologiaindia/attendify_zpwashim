@@ -35,6 +35,7 @@ router.get('/Get_Reports_For_Year_ThirdScreen', AttendanceReports.GetAttendanceR
 router.get('/Get_Reports_For_Week_Sanstha', AttendanceReports.GetWeeklyAttendanceBySanstha);
 
 router.get("/Get_Reports_For_Week_Cader_Wise", AttendanceReports.GetWeeklyAttendanceByCader);
+router.get('/Get_Reports_For_Month_Location_Wise_Cader', AttendanceReports.GetMonthlyAttendanceByCader);
 
 export default router;
 

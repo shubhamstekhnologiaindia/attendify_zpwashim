@@ -81,34 +81,29 @@ export const MasterData = {
 
   getCadresByOfficeLocationId: async (req, res) => {
     try {
-      const { officeLocationId } = req.params;
-
+      const { officeLocationId, dept_id } = req.query;
+  
       if (!officeLocationId || isNaN(officeLocationId)) {
         return res.status(400).json({
           success: false,
           message: "Invalid office location ID",
         });
       }
-
-      const cadres = await masterDataService.getCadresByOfficeLocationId(
-        officeLocationId
-      );
-
+  
+      const cadres = await masterDataService.getCadresByOfficeLocationId(officeLocationId, dept_id);
+  
       res.status(200).json({
         success: true,
         data: cadres,
       });
     } catch (error) {
-      console.error(
-        "Error in OfficeCadreController - getCadresByOfficeLocationId:",
-        error
-      );
+      console.error("Error in OfficeCadreController - getCadresByOfficeLocationId:", error);
       res.status(500).json({
         success: false,
         message: "Internal server error",
       });
     }
-  },
+  },   
 
   getTalukas: async (req, res) => {
     try {
@@ -166,16 +161,15 @@ GetPanchayatSamitiLocations: async (req, res) => {
   try {
     const result = await masterDataService.GetPanchayatSamitiLocations();
 console.log
-    // Log the result to confirm it is correct
     console.log("API Result:", result);
 
     return res.status(200).json({
       status: true,
-      data: result.data, // Send the retrieved data to the client
+      data: result.data, 
       message: "Panchayat Samiti locations retrieved successfully",
     });
   } catch (error) {
-    console.error("Error:", error); // Log the error to help debug
+    console.error("Error:", error); 
     return res.status(400).json({
       status: false,
       message: error.message || "Something went wrong",
@@ -183,10 +177,18 @@ console.log
   }
 },
 
-// controllers/masterDataController.js
 GetSansthaLocations: async (req, res) => {
   try {
-    const result = await masterDataService.GetSansthaLocations();
+    const deptId = req.query.deptId; 
+
+    if (!deptId) {
+      return res.status(400).json({
+        status: false,
+        message: "Missing deptId",
+      });
+    }
+
+    const result = await masterDataService.GetSansthaLocations(deptId);
 
     return res.status(200).json({
       status: true,
@@ -201,6 +203,7 @@ GetSansthaLocations: async (req, res) => {
     });
   }
 }
+
 
 
 
