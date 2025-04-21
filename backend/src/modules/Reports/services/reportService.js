@@ -218,7 +218,7 @@ export const reportService = {
     start_date,
     attendance_period,
     department_id,
-    location_id,
+    location_id=null,
     cader_id = null
   ) => {
     try {
