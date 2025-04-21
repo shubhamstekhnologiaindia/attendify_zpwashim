@@ -45,7 +45,7 @@ export const reportService = {
       );
 
       // Execute the stored procedure
-      const [result] = await query("CALL GetWeeklyAttendanceReport(?, ?, ?)", [
+      const [result] = await query("CALL GetAttendanceReportForWeek(?, ?, ?)", [
         start_date,
         department_id,
         cader_id,
