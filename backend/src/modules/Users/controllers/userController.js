@@ -141,6 +141,5 @@ SendOtp: async (req, res) => {
           });
       }
   }
-
   }; 
 

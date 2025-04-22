@@ -29,6 +29,8 @@ import notificationRoutes from "./src/modules/BirthdayNotification/routes/notifi
 
 import reportsRoute from "./src/modules/Reports/routes/reportRoute.js";
 
+import shiftRoute from "./src/modules/Shifts/routes/shiftRoute.js"
+
 const app = express();
  
 app.use(cors());
@@ -39,7 +41,7 @@ app.use('/api/auth', AuthRoute);
 // app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,UserRoutes, notificationRoutes, holidayRoute, birthdayRoute,forgotPasswordRoute,attendanceCountRoute);
 // app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,userRoute,loginPermissionRoutes);
 app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserRoute,otpRoute,
-  loginPermissionRoutes,reportsRoute,attendanceCountRoute,forgotPasswordRoute);
+  loginPermissionRoutes,reportsRoute,attendanceCountRoute,forgotPasswordRoute,shiftRoute);
 
 const PORT = 3001
  
