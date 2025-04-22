@@ -74,19 +74,15 @@ export const reportService = {
 
   getAttendanceReportForYear: async (year, department_id, cader_id) => {
     try {
-      console.log(
-        `Fetching yearly report for year: ${year}, department_id: ${department_id}, cader_id: ${cader_id}`
-      );
+      console.log(`Fetching report for year=${year}, department_id=${department_id}, cader_id=${cader_id}`);
 
-      // Execute the stored procedure
       const [results] = await query(
         "CALL GetAttendanceReportForYear(?, ?, ?)",
         [year, department_id, cader_id]
       );
 
-      // Map results to the desired format
       const report = results.map((row) => ({
-        date: row.date,
+        date: row.report_date.toLocaleDateString('en-CA'), // Formats to 'YYYY-MM-DD' safely
         total_users: row.total_users,
         morning_present: row.morning_present,
         afternoon_present: row.afternoon_present,
@@ -96,14 +92,13 @@ export const reportService = {
       return report;
     } catch (error) {
       if (error.sqlState === "45000") {
-        throw { status: false, message: error.sqlMessage };
+        throw new Error(error.sqlMessage);
       }
-      throw {
-        status: false,
-        message: "Database error while fetching yearly attendance report",
-      };
+      console.error("DB Error:", error);
+      throw new Error("Database error while fetching yearly attendance report");
     }
   },
+  
 
   // getAttendanceReportForMonth: async (year, month, department_id, cader_id) => {
   //   try {
@@ -221,51 +216,44 @@ export const reportService = {
     }
   },
 
-  GetAttReportForDaySecondScreen: async (
-    start_date,
-    department_id,
-    attendance_period,
-    headquarter_id,
-    taluka_id,
-    sanstha_id,
-    cader_id
-  ) => {
+  GetAttReportForDaySecondScreen: async (req, res) => {
     try {
-      console.log(
-        `Fetching report for date: ${start_date}, department_id: ${department_id}, attendance_period: ${attendance_period}, filters:`,
-        { headquarter_id, taluka_id, sanstha_id, cader_id }
-      );
-
-      // Execute the stored procedure
-      const [result] = await query("CALL GetAttReportForDaySecondScreen(?, ?, ?, ?, ?, ?, ?)", [
+      const {
         start_date,
-        department_id,
         attendance_period,
-        headquarter_id,
-        taluka_id,
-        sanstha_id,
+        department_id,
+        location_id,
         cader_id
-      ]);
+      } = req.query;
  
-     // const report = result[0];
- 
-      const report= result.map(row=>({
-        date:row.date,
-        total_users:row.total_users,
-        present_users : row.present_count,
-        absent_users: row.total_users- row.present_count
-      }))
- 
-      return{report}
- 
-    } catch (error) {
-      if (error.sqlState === "45000") {
-        throw { status: false, message: error.sqlMessage };
+      // Validate required fields
+      if (!start_date || !attendance_period || !department_id) {
+        return res.status(400).json({
+          status: false,
+          message:
+            'start_date, attendance_period, department_id, and location_id are required'
+        });
       }
-      throw {
+ 
+      const report = await reportService.GetAttReportForDaySecondScreen(
+        start_date,
+        Number(attendance_period),
+        Number(department_id),
+        Number(location_id),
+        cader_id ? Number(cader_id) : null
+      );
+ 
+      return res.status(200).json({
+        status: true,
+        data: report,
+        message: 'Attendance report retrieved successfully'
+      });
+    } catch (error) {
+      const statusCode = error.status === false ? 400 : 500;
+      return res.status(statusCode).json({
         status: false,
-        message: "Database error while fetching attendance report",
-      };
+        message: error.message || 'Failed to fetch attendance report'
+      });
     }
   },
   GetAttReportForWeekSecondScreen: async (
@@ -335,23 +323,21 @@ export const reportService = {
   },
   
 
-  GetAttendanceReportForYearSecondScreen: async (year, department_id, attendance_period, headquarter_id, taluka_id, sanstha_id, cader_id) => {
+  GetAttendanceReportForYearSecondScreen: async (year, department_id, attendance_period, location_id, cader_id) => {
     try {
       const [result] = await query(
-        "CALL GetAttReportForYearSecondScreen(?, ?, ?, ?, ?, ?, ?)", 
+        "CALL GetAttReportForYearSecondScreen(?, ?, ?,?, ?)", 
         [
           year,
           department_id,
           attendance_period,
-          headquarter_id,
-          taluka_id,
-          sanstha_id,
+          location_id,
           cader_id
         ]
       );
   
       return result.map(row => ({
-        date: new Date(row.date).toISOString().split('T')[0], // Only date part
+        date: row.date.toLocaleDateString('en-CA'), // Formats to 'YYYY-MM-DD' safely
         total_users: row.total_users,
         present_users: row.present_users,
         absent_users: row.total_users - row.present_users,
