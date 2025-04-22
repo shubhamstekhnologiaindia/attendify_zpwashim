@@ -216,31 +216,21 @@ export const reportService = {
     }
   },
 
-  GetAttReportForDaySecondScreen: async (req, res) => {
+  GetAttReportForDaySecondScreen:  async (
+    start_date,
+    attendance_period,
+    department_id,
+    location_id=null,
+    cader_id = null
+  ) => {
     try {
-      const {
-        start_date,
-        attendance_period,
-        department_id,
-        location_id,
-        cader_id
-      } = req.query;
+      console.log(
+        `Fetching report for date: ${start_date}, period: ${attendance_period}, department: ${department_id}, location: ${location_id}, cader: ${cader_id}`
+      );
  
-      // Validate required fields
-      if (!start_date || !attendance_period || !department_id) {
-        return res.status(400).json({
-          status: false,
-          message:
-            'start_date, attendance_period, department_id, and location_id are required'
-        });
-      }
- 
-      const report = await reportService.GetAttReportForDaySecondScreen(
-        start_date,
-        Number(attendance_period),
-        Number(department_id),
-        Number(location_id),
-        cader_id ? Number(cader_id) : null
+      const [result] = await query(
+        'CALL GetAttReportForDaySecondScreen(?, ?, ?, ?, ?)',
+        [start_date, attendance_period, department_id, location_id, cader_id]
       );
  
       return res.status(200).json({

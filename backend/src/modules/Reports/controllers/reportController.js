@@ -193,11 +193,11 @@ export const AttendanceReports = {
       } = req.query;
 
       // Validate required fields
-      if (!start_date || !attendance_period || !department_id || !location_id) {
+      if (!start_date || !attendance_period || !department_id ) {
         return res.status(400).json({
           status: false,
           message:
-            'start_date, attendance_period, department_id, and location_id are required'
+            'start_date, attendance_period, department_id, are required'
         });
       }
 
