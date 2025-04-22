@@ -32,14 +32,20 @@ export const BirthdayController = {
       const { senderId, receiverId, customMessage } = req.body;
       
       if (!senderId || !receiverId) {
-        return res.status(400).json({ success: false, message: "Sender ID and Receiver ID are required" });
+        return res.status(400).json({ 
+          success: false, 
+          message: "Sender ID and Receiver ID are required" 
+        });
       }
 
       const response = await sendDynamicBirthdayMessage(senderId, receiverId, customMessage);
       res.status(200).json(response);
     } catch (error) {
       console.error("❌ Error in DynamicBirthdayController:", error);
-      res.status(500).json({ success: false, message: "Server error" });
+      res.status(500).json({ 
+        success: false, 
+        message: "Server error" 
+      });
     }
   },
 
