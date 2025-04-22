@@ -182,6 +182,48 @@ export const AttendanceReports = {
   },
   
 
+  // GetAttReportForDaySecondScreen: async (req, res) => {
+  //   try {
+  //     const {
+  //       start_date,
+  //       attendance_period,
+  //       department_id,
+  //       location_id,
+  //       cader_id
+  //     } = req.query;
+
+  //     // Validate required fields
+  //     if (!start_date || !attendance_period || !department_id ) {
+  //       return res.status(400).json({
+  //         status: false,
+  //         message:
+  //           'start_date, attendance_period, department_id, are required'
+  //       });
+  //     }
+
+  //     const report = await reportService.GetAttReportForDaySecondScreen(
+  //       start_date,
+  //       Number(attendance_period),
+  //       Number(department_id),
+  //       Number(location_id),
+  //       cader_id ? Number(cader_id) : null
+  //     );
+ 
+  //     return res.status(200).json({
+  //       status: true,
+  //       data: report,
+  //       message: 'Attendance report retrieved successfully'
+  //     });
+  //   } catch (error) {
+  //     const statusCode = error.status === false ? 400 : 500;
+  //     return res.status(statusCode).json({
+  //       status: false,
+  //       message: error.message || 'Failed to fetch attendance report'
+  //     });
+  //   }
+  // },
+
+
   GetAttReportForDaySecondScreen: async (req, res) => {
     try {
       const {
@@ -191,16 +233,16 @@ export const AttendanceReports = {
         location_id,
         cader_id
       } = req.query;
-
+ 
       // Validate required fields
       if (!start_date || !attendance_period || !department_id ) {
         return res.status(400).json({
           status: false,
           message:
-            'start_date, attendance_period, department_id, are required'
+            'start_date, attendance_period, department_id are required'
         });
       }
-
+ 
       const report = await reportService.GetAttReportForDaySecondScreen(
         start_date,
         Number(attendance_period),
@@ -222,7 +264,6 @@ export const AttendanceReports = {
       });
     }
   },
-
 
   GetAttReportForWeekSecondScreen: async (req, res) => {
     try {

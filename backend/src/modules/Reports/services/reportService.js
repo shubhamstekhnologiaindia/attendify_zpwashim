@@ -216,11 +216,42 @@ export const reportService = {
     }
   },
 
+  // GetAttReportForDaySecondScreen:  async (
+  //   start_date,
+  //   attendance_period,
+  //   department_id,
+  //   location_id=null,
+  //   cader_id = null
+  // ) => {
+  //   try {
+  //     console.log(
+  //       `Fetching report for date: ${start_date}, period: ${attendance_period}, department: ${department_id}, location: ${location_id}, cader: ${cader_id}`
+  //     );
+ 
+  //     const [result] = await query(
+  //       'CALL GetAttReportForDaySecondScreen(?, ?, ?, ?, ?)',
+  //       [start_date, attendance_period, department_id, location_id, cader_id]
+  //     );
+ 
+  //     return res.status(200).json({
+  //       status: true,
+  //       data: report,
+  //       message: 'Attendance report retrieved successfully'
+  //     });
+  //   } catch (error) {
+  //     const statusCode = error.status === false ? 400 : 500;
+  //     return res.status(statusCode).json({
+  //       status: false,
+  //       message: error.message || 'Failed to fetch attendance report'
+  //     });
+  //   }
+  // },
+
   GetAttReportForDaySecondScreen:  async (
     start_date,
     attendance_period,
     department_id,
-    location_id=null,
+    location_id,
     cader_id = null
   ) => {
     try {
@@ -233,17 +264,21 @@ export const reportService = {
         [start_date, attendance_period, department_id, location_id, cader_id]
       );
  
-      return res.status(200).json({
-        status: true,
-        data: report,
-        message: 'Attendance report retrieved successfully'
-      });
+      const report = result[0] || {};
+      return {
+        date: report.date,
+        total_users: report.total_users || 0,
+        present_users: report.present_users || 0,
+        absent_users: report.absent_users || 0
+      };
     } catch (error) {
-      const statusCode = error.status === false ? 400 : 500;
-      return res.status(statusCode).json({
+      if (error.sqlState === '45000') {
+        throw { status: false, message: error.sqlMessage };
+      }
+      throw {
         status: false,
-        message: error.message || 'Failed to fetch attendance report'
-      });
+        message: 'Database error while fetching attendance report'
+      };
     }
   },
   GetAttReportForWeekSecondScreen: async (
