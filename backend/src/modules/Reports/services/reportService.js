@@ -139,7 +139,7 @@ export const reportService = {
       );
   
       const report = results.map((row) => ({
-        date: row.date,
+        date: row.date.toLocaleDateString('en-CA'), // Formats to 'YYYY-MM-DD' safely
         total_users: row.total_users,
         morning_present: row.morning_present,
         afternoon_present: row.afternoon_present,
@@ -158,27 +158,44 @@ export const reportService = {
       };
     }
   },  
-  getAttendanceReportMobno: async ({ mobile_no, date, week, month, year }) => {
+  getAttendanceReportMobno: async ({
+    mobile_no,
+    date,
+    week,
+    month,
+    year,
+    department_id = null,
+    cader_id = null,
+  }) => {
     try {
-      console.log(`Fetching attendance for mobile: ${mobile_no}, date: ${date}, week: ${week}, month: ${month}, year: ${year}`);
-  
       const encrypted_mobile = encryptDeterministic(mobile_no);
+  
       const params = [
         encrypted_mobile,
         date || null,
         week || null,
         month || null,
         year || null,
+        department_id,
+        cader_id,
       ];
   
-      const [results] = await query("CALL GetAttendanceReportOnMobno(?, ?, ?, ?, ?)", params);
+      const [results] = await query(
+        "CALL GetAttendanceReportOnMobno(?, ?, ?, ?, ?, ?, ?)",
+        params
+      );
   
       const report = results.map((row) => {
-        const firstName = row.first_name ? decrypt(row.first_name) : "";
-        const middleName = row.middle_name ? decrypt(row.middle_name) : "";
-        const lastName = row.last_name ? decrypt(row.last_name) : "";
+        let first_name = "", middle_name = "", last_name = "", decrypted_mobile = "";
   
-        const fullName = [firstName, middleName, lastName].filter(Boolean).join(" ");
+        try {
+          first_name = row.first_name ? decrypt(row.first_name) : "";
+          middle_name = row.middle_name ? decrypt(row.middle_name) : "";
+          last_name = row.last_name ? decrypt(row.last_name) : "";
+          decrypted_mobile = row.encrypted_mob_no ? decryptDeterministic(row.encrypted_mob_no) : "";
+        } catch (err) {
+          console.error("Decryption error:", err);
+        }
   
         const isPresent = row.att_morning_in_time !== null;
         let total_hours = 0;
@@ -190,15 +207,20 @@ export const reportService = {
         }
   
         return {
-          name: fullName,
-          user_profile: row.user_profile,
+          emp_id: row.user_id,
           date: row.att_attendance_date
             ? row.att_attendance_date.toISOString().split("T")[0]
             : row.report_date.toISOString().split("T")[0],
-          cader_name: row.cader_id,
-          mob_no: row.encrypted_mob_no ? decryptDeterministic(row.encrypted_mob_no) : null,
+          dept_id: row.department_id,
+          first_name,
+          middle_name,
+          last_name,
+          mobile_no: decrypted_mobile,
+          cader_name: row.cader_name || null,
+          attendance_status: isPresent ? "Present" : "Absent",
           total_hours,
-          status: isPresent ? "Present" : "Absent",
+          user_profile: row.user_profile || null,
+          location_name: row.location_name || null,
         };
       });
   
@@ -213,7 +235,8 @@ export const reportService = {
       };
     }
   },
-
+  
+  
   GetAttReportForDaySecondScreen:  async (
     start_date,
     attendance_period,
