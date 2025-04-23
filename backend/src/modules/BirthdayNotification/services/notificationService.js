@@ -159,7 +159,7 @@ export const getUserById = async (userId) => {
       FROM users 
       WHERE id = ? 
       AND status = '1'
-      AND (role_id = 101 OR (role_id = 103 AND fcm_token IS NOT NULL))
+      AND (role_id = 101 OR (role_id IN (102, 103) AND fcm_token IS NOT NULL))
     `;
 
     const users = await query(sql, [userId]);

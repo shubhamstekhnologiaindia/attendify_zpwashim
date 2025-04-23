@@ -49,11 +49,11 @@ export const AuthController = {
           console.log(userData)
       
           // Check if FCM token is already present for the user
-          // if (userData.fcm_token !== null) {
-          //   return res.status(403).json({
-          //     message: "You are already logged in on another device. Please log out first to proceed with login on this device.",
-          //   });
-          // }
+          if (userData.fcm_token !== null) {
+            return res.status(403).json({
+              message: "You are already logged in on another device. Please log out first to proceed with login on this device.",
+            });
+          }
       
           // Validate status
           if (userData.status !== 1) {
