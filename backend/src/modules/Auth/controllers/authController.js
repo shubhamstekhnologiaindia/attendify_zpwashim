@@ -16,7 +16,8 @@ export const AuthController = {
     login: async (req, res) => {
         try {
           const { mob_no, password, fcm_token } = req.body;
-      
+
+    
           // Validate required fields
           if (!mob_no || !password) {
             return res.status(400).json({ message: "Mobile number and password are required" });
@@ -68,6 +69,7 @@ export const AuthController = {
           }
       
           // Update FCM token since it is null
+
           await query("UPDATE users SET fcm_token = ? WHERE id = ?", [
             fcm_token,
             userData.id,
