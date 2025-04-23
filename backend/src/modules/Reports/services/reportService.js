@@ -139,7 +139,7 @@ export const reportService = {
       );
   
       const report = results.map((row) => ({
-        date: row.date.toLocaleDateString('en-CA'), // Formats to 'YYYY-MM-DD' safely
+        date: row.date,
         total_users: row.total_users,
         morning_present: row.morning_present,
         afternoon_present: row.afternoon_present,

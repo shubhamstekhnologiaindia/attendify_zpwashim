@@ -166,7 +166,7 @@ export const AttendanceReports = {
       const result = await reportService.getAttendanceReportMobno({
         mobile_no,
         date,
-        week,
+        week  ,
         month,
         year,
         department_id,
