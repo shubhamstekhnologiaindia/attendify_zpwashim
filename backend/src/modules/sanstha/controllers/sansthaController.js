@@ -9,7 +9,7 @@ export const SansthaController = {
       
           const sansthaId = await SansthaService.addSanstha({
             loc_name_marathi,
-            loc_name_eng,
+            loc_name_eng: loc_name_eng ? loc_name_eng : '' ,
             dept_id
           });
       
@@ -38,7 +38,7 @@ export const SansthaController = {
           await SansthaService.updateSanstha({
             loc_id,
             loc_name_marathi,
-            loc_name_eng,
+            loc_name_eng: loc_name_eng ? loc_name_eng : '' ,
             dept_id
           });
     

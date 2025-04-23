@@ -10,6 +10,6 @@ router.put("/Edit_OrrShift/:edit_orrshift_id", OverrideShiftController.editOrrSh
 
 router.get("/get_OrrShift", OverrideShiftController.getOrrShifts);
 
-router.delete("/Delete_OrrShift/:delete_orrshift_id", OverrideShiftController.deleteOrrShift);
+router.delete("/Delete_OrrShift/", OverrideShiftController.deleteOrrShift);
 
 export default router;
