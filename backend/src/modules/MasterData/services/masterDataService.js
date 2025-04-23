@@ -135,16 +135,7 @@ export const masterDataService = {
   getCadresByDeptId: async (deptId) => {
     try {
       const result = await query(
-        `SELECT 
-          c.id AS cader_id,
-          c.cader_name,
-          c.cader_name
-       FROM 
-          department_cadre dc
-       INNER JOIN 
-          tbl_cader c ON dc.cader_id = c.id
-       WHERE 
-          dc.department_id = ?`,
+        `SELECT id AS cader_id, cader_name From tbl_cader WHERE dept_id = ?`,
         [deptId]
       );
 

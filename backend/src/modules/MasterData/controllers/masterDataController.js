@@ -154,6 +154,7 @@ getCadresByDeptId: async (req, res) => {
         const result = await masterDataService.getCadresByDeptId(deptId);
         return res.status(200).json(result);
     } catch (error) {
+      console.log(error)
         return res.status(400).json({ status: false, message: error.message });
     }
 },
