@@ -103,4 +103,38 @@ export const AuthController = {
           });
         }
       },
+
+      logout: async (req, res) => {
+        try {
+          const { user_id } = req.body;
+      
+          // 1) Validate required field
+          if (!user_id) {
+            return res.status(400).json({ status: false, message: "user_id is required" });
+          }
+      
+          // 2) Clear the FCM token
+          const result = await query(
+            "UPDATE users SET fcm_token = NULL, updated_at = NOW() WHERE id = ?",
+            [user_id]
+          );
+      
+          // 3) Check that a row was actually updated
+          if (result.affectedRows === 0) {
+            return res.status(404).json({ status: false, message: "User not found or already logged out" });
+          }
+      
+          // 4) Return success
+          return res.status(200).json({ status: true, message: "Logout successful" });
+      
+        } catch (error) {
+          console.error("Logout Error:", error);
+          return res.status(500).json({
+            status: false,
+            message: "Error during logout",
+            error: error.message
+          });
+        }
+      },
+      
 };
