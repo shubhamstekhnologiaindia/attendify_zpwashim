@@ -57,7 +57,7 @@ export const OverrideShiftController = {
       const result = await overrideShiftService.deleteOrrShift(Number(delete_orrshift_id), department_id, cader_id);
       return res.status(200).json({ status: true, data: result, message: 'Override deleted' });
     } catch (error) {
-      return res.status(500).json({ status: false, message: error.message });
+      return res.status(500).json({ status: false, message:error.message });
     }
   }
 };
