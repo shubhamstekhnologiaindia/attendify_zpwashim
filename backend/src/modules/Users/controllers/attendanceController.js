@@ -37,9 +37,9 @@ const calculateWorkingHours = (
 export const AttendanceController = {
   recordAttendance: async (req, res) => {
     try {
-      const { user_id, in_out_id } = req.body;
+      const { user_id, in_out_id, location_lat, location_lon } = req.body;
 
-      if (!user_id || !in_out_id) {
+      if (!user_id || !in_out_id ) {
         return res.status(400).json({ status: false, message: "user_id and inOutId are required" });
       }
 
@@ -50,7 +50,7 @@ export const AttendanceController = {
         .replace('T', ' ')
         .substring(0, 19); // 'YYYY-MM-DD HH:mm:ss'
 
-      const result = await AttendanceService.recordAttendance(user_id, in_out_id, istTime);
+      const result = await AttendanceService.recordAttendance(user_id, in_out_id, istTime,location_lat, location_lon);
       return res.status(200).json(result);
     } catch (error) {
       return res.status(400).json({ status: false, message: error.message });

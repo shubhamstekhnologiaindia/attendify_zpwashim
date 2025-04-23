@@ -29,11 +29,11 @@ function convertEpochToIST(epoch) {
 }
 
 export const AttendanceService = {
-  recordAttendance: async (user_id, inOutId, istTime) => {
+  recordAttendance: async (user_id, inOutId, istTime,location_lat, location_lon) => {
     try {
       console.log(istTime); // Log the IST time for debugging
 
-      await query("CALL MarkAttendance(?, ?, ?)", [user_id, inOutId, istTime]);
+      await query("CALL MarkAttendance(?, ?, ?,?,?)", [user_id, inOutId, istTime,location_lat, location_lon]);
 
       return {
         status: true,
