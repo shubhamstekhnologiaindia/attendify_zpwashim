@@ -26,8 +26,11 @@ import forgotPasswordRoute from "./src/modules/Users/routes/forgotPasswordRoute.
 
 import notificationRoutes from "./src/modules/BirthdayNotification/routes/notificationRoute.js";
 
+import sansthaRoute from "./src/modules/sanstha/routes/sansthaRoute.js";
 
 import reportsRoute from "./src/modules/Reports/routes/reportRoute.js";
+
+import shiftRoute from "./src/modules/Shifts/routes/shiftRoute.js"
 
 const app = express();
  
@@ -38,7 +41,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', AuthRoute);
 
 app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserRoute,otpRoute,
-  loginPermissionRoutes,reportsRoute,attendanceCountRoute,forgotPasswordRoute,fieldvisitRoute);
+  loginPermissionRoutes,reportsRoute,attendanceCountRoute,forgotPasswordRoute,shiftRoute,sansthaRoute,fieldvisitRoute);
 
 const PORT = 3001
  
