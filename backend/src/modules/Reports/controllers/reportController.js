@@ -514,23 +514,23 @@ export const AttendanceReports = {
     }
 },
 
+
 // GetAttendanceReportForWeekDateForthScreen: async (req, res) => {
 //   try {
-//     const { start_date, department_id, cader_id, attendance_period } = req.query;
-
-//     // Validate required fields
-//     if (!start_date || !department_id || !cader_id || !attendance_period) {
-//       return res.status(400).json({
-//         status: false,
-//         message: "start_date, department_id, cader_id, and attendance_period are required"
-//       });
-//     }
+//     let {
+//       start_date = null,
+//       department_id = null,
+//       cader_id = null,
+//       attendance_period = null,
+//       location_id = null
+//     } = req.query;
 
 //     const result = await reportService.GetAttendanceReportForWeekDateForthScreen(
 //       start_date,
 //       department_id,
 //       cader_id,
-//       attendance_period
+//       attendance_period,
+//       location_id
 //     );
 
 //     return res.status(200).json({
@@ -545,7 +545,8 @@ export const AttendanceReports = {
 //       message: error.message || "Error fetching attendance data"
 //     });
 //   }
-// },
+// }, 
+
 GetAttendanceReportForWeekDateForthScreen: async (req, res) => {
   try {
     let {
@@ -555,28 +556,28 @@ GetAttendanceReportForWeekDateForthScreen: async (req, res) => {
       attendance_period = null,
       location_id = null
     } = req.query;
-
+ 
     const result = await reportService.GetAttendanceReportForWeekDateForthScreen(
-      start_date,
-      department_id,
-      cader_id,
-      attendance_period,
-      location_id
-    );
-
+           start_date,
+           department_id,
+          location_id,
+           cader_id,
+           attendance_period
+        );
+console.log(result)
     return res.status(200).json({
       status: true,
       data: result,
       message: "Attendance report fetched successfully"
     });
-
+ 
   } catch (error) {
     return res.status(500).json({
       status: false,
       message: error.message || "Error fetching attendance data"
     });
   }
-}, 
+},
 GetAttendanceReportForYearForthScreen: async (req, res) => {
   try {
       const { year, cader_id, location_id, attendance_period } = req.query;
