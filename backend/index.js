@@ -26,6 +26,7 @@ import forgotPasswordRoute from "./src/modules/Users/routes/forgotPasswordRoute.
 
 import notificationRoutes from "./src/modules/BirthdayNotification/routes/notificationRoute.js";
 
+import sansthaRoute from "./src/modules/sanstha/routes/sansthaRoute.js";
 
 import reportsRoute from "./src/modules/Reports/routes/reportRoute.js";
 
@@ -41,7 +42,7 @@ app.use('/api/auth', AuthRoute);
 // app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,UserRoutes, notificationRoutes, holidayRoute, birthdayRoute,forgotPasswordRoute,attendanceCountRoute);
 // app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,userRoute,loginPermissionRoutes);
 app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserRoute,otpRoute,
-  loginPermissionRoutes,reportsRoute,attendanceCountRoute,forgotPasswordRoute,shiftRoute);
+  loginPermissionRoutes,reportsRoute,attendanceCountRoute,forgotPasswordRoute,shiftRoute,sansthaRoute);
 
 const PORT = 3001
  

@@ -118,60 +118,65 @@ export const AttendanceReports = {
   },
   getAttendanceReportMobno: async (req, res) => {
     try {
-      const { mobile_no, date, week, month, year } = req.query;
-
+      const {
+        mobile_no,
+        date,
+        week,
+        month,
+        year,
+        department_id,
+        cader_id,
+      } = req.query;
+  
       if (!mobile_no) {
-        return res
-          .status(400)
-          .json({ status: false, message: "mobile_no is required" });
+        return res.status(400).json({
+          status: false,
+          message: "mobile_no is required",
+        });
       }
-
+  
       if (!date && !week && !month && !year) {
         return res.status(400).json({
           status: false,
-          message:
-            "At least one of date, week, month, or year must be provided",
+          message: "At least one of date, week, month, or year must be provided",
         });
       }
-
+  
       if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
         return res.status(400).json({
           status: false,
           message: "Invalid date format: Use YYYY-MM-DD",
         });
       }
-
-      if (week && (week < 1 || week > 53)) {
-        return res
-          .status(400)
-          .json({ status: false, message: "week must be between 1 and 53" });
-      }
-
+  
       if (month && (month < 1 || month > 12)) {
-        return res
-          .status(400)
-          .json({ status: false, message: "month must be between 1 and 12" });
+        return res.status(400).json({
+          status: false,
+          message: "month must be between 1 and 12",
+        });
       }
-
+  
       if ((week || month) && !year) {
         return res.status(400).json({
           status: false,
           message: "year is required when week or month is provided",
         });
       }
-
+  
       const result = await reportService.getAttendanceReportMobno({
         mobile_no,
         date,
         week,
         month,
         year,
+        department_id,
+        cader_id,
       });
-
+  
       return res.status(200).json({
         status: true,
-        data: result,
         message: "Attendance retrieved successfully",
+        data: result,
       });
     } catch (error) {
       return res.status(400).json({
@@ -179,7 +184,9 @@ export const AttendanceReports = {
         message: error.message || "Something went wrong",
       });
     }
-  },
+  },  
+  
+  
   
 
   GetAttReportForDaySecondScreen: async (req, res) => {
