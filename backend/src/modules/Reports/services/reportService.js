@@ -22,6 +22,8 @@ export const reportService = {
       // The result is an array of rows; take the first row since the SP returns one row
       const report = result[0];
 
+      console.log(result)
+
       return {
         total_users: report.total_users,
         morning_present: report.morning_present,
@@ -241,7 +243,7 @@ export const reportService = {
     start_date,
     attendance_period,
     department_id,
-    location_id=null,
+    location_id,
     cader_id = null
   ) => {
     try {

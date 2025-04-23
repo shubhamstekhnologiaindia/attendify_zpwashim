@@ -27,16 +27,15 @@ export const AuthController = {
           // }
       
           const encryptedMobNo = encryptDeterministic(mob_no);
-          if (!encryptedMobNo) {
-            return res.status(400).json({ message: "Invalid mobile number" });
-          }
       
-          console.log("Login Encrypted Mobile Number:", encryptedMobNo);
+          console.log("Login Encrypted Mobile Number:", encryptedMobNo)
       
-          // Fetch user data
+
           const user = await query("SELECT * FROM users WHERE mob_no = ?", [
             encryptedMobNo,
           ]);
+
+          console.log(user)
       
           if (user.length === 0) {
             return res
@@ -45,13 +44,15 @@ export const AuthController = {
           }
       
           const userData = user[0];
+
+          console.log(userData)
       
           // Check if FCM token is already present for the user
-          if (userData.fcm_token !== null) {
-            return res.status(403).json({
-              message: "You are already logged in on another device. Please log out first to proceed with login on this device.",
-            });
-          }else 
+          // if (userData.fcm_token !== null) {
+          //   return res.status(403).json({
+          //     message: "You are already logged in on another device. Please log out first to proceed with login on this device.",
+          //   });
+          // }
       
           // Validate status
           if (userData.status !== 1) {

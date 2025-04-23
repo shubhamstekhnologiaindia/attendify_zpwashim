@@ -9,11 +9,11 @@ import { decrypt } from "../../../../utils/crypto.js";
 //     const day = String(today.getDate()).padStart(2, "0");
 
 //     const sql = `
-//       SELECT first_name, last_name, fcm_token 
-//       FROM users 
-//       WHERE MONTH(birth_date) = ? 
-//       AND DAY(birth_date) = ? 
-//       AND fcm_token IS NOT NULL 
+//       SELECT first_name, last_name, fcm_token
+//       FROM users
+//       WHERE MONTH(birth_date) = ?
+//       AND DAY(birth_date) = ?
+//       AND fcm_token IS NOT NULL
 //       AND status = '1'
 //     `;
 
@@ -151,17 +151,15 @@ const decryptName = (encryptedName) => {
   }
 };
 
-
-
-// dynamic msg share by ceo
+// send birthday msg from ceo to employees
 export const getUserById = async (userId) => {
   try {
     const sql = `
-      SELECT first_name, last_name, fcm_token 
+      SELECT first_name, last_name, fcm_token, role_id
       FROM users 
       WHERE id = ? 
-      AND fcm_token IS NOT NULL 
       AND status = '1'
+      AND (role_id = 101 OR (role_id = 103 AND fcm_token IS NOT NULL))
     `;
 
     const users = await query(sql, [userId]);
@@ -183,7 +181,8 @@ export const sendDynamicBirthdayMessage = async (
     if (!user) {
       return {
         success: false,
-        message: "Receiver not found or inactive",
+        message:
+          "Receiver not found, inactive, or missing FCM token for role 103",
       };
     }
 
@@ -191,7 +190,8 @@ export const sendDynamicBirthdayMessage = async (
     if (!sender) {
       return {
         success: false,
-        message: "Sender not found or inactive",
+        message:
+          "Sender not found, inactive, or missing FCM token for role 103",
       };
     }
 
@@ -224,18 +224,23 @@ export const sendDynamicBirthdayMessage = async (
           .replace("{senderName}", senderFullName)
       : `Dear ${receiverFullName}, Happy Birthday from ${senderFullName}! 🎂 Have a fantastic day! 🎉`;
 
-    const notificationResult = await sendPushNotification(
-      user.fcm_token,
-      "Happy Birthday 🎉",
-      message
-    );
+    // Send push notification only if fcm_token exists (role_id 103 or role_id 101 with non-null token)
+    let notificationResult = { success: true };
+    if (user.fcm_token) {
+      console.log("Sending notification to FCM token:", user.fcm_token);
+      notificationResult = await sendPushNotification(
+        user.fcm_token,
+        "Happy Birthday 🎉",
+        message
+      );
 
-    if (!notificationResult.success) {
-      return {
-        success: false,
-        message: "Failed to send notification",
-        error: notificationResult.error,
-      };
+      if (!notificationResult.success) {
+        return {
+          success: false,
+          message: "Failed to send notification",
+          error: notificationResult.error,
+        };
+      }
     }
 
     // Save the message to the birthday_messages table
@@ -247,11 +252,9 @@ export const sendDynamicBirthdayMessage = async (
 
     return {
       success: true,
-      // message: `Birthday notification sent to ${receiverFullName}`,
       senderName: senderFullName,
-      // receiverId: receiverId,
       sentMessage: message,
-      // recipientName: receiverFullName
+      notificationSent: !!user.fcm_token, // Indicates if a notification was sent
     };
   } catch (error) {
     console.error("❌ Error sending dynamic birthday message:", error);
@@ -262,6 +265,7 @@ export const sendDynamicBirthdayMessage = async (
     };
   }
 };
+
 // show birthday msg
 export const getBirthdayMessages = async (receiverId) => {
   try {
@@ -294,6 +298,7 @@ export const getBirthdayMessages = async (receiverId) => {
         senderId: msg.sender_id,
         senderName: senderFullName || "Unknown Sender",
         message: msg.message,
+        createdAt: msg.created_at,
         // createdAt: msg.created_at
       };
     });
@@ -312,233 +317,93 @@ export const getBirthdayMessages = async (receiverId) => {
   }
 };
 
-// export const sendAnnouncement = async (caderId, departmentId, talukaId, sansthaId, allUsers, subject, message) => {
-//   try {
-//     // Validate inputs
-//     if (!allUsers && 
-//         (caderId === null || caderId === undefined) && 
-//         (departmentId === null || departmentId === undefined) && 
-//         (talukaId === null || talukaId === undefined) && 
-//         (sansthaId === null || sansthaId === undefined)) {
-//       return {
-//         success: false,
-//         message: "At least one of Cader ID, Department ID, Taluka ID, or Sanstha ID must be provided when allUsers is not 1"
-//       };
-//     }
-
-//     // Validate allUsers
-//     if (allUsers !== null && allUsers !== 1) {
-//       return {
-//         success: false,
-//         message: "allUsers must be 1 or null"
-//       };
-//     }
-
-//     // Validate caderId if provided
-//     if (caderId !== null && (!Number.isInteger(caderId) || caderId <= 0)) {
-//       return {
-//         success: false,
-//         message: "Cader ID must be a positive integer or null"
-//       };
-//     }
-
-//     // Validate departmentId if provided
-//     if (departmentId !== null && (!Number.isInteger(departmentId) || departmentId <= 0)) {
-//       return {
-//         success: false,
-//         message: "Department ID must be a positive integer or null"
-//       };
-//     }
-
-//     // Validate talukaId if provided
-//     if (talukaId !== null && (!Number.isInteger(talukaId) || talukaId <= 0)) {
-//       return {
-//         success: false,
-//         message: "Taluka ID must be a positive integer or null"
-//       };
-//     }
-
-//     // Validate sansthaId if provided
-//     if (sansthaId !== null && (!Number.isInteger(sansthaId) || sansthaId <= 0)) {
-//       return {
-//         success: false,
-//         message: "Sanstha ID must be a positive integer or null"
-//       };
-//     }
-
-//     // Build user query based on allUsers and provided IDs
-//     let usersSql = `
-//       SELECT id, first_name, last_name, fcm_token
-//       FROM users
-//       WHERE fcm_token IS NOT NULL
-//       AND status = '1'
-//     `;
-//     const queryParams = [];
-
-//     if (!allUsers) {
-//       if (caderId !== null) {
-//         usersSql += ` AND cader_id = ?`;
-//         queryParams.push(caderId);
-//       }
-
-//       if (departmentId !== null) {
-//         usersSql += ` AND department_id = ?`;
-//         queryParams.push(departmentId);
-//       }
-
-//       if (talukaId !== null) {
-//         usersSql += ` AND taluka_id = ?`;
-//         queryParams.push(talukaId);
-//       }
-
-//       if (sansthaId !== null) {
-//         usersSql += ` AND sanstha_id = ?`;
-//         queryParams.push(sansthaId);
-//       }
-//     }
-
-//     const users = await query(usersSql, queryParams);
-
-//     if (!users || users.length === 0) {
-//       return {
-//         success: true,
-//         message: allUsers 
-//           ? "No active users found" 
-//           : "No active users found for the specified cader, department, taluka, and/or sanstha",
-//         notificationsSent: 0
-//       };
-//     }
-
-//     // Send notifications and collect results
-//     const notifications = users.map(async (user) => {
-//       const firstName = decryptName(user.first_name);
-//       const lastName = decryptName(user.last_name);
-//       const fullName = `${firstName} ${lastName}`.trim();
-
-//       if (!fullName) {
-//         console.warn("⚠️ Could not decrypt name for user ID:", user.id);
-//         return null;
-//       }
-
-//       const personalizedMessage = `Dear ${fullName}, ${message}`;
-//       return sendPushNotification(user.fcm_token, subject, personalizedMessage);
-//     });
-
-//     const results = await Promise.all(notifications);
-//     const validNotifications = results.filter(result => result !== null && result.success);
-//     const failedNotifications = results.filter(result => result !== null && !result.success);
-
-//     // Store announcement in tbl_announcement
-//     const insertAnnouncementSql = `
-//       INSERT INTO tbl_announcement (cader_id, dept_id, taluka_id, sanstha_id, all_users, subject, description)
-//       VALUES (?, ?, ?, ?, ?, ?, ?)
-//     `;
-//     await query(insertAnnouncementSql, [
-//       allUsers ? null : caderId, 
-//       allUsers ? null : departmentId, 
-//       allUsers ? null : talukaId, 
-//       allUsers ? null : sansthaId, 
-//       allUsers, 
-//       subject, 
-//       message
-//     ]);
-
-//     return {
-//       success: true,
-//       message: `Notifications sent to ${validNotifications.length} users${
-//         allUsers 
-//           ? " for all users" 
-//           : ` for ${caderId ? `cader ${caderId}` : ''}${
-//               caderId && (departmentId || talukaId || sansthaId) ? ', ' : ''
-//             }${departmentId ? `department ${departmentId}` : ''}${
-//               departmentId && (talukaId || sansthaId) ? ' and ' : ''
-//             }${talukaId ? `taluka ${talukaId}` : ''}${
-//               talukaId && sansthaId ? ' and ' : ''
-//             }${sansthaId ? `sanstha ${sansthaId}` : ''}`
-//       }`,
-//       notificationsSent: validNotifications.length,
-//       failedNotifications: failedNotifications.length,
-//       caderId: allUsers ? null : caderId,
-//       departmentId: allUsers ? null : departmentId,
-//       talukaId: allUsers ? null : talukaId,
-//       sansthaId: allUsers ? null : sansthaId,
-//       allUsers
-//     };
-//   } catch (error) {
-//     console.error("❌ Error sending announcement:", error);
-//     return {
-//       success: false,
-//       message: "Error sending announcement",
-//       error: error.message
-//     };
-//   }
-// };
-
-export const sendAnnouncement = async (senderUserId, caderId, departmentId, talukaId, sansthaId, allUsers, subject, message) => {
+//  send announcement
+export const sendAnnouncement = async (
+  senderUserId,
+  caderId,
+  departmentId,
+  talukaId,
+  sansthaId,
+  allUsers,
+  subject,
+  message
+) => {
   try {
     // Validate inputs
     if (!senderUserId || !Number.isInteger(senderUserId) || senderUserId <= 0) {
       return {
         success: false,
-        message: "Sender User ID must be a positive integer"
+        message: "Sender User ID must be a positive integer",
       };
     }
 
-    if (!allUsers && 
-        (caderId === null || caderId === undefined) && 
-        (departmentId === null || departmentId === undefined) && 
-        (talukaId === null || talukaId === undefined) && 
-        (sansthaId === null || sansthaId === undefined)) {
+    if (
+      !allUsers &&
+      (caderId === null || caderId === undefined) &&
+      (departmentId === null || departmentId === undefined) &&
+      (talukaId === null || talukaId === undefined) &&
+      (sansthaId === null || sansthaId === undefined)
+    ) {
       return {
         success: false,
-        message: "At least one of Cader ID, Department ID, Taluka ID, or Sanstha ID must be provided when allUsers is not 1"
+        message:
+          "At least one of Cader ID, Department ID, Taluka ID, or Sanstha ID must be provided when allUsers is not 1",
       };
     }
 
     if (allUsers !== null && allUsers !== 1) {
       return {
         success: false,
-        message: "allUsers must be 1 or null"
+        message: "allUsers must be 1 or null",
       };
     }
 
     if (caderId !== null && (!Number.isInteger(caderId) || caderId <= 0)) {
       return {
         success: false,
-        message: "Cader ID must be a positive integer or null"
+        message: "Cader ID must be a positive integer or null",
       };
     }
 
-    if (departmentId !== null && (!Number.isInteger(departmentId) || departmentId <= 0)) {
+    if (
+      departmentId !== null &&
+      (!Number.isInteger(departmentId) || departmentId <= 0)
+    ) {
       return {
         success: false,
-        message: "Department ID must be a positive integer or null"
+        message: "Department ID must be a positive integer or null",
       };
     }
 
     if (talukaId !== null && (!Number.isInteger(talukaId) || talukaId <= 0)) {
       return {
         success: false,
-        message: "Taluka ID must be a positive integer or null"
+        message: "Taluka ID must be a positive integer or null",
       };
     }
 
-    if (sansthaId !== null && (!Number.isInteger(sansthaId) || sansthaId <= 0)) {
+    if (
+      sansthaId !== null &&
+      (!Number.isInteger(sansthaId) || sansthaId <= 0)
+    ) {
       return {
         success: false,
-        message: "Sanstha ID must be a positive integer or null"
+        message: "Sanstha ID must be a positive integer or null",
       };
     }
 
     if (!subject || !message) {
       return {
         success: false,
-        message: "Subject and message are required"
+        message: "Subject and message are required",
       };
     }
 
     // Verify sender exists
-    const senderCheck = await query('SELECT id FROM users WHERE id = ? AND status = 1', [senderUserId]);
+    const senderCheck = await query(
+      "SELECT id FROM users WHERE id = ? AND status = 1",
+      [senderUserId]
+    );
     if (!senderCheck.length) {
       return { success: false, message: "Sender not found or inactive" };
     }
@@ -577,10 +442,10 @@ export const sendAnnouncement = async (senderUserId, caderId, departmentId, talu
     if (!users || users.length === 0) {
       return {
         success: true,
-        message: allUsers 
-          ? "No active users found" 
+        message: allUsers
+          ? "No active users found"
           : "No active users found for the specified filters",
-        notificationsSent: 0
+        notificationsSent: 0,
       };
     }
 
@@ -611,17 +476,25 @@ export const sendAnnouncement = async (senderUserId, caderId, departmentId, talu
           allUsers ? null : caderId,
           subject,
           personalizedMessage,
-          allUsers
+          allUsers,
         ]);
 
-        return sendPushNotification(user.fcm_token, subject, personalizedMessage);
+        return sendPushNotification(
+          user.fcm_token,
+          subject,
+          personalizedMessage
+        );
       });
       notifications.push(...batchNotifications);
     }
 
     const results = await Promise.all(notifications);
-    const validNotifications = results.filter(result => result !== null && result.success);
-    const failedNotifications = results.filter(result => result !== null && !result.success);
+    const validNotifications = results.filter(
+      (result) => result !== null && result.success
+    );
+    const failedNotifications = results.filter(
+      (result) => result !== null && !result.success
+    );
 
     // Store announcements
     if (announcementEntries.length > 0) {
@@ -635,15 +508,15 @@ export const sendAnnouncement = async (senderUserId, caderId, departmentId, talu
     return {
       success: true,
       message: `Notifications sent to ${validNotifications.length} users${
-        allUsers 
-          ? " for all users" 
-          : ` for ${departmentId ? `department ${departmentId}` : ''}${
-              departmentId && (caderId || talukaId || sansthaId) ? ', ' : ''
-            }${caderId ? `cader ${caderId}` : ''}${
-              caderId && (talukaId || sansthaId) ? ', ' : ''
-            }${talukaId ? `taluka ${talukaId}` : ''}${
-              talukaId && sansthaId ? ', ' : ''
-            }${sansthaId ? `sanstha ${sansthaId}` : ''}`
+        allUsers
+          ? " for all users"
+          : ` for ${departmentId ? `department ${departmentId}` : ""}${
+              departmentId && (caderId || talukaId || sansthaId) ? ", " : ""
+            }${caderId ? `cader ${caderId}` : ""}${
+              caderId && (talukaId || sansthaId) ? ", " : ""
+            }${talukaId ? `taluka ${talukaId}` : ""}${
+              talukaId && sansthaId ? ", " : ""
+            }${sansthaId ? `sanstha ${sansthaId}` : ""}`
       }`,
       notificationsSent: validNotifications.length,
       failedNotifications: failedNotifications.length,
@@ -651,14 +524,14 @@ export const sendAnnouncement = async (senderUserId, caderId, departmentId, talu
       departmentId: allUsers ? null : departmentId,
       talukaId: allUsers ? null : talukaId,
       sansthaId: allUsers ? null : sansthaId,
-      allUsers
+      allUsers,
     };
   } catch (error) {
     console.error("❌ Error sending announcement:", error);
     return {
       success: false,
       message: "Error sending announcement",
-      error: error.message
+      error: error.message,
     };
   }
 };
@@ -669,12 +542,15 @@ export const getUserAnnouncements = async (userId) => {
     if (!userId || !Number.isInteger(userId) || userId <= 0) {
       return {
         success: false,
-        message: "User ID must be a positive integer"
+        message: "User ID must be a positive integer",
       };
     }
 
     // Verify user exists
-    const userCheck = await query('SELECT id FROM users WHERE id = ? AND status = 1', [userId]);
+    const userCheck = await query(
+      "SELECT id FROM users WHERE id = ? AND status = 1",
+      [userId]
+    );
     if (!userCheck.length) {
       return { success: false, message: "User not found or inactive" };
     }
@@ -693,37 +569,38 @@ export const getUserAnnouncements = async (userId) => {
       return {
         success: true,
         message: "No announcements found for this user",
-        announcements: []
+        announcements: [],
       };
     }
 
-    const formattedAnnouncements = announcements.map(announcement => ({
+    const formattedAnnouncements = announcements.map((announcement) => ({
       id: announcement.id,
       subject: announcement.subject,
       description: announcement.description,
       createdAt: announcement.created_at,
-      matchedFilter: announcement.all_users === 1 
-        ? "all_users" 
-        : announcement.dept_id 
-          ? "department" 
-          : announcement.taluka_id 
-            ? "taluka" 
-            : announcement.sanstha_id 
-              ? "sanstha" 
-              : "cader"
+      matchedFilter:
+        announcement.all_users === 1
+          ? "all_users"
+          : announcement.dept_id
+          ? "department"
+          : announcement.taluka_id
+          ? "taluka"
+          : announcement.sanstha_id
+          ? "sanstha"
+          : "cader",
     }));
 
     return {
       success: true,
       message: `${formattedAnnouncements.length} announcement(s) found`,
-      announcements: formattedAnnouncements
+      announcements: formattedAnnouncements,
     };
   } catch (error) {
     console.error("❌ Error fetching user announcements:", error);
     return {
       success: false,
       message: "Error fetching announcements",
-      error: error.message
+      error: error.message,
     };
   }
 };
