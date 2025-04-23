@@ -1,6 +1,6 @@
 import { query } from "../../../../utils/database.js";
-import { decrypt } from "../../../../utils/crypto.js"; // Import decryption function
-
+import { decrypt, decryptDeterministic } from "../../../../utils/crypto.js"; // Import decryption function
+// import { decrypt, decryptDeterministic } from '../../../../utils/crypto.js';
 export const hodService = {
   getEmployeesByHod: async (hod_id) => {
     try {
@@ -85,4 +85,90 @@ export const hodService = {
       return { error: "Database error", details: err.message };
     }
   },
+
+  getUsersByHodDept: async ({ dept_id }) => {
+    try {
+        // Step 1: Check if the department has at least one user with role_id = 102
+        const hodCheckSql = `
+            SELECT COUNT(*) AS hod_count
+            FROM users
+            WHERE role_id = 102 AND department_id = ? AND department_id IS NOT NULL
+        `;
+        const [hodCheck] = await query(hodCheckSql, [dept_id]);
+
+        if (hodCheck.hod_count === 0) {
+            throw new Error('No HOD found in the specified department');
+        }
+
+        // Step 2: Fetch all users in the specified department with department_name and cader_name
+        const usersSql = `
+            SELECT 
+                u.id,
+                u.first_name,
+                u.middle_name,
+                u.last_name,
+                u.mob_no,
+                d.dept_name_marathi,
+                c.cader_name,
+                u.email,
+                u.field_status
+            FROM users u
+            JOIN departments d ON u.department_id = d.id
+            JOIN tbl_cader c ON u.cader_id = c.id
+            WHERE u.department_id = ?
+            ORDER BY u.first_name
+        `;
+        const users = await query(usersSql, [dept_id]);
+
+        if (users.length === 0) {
+            throw new Error('No users found in the specified department');
+        }
+
+        // Step 3: Decrypt encrypted fields
+        const decryptedUsers = users.map(user => ({
+           user_id: user.id,
+            full_name: `${decrypt(user.first_name)} ${decrypt(user.middle_name)} ${decrypt(user.last_name)}`.trim(),
+            mob_no: decryptDeterministic(user.mob_no),
+            dept_name_marathi: user.dept_name_marathi,
+            cader_name: user.cader_name,
+            email: user.email ? decrypt(user.email) : null,
+            field_status: user.field_status
+        }));
+
+        return decryptedUsers;
+    } catch (error) {
+        console.error('Error in getUsersByHodDept service:', error);
+        throw new Error(`Failed to retrieve users: ${error.message}`);
+    }
+},
+
+
+updateFieldStatus: async ({ user_id, field_status }) => {
+  try {
+      // Check if user exists
+      const checkUserSql = `SELECT id FROM users WHERE id = ? LIMIT 1`;
+      const existingUser = await query(checkUserSql, [user_id]);
+
+      if (existingUser.length === 0) {
+          throw new Error('User does not exist');
+      }
+
+      // Update field_status
+      const updateSql = `
+          UPDATE users 
+          SET field_status = ?, updated_at = NOW()
+          WHERE id = ?
+      `;
+      const result = await query(updateSql, [field_status, user_id]);
+
+      if (result.affectedRows === 0) {
+          throw new Error('Failed to update field status');
+      }
+
+      return { success: true };
+  } catch (error) {
+      console.error('Error in updateFieldStatus service:', error);
+      throw new Error(`Failed to update field status: ${error.message}`);
+  }
+},
 };

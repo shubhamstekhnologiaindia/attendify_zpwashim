@@ -85,6 +85,7 @@ export const AuthController = {
               id: userData.id,
               role_id: userData.role_id,
               username: fullName,
+              department_id: userData.department_id
             },
             process.env.JWT_SECRET,
             { expiresIn: "7d" }
