@@ -141,7 +141,7 @@ export const reportService = {
       );
   
       const report = results.map((row) => ({
-        date: row.date.toLocaleDateString('en-CA'), // Formats to 'YYYY-MM-DD' safely
+        date: row.date,
         total_users: row.total_users,
         morning_present: row.morning_present,
         afternoon_present: row.afternoon_present,
@@ -210,14 +210,17 @@ export const reportService = {
   
         return {
           emp_id: row.user_id,
-          date: row.att_attendance_date
-            ? row.att_attendance_date.toISOString().split("T")[0]
-            : row.report_date.toISOString().split("T")[0],
+          date: row.att_attendance_date || row.report_date,
+
+          // date: row.att_attendance_date
+          //   ? row.att_attendance_date.toISOString().split("T")[0]
+          //   : row.report_date.toISOString().split("T")[0],
           dept_id: row.department_id,
           first_name,
           middle_name,
           last_name,
           mobile_no: decrypted_mobile,
+          department_name:row.department_name,
           cader_name: row.cader_name || null,
           attendance_status: isPresent ? "Present" : "Absent",
           total_hours,
@@ -243,7 +246,7 @@ export const reportService = {
     start_date,
     attendance_period,
     department_id,
-    location_id,
+    location_id = null,
     cader_id = null
   ) => {
     try {
