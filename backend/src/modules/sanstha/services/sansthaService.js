@@ -11,15 +11,14 @@ export const SansthaService = {
           });
       
           const sql = `
-            INSERT INTO office_location (loc_name_marathi, loc_name_eng, dept_id, location_type)
-            VALUES (?, ?, ?, 'sanstha')
-          `;
+            INSERT INTO office_location (loc_name_marathi, loc_name_eng, dept_id, location_type)VALUES (?, ?, ?, 'sanstha')`;
       
           const result = await query(sql, [loc_name_marathi, loc_name_eng, dept_id]);
           return result.insertId;
       
         } catch (error) {
           console.error("Error creating Sanstha:", error);
+          console.log(error)
           throw error;
         }
       },
