@@ -5,7 +5,7 @@ export const OverrideShiftController = {
     try {
       const data = req.body;
       const result = await overrideShiftService.createOrrShift(data);
-      return res.status(201).json({ status: true, data: result, message: 'Override created' });
+      return res.status(201).json({ status: true, data: result, message: 'Override created' })
     } catch (error) {
       const statusCode = error.status === false ? 400 : 500;
       return res.status(statusCode).json({ status: false, message: error.message });
@@ -13,7 +13,7 @@ export const OverrideShiftController = {
   },
   getOrrShifts: async (req, res) => {
     try {
-      const overrides = await overrideShiftService.getOrrShifts();
+      const overrides = await overrideShiftService.getOrrShifts()
       return res.status(200).json({ status: true, data: overrides });
     } catch (error) {
       return res.status(500).json({ status: false, message: error.message });
@@ -30,6 +30,7 @@ export const OverrideShiftController = {
 //       return res.status(500).json({ status: false, message: error.message });
 //     }
 //   },
+
   editOrrShift: async (req, res) => {
     try {
       const { edit_orrshift_id } = req.params;
@@ -46,16 +47,17 @@ export const OverrideShiftController = {
         afternoon_in_end,
         overtime_allowed_from,
         updated_by);
+
       return res.status(200).json({ status: true, data: result, message: 'Override updated' });
     } catch (error) {
-      return res.status(400).json({ status: false, message: error.message });
+      return res.status(400).json({ status: false, message: error.message })
     }
   },
   deleteOrrShift: async (req, res) => {
     try {
-      const { delete_orrshift_id, department_id, cader_id } = req.body;
+      const { delete_orrshift_id, department_id, cader_id } = req.body
       const result = await overrideShiftService.deleteOrrShift(Number(delete_orrshift_id), department_id, cader_id);
-      return res.status(200).json({ status: true, data: result, message: 'Override deleted' });
+      return res.status(200).json({ status: true, data: result, message: 'Override deleted' })
     } catch (error) {
       return res.status(500).json({ status: false, message:error.message });
     }

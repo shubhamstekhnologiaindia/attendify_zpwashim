@@ -560,7 +560,7 @@ GetAttendanceReportForWeekDateForthScreen: async (req, res) => {
     const result = await reportService.GetAttendanceReportForWeekDateForthScreen(
            start_date,
            department_id,
-          location_id,
+            location_id,
            cader_id,
            attendance_period
         );
@@ -612,10 +612,10 @@ GetAttendanceReportForYearForthScreen: async (req, res) => {
   
 GetAttendanceReportForDayThirdScreen: async (req, res) => {
   try {
-    const { start_date, department_id, office_location_id, attendance_period } = req.query;
+    const { start_date, department_id, location_id, attendance_period } = req.query;
 
     // Validate input
-    if (!start_date || !department_id || !office_location_id || !attendance_period) {
+    if (!start_date || !department_id || !location_id || !attendance_period) {
       return res.status(400).json({
         status: false,
         message: "date, department_id, office_location_id, and attendance_period are required",
@@ -625,7 +625,7 @@ GetAttendanceReportForDayThirdScreen: async (req, res) => {
     const result = await reportService.GetAttendanceReportForDayThirdScreen(
       start_date,
       parseInt(department_id),
-      parseInt(office_location_id),
+      parseInt(location_id),
       parseInt(attendance_period)
     );
 

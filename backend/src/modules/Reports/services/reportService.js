@@ -466,14 +466,14 @@ GetAttendanceReportForWeekDateForthScreen: async (
       "CALL GetAttReportShowEmpDetailsByDate(?, ?, ?, ?, ?)",
       [start_date, department_id, location_id, cader_id, attendance_period]
     );
- 
+
     // Don’t throw on empty—just return an empty array
     return (rows || []).map(row => {
       let first_name  = "Decryption Failed";
       let middle_name = "Decryption Failed";
       let last_name   = "Decryption Failed";
       let mobile_no   = "Hidden";
- 
+
       try {
         first_name  = decrypt(row.first_name);
         middle_name = decrypt(row.middle_name);
@@ -551,11 +551,11 @@ GetAttendanceReportForYearForthScreen:async(year,cader_id,location_id,attendance
     throw { status: false, message: error.message || "Database error" };
   }
 },
-GetAttendanceReportForDayThirdScreen: async (start_date, department_id, office_location_id, attendance_period) => {
+GetAttendanceReportForDayThirdScreen: async (start_date, department_id, location_id, attendance_period) => {
   try {
     const [result] = await query(
       "CALL GetAttReportForShowCaderName(?, ?, ?, ?)",
-      [start_date, department_id, attendance_period, office_location_id]
+      [start_date, department_id, attendance_period, location_id]
     );
 
     if (!result || result.length === 0) {
