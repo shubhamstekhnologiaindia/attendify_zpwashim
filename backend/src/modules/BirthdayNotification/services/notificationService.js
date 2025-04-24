@@ -475,7 +475,7 @@ export const sendAnnouncement = async (
           allUsers ? null : sansthaId,
           allUsers ? null : caderId,
           subject,
-          personalizedMessage,
+          message,
           allUsers,
         ]);
 
@@ -603,4 +603,91 @@ export const getUserAnnouncements = async (userId) => {
       error: error.message,
     };
   }
+};
+
+
+ export const getCeoAnnouncementsHistory = async (userId) => {
+  try {
+    // Check if user exists and is not CEO (role_id != 101)
+    const userCheckSql = `SELECT id FROM users WHERE id = ?  LIMIT 1`;
+    const userResult = await query(userCheckSql, [userId]);
+    if (userResult.length === 0) {
+        throw new Error('User not found or is a CEO');
+    }
+
+    const sql = `
+        SELECT 
+            a.id,
+            a.subject,
+            a.description,
+            a.created_at,
+            a.all_users,
+            a.dept_id,
+            a.taluka_id,
+            a.cader_id,
+            dep.dept_name_marathi,
+            t.taluka_name,
+            c.cader_name
+        FROM tbl_announcement a
+        LEFT JOIN departments dep ON a.dept_id = dep.id
+        LEFT JOIN taluka t ON a.taluka_id = t.id
+        LEFT JOIN tbl_cader c ON a.cader_id = c.id
+        WHERE a.sender_user_id = ?
+        ORDER BY a.created_at DESC
+    `;
+    const announcements = await query(sql, [userId]);
+
+    return announcements.map(announcement => {
+        const result = {
+            id: announcement.id,
+            subject: announcement.subject,
+            description: announcement.description,
+            created_at: announcement.created_at
+        };
+
+        // If all_users = 1, set all names to "All District Users"
+        // if (announcement.all_users) {
+        //     result.all_District = 'All District Users';          
+        // } else {
+        //     // Include names only if their IDs are not NULL
+        //     if (announcement.dept_id && announcement.dept_name_marathi) {
+        //         result.dept_name_marathi = announcement.dept_name_marathi;
+        //     }
+        //     if (announcement.taluka_id && announcement.taluka_name) {
+        //         result.taluka_name = announcement.taluka_name;
+        //     }
+        //     if (announcement.cader_id && announcement.cader_name) {
+        //         result.cader_name = announcement.cader_name;
+        //     }
+        //     if (announcement.dept_id && announcement.cader_id && 
+        //       announcement.dept_name_marathi && announcement.cader_name) {
+        //       result.reciver = `${announcement.dept_name_marathi} - ${announcement.cader_name}`;
+        //   }
+        // }
+
+         // If all_users = 1, set reciver to "All District Users"
+         if (announcement.all_users) {
+          result.reciver = 'सर्व जिल्ह्यातील वापरकर्ते';
+      } else {
+          // Set reciver based on dept_id and/or cader_id
+          if (announcement.dept_id && announcement.cader_id && 
+              announcement.dept_name_marathi && announcement.cader_name) {
+              result.reciver = `${announcement.dept_name_marathi} - ${announcement.cader_name}`;
+          } else if (announcement.dept_id && announcement.dept_name_marathi) {
+              result.reciver = announcement.dept_name_marathi;
+          } else if (announcement.cader_id && announcement.cader_name) {
+              result.reciver = announcement.cader_name;
+          }
+      }
+      if (announcement.taluka_id && announcement.taluka_name) {
+        result.reciver = announcement.taluka_name;
+    }
+
+        return result;
+    });
+} catch (error) {
+    console.error('Error in getAnnouncements service:', error);
+    throw new Error(`Failed to retrieve announcements: ${error.message}`);
+}
+
 };

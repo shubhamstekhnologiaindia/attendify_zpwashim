@@ -9,4 +9,7 @@ router.post("/get-birthday-messages", BirthdayController.getBirthdayMessages);
 router.post("/send-announcement", BirthdayController.sendAnnouncement);
 // router.post("/send-announcement", BirthdayController.sendAnnouncement);
 router.get("/get-department-announcements", BirthdayController.getUserAnnouncements);
+
+router.get('/ceo-announcements-history/:user_id', BirthdayController.getCeoAnnouncementsHistory);
+
 export default router; 

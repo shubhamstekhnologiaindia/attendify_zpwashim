@@ -4,6 +4,7 @@ import {
   getBirthdayMessages,
   sendAnnouncement,
   getUserAnnouncements,
+  getCeoAnnouncementsHistory,
   
 } from "../services/notificationService.js";
 
@@ -231,5 +232,35 @@ export const BirthdayController = {
       res.status(500).json({ success: false, message: "Server error" });
     }
   },
+
+
+
+  getCeoAnnouncementsHistory: async (req, res) => {
+   
+    try {
+      const { user_id } = req.params;
+
+      // Validate user_id
+      if (!user_id || isNaN(user_id)) {
+          return res.status(400).json({
+              success: false,
+              message: 'Valid user_id is required'
+          });
+      }
+
+      const announcements = await getCeoAnnouncementsHistory(parseInt(user_id));
+      res.status(200).json({
+          success: true,
+          message: announcements.length ? 'Announcements retrieved successfully' : 'No announcements found',
+          data: announcements
+      });
+  } catch (error) {
+      res.status(500).json({
+          success: false,
+          message: 'Internal server error',
+          details: error.message
+      });
+  }
+},
  
 };
