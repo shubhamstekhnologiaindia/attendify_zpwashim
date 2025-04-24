@@ -80,10 +80,10 @@ editOrrShift: async (edit_orrshift_id,  start_date,  end_date,morning_in_start,m
   deleteOrrShift: async (delete_orrshift_id, department_id, cader_id) => {
     try {
       const sql = 'CALL DeleteOverrideShift(?, ?, ?)';
-      const [rows] = await query(sql, [delete_orrshift_id, department_id, cader_id]);
+      const [rows] = await query(sql, [delete_orrshift_id, department_id, cader_id])
       return { affected: rows[0].affected };
     } catch (error) {
-      throw { status: false, message: 'Error deleting override' };
+      throw { status: false, message: 'Error deleting override' }
     }
   }
 };

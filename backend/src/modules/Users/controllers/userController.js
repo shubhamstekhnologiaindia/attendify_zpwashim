@@ -63,6 +63,7 @@ export const UserController = {
       const missingFields = Object.entries(requiredFields)
         .filter(([key, value]) => value === undefined || value === null || value === "")
         .map(([key]) => key);
+
   
       if (missingFields.length > 0) {
         return res.status(400).json({
@@ -93,7 +94,6 @@ export const UserController = {
     }
   },
   
-    
 getUserProfile: async (req, res) => {
   try {
     const { id } = req.params;
