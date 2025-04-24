@@ -559,7 +559,7 @@ GetAttendanceReportForWeekDateForthScreen: async (req, res) => {
     const result = await reportService.GetAttendanceReportForWeekDateForthScreen(
            start_date,
            department_id,
-          location_id,
+            location_id,
            cader_id,
            attendance_period
         );
