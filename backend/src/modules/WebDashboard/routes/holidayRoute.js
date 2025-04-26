@@ -5,4 +5,7 @@ const router = express.Router();
 
 router.get("/upcomming-holiday", authMiddleware,HolidayController.showHolidays); 
 
+router.put('/update_radius', HolidayController.updateRadius);
+router.get('/show_radius', HolidayController.getRadiusWeb);
+
 export default router;
