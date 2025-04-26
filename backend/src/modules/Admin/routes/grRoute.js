@@ -11,6 +11,4 @@ router.delete("/delete/:gr_id" ,GRController.deleteGR);
 router.get("/gr/:dept_id?", GRController.getGRByDepartment);
 
 
-
-
 export default router;
