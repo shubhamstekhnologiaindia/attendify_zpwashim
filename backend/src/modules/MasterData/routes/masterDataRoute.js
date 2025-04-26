@@ -5,16 +5,16 @@ import {MasterData} from "../controllers/masterDataController.js";
 const router = express.Router();
 
 
-router.get("/show/departments",MasterData.getDepartments);
-router.get("/show-cadres",MasterData.getCadresByOfficeLocationId);
-router.get('/show/talukas', MasterData.getTalukas);
-router.get("/show/villages/:talukaId",  MasterData.getVillagesByTalukaId);
-router.get("/office-locations/:departmentId", MasterData.getHeadquartersZpSanstha);
+router.get("/show/departments",authMiddleware,MasterData.getDepartments);
+router.get("/show-cadres",authMiddleware,MasterData.getCadresByOfficeLocationId);
+router.get('/show/talukas', authMiddleware,MasterData.getTalukas);
+router.get("/show/villages/:talukaId", authMiddleware, MasterData.getVillagesByTalukaId);
+router.get("/office-locations/:departmentId",authMiddleware, MasterData.getHeadquartersZpSanstha);
 
-router.get('/Get_Panchayat_Samiti_Locations', MasterData.GetPanchayatSamitiLocations);
+router.get('/Get_Panchayat_Samiti_Locations', authMiddleware,MasterData.GetPanchayatSamitiLocations);
 
-router.get("/Get_Caders_By_DeptId/:deptId", MasterData.getCadresByDeptId);
-router.get('/sanstha-locations', MasterData.GetSansthaLocations)
+router.get("/Get_Caders_By_DeptId/:deptId",authMiddleware, MasterData.getCadresByDeptId);
+router.get('/sanstha-locations', authMiddleware,MasterData.GetSansthaLocations)
 
 
 export default router;
