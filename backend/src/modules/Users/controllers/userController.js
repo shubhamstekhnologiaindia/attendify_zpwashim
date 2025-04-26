@@ -11,15 +11,51 @@ import multer from "multer";
 export const UserController = {
   // RegisterUser: async (req, res) => {
   //   try {
-  //     const result = await UserService.RegisterUser(req.body);
+  //     const {
+  //       first_name, middle_name, last_name,
+  //       mob_no, email, birth_date,joining_date, department_id,
+  //       office_location_id, taluka_id, village_id,
+  //       cader_id, password
+  //     } = req.body;
   
+  //     // List of mandatory fields
+  //     const requiredFields = {
+  //       first_name,
+  //       middle_name,
+  //       last_name,
+  //       mob_no,
+  //       email,
+  //       birth_date,
+  //       department_id,
+  //       office_location_id,
+  //       taluka_id,
+  //       village_id,
+  //       cader_id,
+  //       joining_date,
+  //       password
+  //     };
+  
+  //     // Check for missing or undefined/null fields
+  //     const missingFields = Object.entries(requiredFields)
+  //       .filter(([key, value]) => value === undefined || value === null || value === "")
+  //       .map(([key]) => key);
+  
+  //     if (missingFields.length > 0) {
+  //       return res.status(400).json({
+  //         status: false,
+  //         message: `Missing mandatory fields: ${missingFields.join(", ")}`
+  //       });
+  //     }
+  
+  //     const result = await UserService.RegisterUser(req.body);
+ 
   //     if (result.alreadyExists) {
   //       return res.status(409).json({
   //         status: false,
   //         message: "User already exists with this mobile number"
   //       });
   //     }
-  
+ 
   //     return res.status(201).json({
   //       status: true,
   //       message: "User registered successfully"
@@ -33,67 +69,70 @@ export const UserController = {
   //   }
   // },
 
+
+
+
   RegisterUser: async (req, res) => {
     try {
-      const {
-        first_name, middle_name, last_name,
-        mob_no, email, birth_date,joining_date, department_id,
-        office_location_id, taluka_id, village_id,
-        cader_id, password
-      } = req.body;
-  
-      // List of mandatory fields
-      const requiredFields = {
-        first_name,
-        middle_name,
-        last_name,
-        mob_no,
-        email,
-        birth_date,
-        department_id,
-        office_location_id,
-        taluka_id,
-        village_id,
-        cader_id,
-        joining_date,
-        password
-      };
-  
-      // Check for missing or undefined/null fields
-      const missingFields = Object.entries(requiredFields)
-        .filter(([key, value]) => value === undefined || value === null || value === "")
-        .map(([key]) => key);
+        const {
+            first_name, middle_name, last_name,
+            mob_no, email, birth_date, joining_date, department_id,
+            office_location_id, taluka_id, village_id,
+            cader_id, password
+        } = req.body;
 
-  
-      if (missingFields.length > 0) {
-        return res.status(400).json({
-          status: false,
-          message: `Missing mandatory fields: ${missingFields.join(", ")}`
+        // List of mandatory fields
+        const requiredFields = {
+            first_name,
+            middle_name,
+            last_name,
+            mob_no,
+            email,
+            birth_date,
+            department_id,
+            office_location_id,
+            taluka_id,
+            village_id,
+            cader_id,
+            joining_date,
+            password
+        };
+
+        // Check for missing or undefined/null fields
+        const missingFields = Object.entries(requiredFields)
+            .filter(([key, value]) => value === undefined || value === null || value === "")
+            .map(([key]) => key);
+
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                status: false,
+                message: `Missing mandatory fields: ${missingFields.join(", ")}`
+            });
+        }
+
+        const result = await UserService.RegisterUser(req.body);
+
+        if (result.alreadyExists) {
+            return res.status(409).json({
+                status: false,
+                message: "User already exists with this mobile number"
+            });
+        }
+
+        return res.status(201).json({
+            status: true,
+            message: "User registered successfully"
         });
-      }
-  
-      const result = await UserService.RegisterUser(req.body);
- 
-      if (result.alreadyExists) {
-        return res.status(409).json({
-          status: false,
-          message: "User already exists with this mobile number"
-        });
-      }
- 
-      return res.status(201).json({
-        status: true,
-        message: "User registered successfully"
-      });
     } catch (error) {
-      console.error("Error in RegisterUser controller:", error);
-      return res.status(500).json({
-        status: false,
-        message: "Failed to register user"
-      });
+        console.error("Error in RegisterUser controller:", error);
+        return res.status(500).json({
+            status: false,
+            message: "Failed to register user"
+        });
     }
-  },
+},
   
+    
 getUserProfile: async (req, res) => {
   try {
     const { id } = req.params;

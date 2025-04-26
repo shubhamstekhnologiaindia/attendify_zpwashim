@@ -16,7 +16,8 @@ export const AuthController = {
     login: async (req, res) => {
         try {
           const { mob_no, password, fcm_token } = req.body;
-      
+
+    
           // Validate required fields
           if (!mob_no || !password) {
             return res.status(400).json({ message: "Mobile number and password are required" });
@@ -48,11 +49,11 @@ export const AuthController = {
           console.log(userData)
       
           // Check if FCM token is already present for the user
-          // if (userData.fcm_token !== null) {
-          //   return res.status(403).json({
-          //     message: "You are already logged in on another device. Please log out first to proceed with login on this device.",
-          //   });
-          // }
+          if (userData.fcm_token !== null) {
+            return res.status(403).json({
+              message: "You are already logged in on another device. Please log out first to proceed with login on this device.",
+            });
+          }
       
           // Validate status
           if (userData.status !== 1) {
@@ -68,6 +69,7 @@ export const AuthController = {
           }
       
           // Update FCM token since it is null
+
           await query("UPDATE users SET fcm_token = ? WHERE id = ?", [
             fcm_token,
             userData.id,
@@ -85,6 +87,7 @@ export const AuthController = {
               id: userData.id,
               role_id: userData.role_id,
               username: fullName,
+              department_id: userData.department_id
             },
             process.env.JWT_SECRET,
             { expiresIn: "7d" }

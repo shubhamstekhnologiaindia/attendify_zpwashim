@@ -60,30 +60,31 @@ export const AttendanceController = {
 
   getUserAttendance: async (req, res) => {
     try {
-      const { employee_id } = req.params;
-      if (!employee_id) {
-        return res.status(400).json({ error: "Employee ID is required" });
-      }
+        const { employee_id } = req.params;
 
-      const attendanceData = await AttendanceService.getUserAttendance(
-        employee_id
-      );
-      if (!attendanceData?.length) {
-        return res.status(404).json({ message: "No attendance records found" });
-      }
+        if (!employee_id || isNaN(employee_id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Valid employee_id is required'
+            });
+        }
 
-      res.status(200).json({
-        success: true,
-        message: "Attendance records fetched successfully",
-        data: attendanceData,
-      });
+        const { field_status, attendanceData } = await AttendanceService.getUserAttendance(employee_id);
+
+        res.status(200).json({
+            success: true,
+            message: attendanceData.length ? 'Attendance records fetched successfully' : 'Attendance records not found',
+            field_status,
+            data: attendanceData
+        });
     } catch (error) {
-      res.status(500).json({
-        error: "Internal server error",
-        details: error.message,
-      });
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            details: error.message
+        });
     }
-  },
+},
 
   // recordOfflineAttendance: async (req, res) => {
   //   try {

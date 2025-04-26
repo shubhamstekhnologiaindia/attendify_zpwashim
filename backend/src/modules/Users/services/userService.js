@@ -3,57 +3,132 @@ import { decrypt, decryptDeterministic,encrypt,encryptDeterministic } from "../.
 import axios from "axios";
 import bcrypt from 'bcrypt';
 import path from "path";
-
+  // Mapping of dept_id to cader_id for role_id = 102
+  const SPECIAL_CADER_ROLES = {
+    1: 2,
+    2: 25,
+    3: 36,
+    4: 43,
+    5: 55,
+    6: 67,
+    7: 80,
+    8: 94,
+    9: 102,
+    10: 115,
+    11: 134,
+    12: 148,
+    13: 157,
+    14: 172
+  };
 export const UserService = {
+
+
+  // RegisterUser: async (userData) => {
+  //   try {
+  //     const {
+  //       first_name, middle_name, last_name,
+  //       mob_no, email, birth_date,joining_date, department_id, office_location_id,
+  //       taluka_id, village_id, cader_id,
+  //       password, role_id, device_id,
+  //     } = userData;
+   
+  //     // ✅ Check if user exists with encrypted deterministic mobile number
+  //     const encryptedMobNo = encryptDeterministic(mob_no);
+  //     const checkUserSql = `SELECT * FROM users WHERE mob_no = ? LIMIT 1`;
+  //     const existingUser = await query(checkUserSql, [encryptedMobNo]);
+   
+  //     if (existingUser.length > 0) {
+  //       // User already exists
+  //       return { alreadyExists: true };
+  //     }
+   
+  //     // Continue registration
+  //     const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?)`;
+  //     const hashedPassword = await bcrypt.hash(password, 10);
+   
+  //     const results = await query(sql, [
+  //       encrypt(first_name),
+  //       encrypt(middle_name),
+  //       encrypt(last_name),
+  //       encryptedMobNo,
+  //       encrypt(email),
+  //       birth_date,
+  //       joining_date,
+  //       department_id,
+  //       office_location_id,
+  //       taluka_id,
+  //       village_id,
+  //       cader_id,
+  //       hashedPassword,
+  //       role_id,
+  //       device_id
+  //     ]);
+   
+  //     return { success: true, data: results };
+  //   } catch (error) {
+  //     console.error("Error in RegisterUser service:", error);
+  //     throw new Error("Failed to register user");
+  //   }
+  // },
+
+
+
 
 
   RegisterUser: async (userData) => {
     try {
-      const {
-        first_name, middle_name, last_name,
-        mob_no, email, birth_date,joining_date, department_id, office_location_id,
-        taluka_id, village_id, cader_id,
-        password, role_id, device_id,
-      } = userData;
-   
-      // ✅ Check if user exists with encrypted deterministic mobile number
-      const encryptedMobNo = encryptDeterministic(mob_no);
-      const checkUserSql = `SELECT * FROM users WHERE mob_no = ? LIMIT 1`;
-      const existingUser = await query(checkUserSql, [encryptedMobNo]);
-   
-      if (existingUser.length > 0) {
-        // User already exists
-        return { alreadyExists: true };
-      }
-   
-      // Continue registration
-      const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?)`;
-      const hashedPassword = await bcrypt.hash(password, 10);
-   
-      const results = await query(sql, [
-        encrypt(first_name),
-        encrypt(middle_name),
-        encrypt(last_name),
-        encryptedMobNo,
-        encrypt(email),
-        birth_date,
-        joining_date,
-        department_id,
-        office_location_id,
-        taluka_id,
-        village_id,
-        cader_id,
-        hashedPassword,
-        role_id,
-        device_id
-      ]);
-   
-      return { success: true, data: results };
+        const {
+            first_name, middle_name, last_name,
+            mob_no, email, birth_date, joining_date, department_id,
+            office_location_id, taluka_id, village_id,
+            cader_id, password, role_id, device_id
+        } = userData;
+
+        // Check if user exists with encrypted deterministic mobile number
+        const encryptedMobNo = encryptDeterministic(mob_no);
+        const checkUserSql = `SELECT * FROM users WHERE mob_no = ? LIMIT 1`;
+        const existingUser = await query(checkUserSql, [encryptedMobNo]);
+
+        if (existingUser.length > 0) {
+            return { alreadyExists: true };
+        }
+
+        // Determine role_id based on dept_id and cader_id
+        let finalRoleId = role_id || 0; // Default to 0 if role_id is not provided
+        if (department_id && cader_id && SPECIAL_CADER_ROLES[department_id] === parseInt(cader_id)) {
+            finalRoleId = 102;
+        }
+
+        // Continue registration
+        const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const results = await query(sql, [
+            encrypt(first_name),
+            encrypt(middle_name),
+            encrypt(last_name),
+            encryptedMobNo,
+            encrypt(email),
+            birth_date,
+            joining_date,
+            department_id,
+            office_location_id,
+            taluka_id,
+            village_id,
+            cader_id,
+            hashedPassword,
+            finalRoleId,
+            device_id || null
+        ]);
+
+        return { success: true, data: results };
     } catch (error) {
-      console.error("Error in RegisterUser service:", error);
-      throw new Error("Failed to register user");
+        console.error("Error in RegisterUser service:", error);
+        throw new Error("Failed to register user");
     }
-  },
+},
+
+
 
  
 getUserProfileById: async (id) => {

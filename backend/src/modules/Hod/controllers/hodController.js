@@ -40,4 +40,65 @@ export const hodController = {
         res.status(500).json({ error: "Database error", details: err.message });
       }
     },
+
+
+    getUsersByHodDept: async (req, res) => {
+      try {
+          const { dept_id } = req.query;
+
+          // Validate dept_id
+          if (!dept_id || isNaN(dept_id)) {
+              return res.status(400).json({
+                  status: false,
+                  message: 'Valid dept_id is required'
+              });
+          }
+
+          const users = await hodService.getUsersByHodDept({ dept_id: parseInt(dept_id) });
+          res.status(200).json({
+              status: true,
+              message: 'Users retrieved successfully',
+              data: users
+          });
+      } catch (error) {
+          res.status(500).json({
+              status: false,
+              message: error.message
+          });
+      }
+  },
+
+
+  updateFieldStatus: async (req, res) => {
+    try {
+        const { user_id, field_status } = req.body;
+
+        // Validate required fields
+        if (!user_id || field_status === undefined) {
+            return res.status(400).json({
+                status: false,
+                message: 'user_id and field_status are required'
+            });
+        }
+
+        // Validate field_status
+        if (field_status !== 0 && field_status !== 1) {
+            return res.status(400).json({
+                status: false,
+                message: 'field_status must be 0 (inactive) or 1 (active)'
+            });
+        }
+
+        await hodService.updateFieldStatus({ user_id, field_status });
+        res.status(200).json({
+            status: true,
+            message: `Field status updated to ${field_status === 1 ? 'active' : 'inactive'} successfully`
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: false,
+            message: error.message
+        });
+    }
+},
 };
