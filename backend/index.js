@@ -34,6 +34,8 @@ import shiftRoute from "./src/modules/Shifts/routes/shiftRoute.js"
 
 import orrShiftRoute from "./src/modules/Shifts/routes/orrShiftRoute.js"
 
+import salaryRoute from "./src/modules/Salary/routes/salaryRoute.js";
+
 const app = express();
  
 app.use(cors());
@@ -43,7 +45,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', AuthRoute);
 
 app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserRoute,otpRoute,
-  loginPermissionRoutes,reportsRoute,attendanceCountRoute,forgotPasswordRoute,shiftRoute,sansthaRoute,fieldvisitRoute,orrShiftRoute);
+  loginPermissionRoutes,reportsRoute,attendanceCountRoute,forgotPasswordRoute,shiftRoute,sansthaRoute,fieldvisitRoute,orrShiftRoute,salaryRoute);
 
 const PORT = 3001
  

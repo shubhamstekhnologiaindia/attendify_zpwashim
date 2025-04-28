@@ -1,4 +1,5 @@
 import { query } from "../../../../utils/database.js";
+import {encryptDeterministic,decryptDeterministic,decrypt,} from "../../../../utils/crypto.js";
 
 export const masterDataService = {
   getDepartments: async () => {
@@ -199,8 +200,66 @@ GetSansthaLocations: async (deptId) => {
       message: "Database error while fetching Sanstha locations",
     };
   }
+},
+
+
+GetOfficeLocationByDept:async(deptId)=>{
+  try{
+    const fetchOfficeLocation=await query( `SELECT loc_name_marathi, loc_id FROM office_location WHERE dept_id=?`,[deptId]);
+  return {
+    status: true,
+    data: fetchOfficeLocation,
+  };
+} catch (error) {
+  console.error("Service Error:", error);
+  throw {
+    status: false,
+    message: "Database error while fetching Sanstha locations",
+  };
 }
+},
+getUsersForSalaryRequest: async (dept_id, location_id, cader_id) => {
+  try {
+    const users = await query(
+      `CALL GetUsersForSalaryRequest(?, ?, ?)`,
+      [dept_id, location_id, cader_id]
+    );
+
+    const decryptedUsers = (users[0] || []).map(row => {
+      let first_name  = "Decryption Failed";
+      let middle_name = "Decryption Failed";
+      let last_name    = "Decryption Failed";
+
+      try {
+        first_name  = decrypt(row.first_name);
+        middle_name = decrypt(row.middle_name);
+        last_name    = decrypt(row.last_name); // Assuming password is encrypted symmetrically
+      } catch (e) {
+        console.error("Decryption error in getUsersForSalaryRequest:", e);
+      }
+
+      return {
+        ...row, // keep all other fields as is
+        first_name,
+        middle_name,
+        last_name
+      };
+    });
+
+    console.log("Fetched and Decrypted Users for Salary Request:", decryptedUsers);
+
+    return {
+      status: true,
+      data: decryptedUsers,
+    };
+  } catch (error) {
+    console.error("Service Error (getUsersForSalaryRequest):", error);
+    throw {
+      status: false,
+      message: "Database error while fetching users for salary request.",
+    };
+  }
+},
 
 
-  
 };
