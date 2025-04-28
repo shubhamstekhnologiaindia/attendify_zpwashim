@@ -1,10 +1,10 @@
 import { overrideShiftService } from '../services/orrShiftService.js';
 
 export const OverrideShiftController = {
-    createOrrShift: async (req, res) => {
+    createOrrShift: async (req, res) =>{
     try {
       const data = req.body;
-      const result = await overrideShiftService.createOrrShift(data);
+      const result = await overrideShiftService.createOrrShift(data)
       return res.status(201).json({ status: true, data: result, message: 'Override created' })
     } catch (error) {
       const statusCode = error.status === false ? 400 : 500;
@@ -34,10 +34,11 @@ export const OverrideShiftController = {
   editOrrShift: async (req, res) => {
     try {
       const { edit_orrshift_id } = req.params;
-      const {start_date, end_date,  morning_in_start, morning_in_end,late_cut_off,afternoon_in_start,afternoon_in_end,overtime_allowed_from,updated_by}= req.body
+      const {override_shift_name,start_date, end_date,  morning_in_start, morning_in_end,late_cut_off,afternoon_in_start,afternoon_in_end,overtime_allowed_from,updated_by}= req.body
 
-      const result = await overrideShiftService.editOrrShift( 
+      const result = await overrideShiftService.editOrrShift(
         Number(edit_orrshift_id),
+        override_shift_name,
         start_date,
         end_date,
         morning_in_start,
@@ -53,13 +54,24 @@ export const OverrideShiftController = {
       return res.status(400).json({ status: false, message: error.message })
     }
   },
-  deleteOrrShift: async (req, res) => {
+  deleteOrrShift: async (req, res) =>{
     try {
-      const { delete_orrshift_id, department_id, cader_id } = req.body
-      const result = await overrideShiftService.deleteOrrShift(Number(delete_orrshift_id), department_id, cader_id);
+      const { delete_orrshift_id } = req.query
+      const result = await overrideShiftService.deleteOrrShift(Number(delete_orrshift_id));
       return res.status(200).json({ status: true, data: result, message: 'Override deleted' })
     } catch (error) {
-      return res.status(500).json({ status: false, message:error.message });
+      return res.status(500).json({ status: false, message:error.message })
     }
-  }
+  },
+
+  checking_salary_slip_per:async (req,res)=>{
+    try {
+      const { user_id } = req.query
+      const result = await overrideShiftService.checking_salary_slip_per(user_id);
+      return res.status(200).json({ status: true, data: result, message: 'Override deleted' })
+    } catch (error) {
+      return res.status(500).json({ status: false, message:error.message })
+    }
+  },
 };
+
