@@ -4,7 +4,7 @@ export const overrideShiftService = {
     createOrrShift: async (data) => {
     const {
       cader_id,
-      department_id,
+      override_shift_name,
       start_date,
       end_date,
       morning_in_start,
@@ -19,7 +19,7 @@ export const overrideShiftService = {
       const sql = 'CALL CreateOverrideShift(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
       const params = [
         cader_id,
-        department_id,
+        override_shift_name,
         start_date,
         end_date,
         morning_in_start,
@@ -56,11 +56,12 @@ export const overrideShiftService = {
 //   },
 
 
-editOrrShift: async (edit_orrshift_id,  start_date,  end_date,morning_in_start,morning_in_end,late_cut_off,afternoon_in_start,afternoon_in_end,overtime_allowed_from,updated_by) => {
+editOrrShift: async (edit_orrshift_id, override_shift_name,start_date,  end_date,morning_in_start,morning_in_end,late_cut_off,afternoon_in_start,afternoon_in_end,overtime_allowed_from,updated_by) => {
     try {
-      const sql = 'CALL UpdateOverrideShift(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+      const sql = 'CALL UpdateOverrideShift(?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
       const params = [
         edit_orrshift_id,
+        override_shift_name,
         start_date,
         end_date,
         morning_in_start,
@@ -78,13 +79,15 @@ editOrrShift: async (edit_orrshift_id,  start_date,  end_date,morning_in_start,m
     }
   },
 
-  deleteOrrShift: async (delete_orrshift_id, department_id, cader_id) => {
+  deleteOrrShift: async (delete_orrshift_id) => {
     try {
-      const sql = 'CALL DeleteOverrideShift(?, ?, ?)';
-      const [rows] = await query(sql, [delete_orrshift_id, department_id, cader_id])
+      const sql = 'CALL DeleteOverrideShift(?)';
+      const [rows] = await query(sql, [delete_orrshift_id])
       return { affected: rows[0].affected };
     } catch (error) {
       throw { status: false, message: 'Error deleting override' }
     }
-  }
+  },
+
+
 };
