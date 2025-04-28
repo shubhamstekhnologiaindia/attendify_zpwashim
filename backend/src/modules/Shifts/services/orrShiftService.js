@@ -89,16 +89,5 @@ editOrrShift: async (edit_orrshift_id, override_shift_name,start_date,  end_date
     }
   },
 
-  checking_salary_slip_per:async(user_id)=>{
-    try {
-      const checkpermissionQuery = 'SELECT * FROM tbl_salary_slip_per WHERE salary_slip_per_userid = ? AND permission_status = 1';
-      const [fetchPermission]= await query(checkpermissionQuery,[user_id])
 
- console.log(fetchPermission) 
-
-      return res.status(200).json({ status: true, data: result, message: 'Override deleted' })
-    } catch (error) {
-      throw { status: false, message: 'Error in fetching salary slip permission' }
-    }
-  }
 };
