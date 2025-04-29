@@ -205,43 +205,50 @@ GetSansthaLocations: async (req, res) => {
   }
 },
 
-GetOfficeLocationByDept:async(req,res)=>{
-  try {
-    const deptId = req.query.deptId; 
+// GetOfficeLocationByDept:async(req,res)=>{
+//   try {
+//     const deptId = req.query.deptId; 
 
-    if (!deptId) {
-      return res.status(400).json({
-        status: false,
-        message: "Missing deptId",
-      });
-    }
+//     if (!deptId) {
+//       return res.status(400).json({
+//         status: false,
+//         message: "Missing deptId",
+//       });
+//     }
 
-    const result = await masterDataService.GetOfficeLocationByDept(deptId);
+//     const result = await masterDataService.GetOfficeLocationByDept(deptId);
 
-    return res.status(200).json({
-      status: true,
-      data: result.data,
-      message: "Office Locations retrieved successfully",
-    });
-  } catch (error) {
-    console.error("Controller Error:", error);
-    return res.status(400).json({
-      status: false,
-      message: error.message || "Something went wrong",
-    });
-  }
-},
-
+//     return res.status(200).json({
+//       status: true,
+//       data: result.data,
+//       message: "Office Locations retrieved successfully",
+//     });
+//   } catch (error) {
+//     console.error("Controller Error:", error);
+//     return res.status(400).json({
+//       status: false,
+//       message: error.message || "Something went wrong",
+//     });
+//   }
+// },
 
 getUsersForSalaryRequest: async (req, res) => {
   try {
-    const { dept_id, location_id, cader_id } = req.query; // assuming you're passing parameters as query string
-    
-    const response = await masterDataService.getUsersForSalaryRequest(
-      dept_id || null,
-      location_id || null,
-      cader_id || null
-    );
+    let { dept_ids } = req.query;
+
+    // Handle JSON string input like "[1,2]"
+    if (typeof dept_ids === 'string') {
+      try {
+        dept_ids = JSON.parse(dept_ids);
+      } catch (e) {
+        return res.status(400).json({
+          status: false,
+          message: "Invalid dept_ids format. Use JSON array format like [1,2]",
+        });
+      }
+    }
+
+    const response = await masterDataService.getUsersForSalaryRequest(dept_ids);
 
     return res.status(200).json(response);
   } catch (error) {
@@ -251,5 +258,6 @@ getUsersForSalaryRequest: async (req, res) => {
     });
   }
 },
+
 
 }
