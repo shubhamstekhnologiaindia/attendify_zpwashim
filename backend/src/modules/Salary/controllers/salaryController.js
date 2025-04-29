@@ -108,7 +108,7 @@ export const SalaryController = {
             });
           }
     
-          const result = await SalarySlipsService.storeSalarySlipRequest({
+          const result = await SalaryService.storeSalarySlipRequest({
             req_sender_id,
             req_reciver_id,
             salary_slip,
