@@ -101,16 +101,20 @@ export const SalaryService = {
 
           checking_salary_slip_per:async(user_id)=>{
             try {
-              const checkpermissionQuery = 'SELECT * FROM tbl_salary_slip_per WHERE salary_slip_per_userid = ? AND permission_status = 1';
+              const checkpermissionQuery = 'SELECT salary_slip_per_id AS salary_slip_permission_id,salary_slip_per_userid AS user_id,salary_slip_per_departnment_id AS departnment_id FROM tbl_salary_slip_per WHERE salary_slip_per_userid = ? AND permission_status = 1';
               const [fetchPermission]= await query(checkpermissionQuery,[user_id])
         
          console.log(fetchPermission) 
-        
-              return res.status(200).json({ status: true, data: result, message: 'Override deleted' })
-            } catch (error) {
-              throw { status: false, message: 'Error in fetching salary slip permission' }
-            }
-          }
 
+         return fetchPermission;
+        
+        } catch (error) {
+          console.error("Service Error (updateSalarySlipPermission):", error);
+          throw {
+            status: false,
+            message: error.message || "Database error while updating salary slip permission.",
+          };
+        }
+    },
 
 }
