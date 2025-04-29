@@ -110,7 +110,38 @@ export const SalaryService = {
             } catch (error) {
               throw { status: false, message: 'Error in fetching salary slip permission' }
             }
-          }
+          },
+
+          storeSalarySlipRequest: async ({ req_sender_id, req_reciver_id, salary_slip, month, description }) => {
+            try {
+              const sql = `
+                INSERT INTO tbl_salary_slips (
+                  req_sender_id, req_reciver_id, salary_slip, month, description, status
+                ) VALUES (?, ?, ?, ?, ?, 0)
+              `;
+              const result = await query(sql, [
+                req_sender_id,
+                req_reciver_id,
+                salary_slip,
+                month,
+                description || null,
+              ]);
+        
+              return {
+                id: result.insertId,
+                req_sender_id,
+                req_reciver_id,
+                salary_slip,
+                month,
+                description,
+                status: 0,
+                created_at: new Date(),
+              };
+            } catch (error) {
+              console.error("Error in storeSalarySlipRequest service:", error);
+              throw new Error("Failed to store salary slip request");
+            }
+          },
 
 
 }

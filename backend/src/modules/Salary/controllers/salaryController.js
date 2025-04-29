@@ -94,5 +94,39 @@ export const SalaryController = {
         } catch (error) {
           return res.status(500).json({ status: false, message:error.message })
         }
-      }
+      },
+
+
+      storeSalarySlipRequest: async (req, res) => {
+        try {
+          const { req_sender_id, req_reciver_id, salary_slip, month, description } = req.body;
+    
+          if (!req_sender_id || !req_reciver_id || !salary_slip || !month) {
+            return res.status(400).json({
+              status: false,
+              message: "Missing required fields: req_sender_id, req_reciver_id, salary_slip, month",
+            });
+          }
+    
+          const result = await SalarySlipsService.storeSalarySlipRequest({
+            req_sender_id,
+            req_reciver_id,
+            salary_slip,
+            month,
+            description,
+          });
+    
+          return res.status(201).json({
+            status: true,
+            message: "Salary slip request stored successfully",
+            data: result,
+          });
+        } catch (error) {
+          console.error("Error in storeSalarySlipRequest controller:", error);
+          return res.status(500).json({
+            status: false,
+            message: "Failed to store salary slip request",
+          });
+        }
+      },
 }

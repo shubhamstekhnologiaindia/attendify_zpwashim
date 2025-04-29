@@ -11,6 +11,8 @@ router.delete('/Delete_Users_For_Salary_Slip_Permission/:salary_slip_per_id', Sa
 
 router.post('/checking_salary_slip_per', SalaryController.checking_salary_slip_per);
 
+router.post('/salary-slips-store', SalaryController.storeSalarySlipRequest);
+
 export default router;
 
 
