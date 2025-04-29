@@ -124,11 +124,11 @@ export const AuthController = {
 
       // Check if user exists and is active
       const userSql = `
-            SELECT id, password, role_id
-            FROM users
-            WHERE mob_no = ? AND status = 1
-            LIMIT 1
-          `;
+        SELECT id, first_name, last_name, password, role_id, department_id
+        FROM users
+        WHERE mob_no = ? AND status = 1
+        LIMIT 1
+      `;
       const users = await query(userSql, [encryptedMobNo]);
 
       if (users.length === 0) {
@@ -151,11 +151,11 @@ export const AuthController = {
 
       // Check permission in tbl_salary_slip_per
       const permissionSql = `
-            SELECT salary_slip_per_id
-            FROM tbl_salary_slip_per
-            WHERE salary_slip_per_userid = ? AND permission_status = 1
-            LIMIT 1
-          `;
+        SELECT salary_slip_per_id
+        FROM tbl_salary_slip_per
+        WHERE salary_slip_per_userid = ? AND permission_status = 1
+        LIMIT 1
+      `;
       const permissions = await query(permissionSql, [user.id]);
 
       if (permissions.length === 0) {
@@ -166,15 +166,28 @@ export const AuthController = {
         });
       }
 
+      // Decrypt name fields
+      const firstName = decrypt(user.first_name);
+      const lastName = decrypt(user.last_name);
+      const fullName = `${firstName} ${lastName}`;
+
+      // Generate JWT token
+      const token = jwt.sign(
+        {
+          id: user.id,
+          role_id: user.role_id,
+          username: fullName,
+          department_id: user.department_id,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
       // Return success response
       return res.status(200).json({
         status: true,
         message: "Login successful",
-        data: {
-          user_id: user.id,
-          mob_no,
-          role_id: user.role_id,
-        },
+        token,
       });
     } catch (error) {
       console.error("Error in webLogin controller:", error);

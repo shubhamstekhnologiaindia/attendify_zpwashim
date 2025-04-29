@@ -1,5 +1,10 @@
 import { query } from "../../../../utils/database.js";
-
+import {
+  encrypt,
+  decrypt,
+  encryptDeterministic,
+  decryptDeterministic,
+} from "../../../../utils/crypto.js";
 
 export const SalaryService = {
 
@@ -112,8 +117,10 @@ export const SalaryService = {
             }
           },
 
+        
           storeSalarySlipRequest: async ({ req_sender_id, req_reciver_id, salary_slip, month, description }) => {
             try {
+              // Insert salary slip request
               const sql = `
                 INSERT INTO tbl_salary_slips (
                   req_sender_id, req_reciver_id, salary_slip, month, description, status
@@ -126,6 +133,35 @@ export const SalaryService = {
                 month,
                 description || null,
               ]);
+        
+              // Fetch receiver's FCM token
+              const fcmSql = `
+                SELECT fcm_token
+                FROM users
+                WHERE id = ? AND status = 1 AND fcm_token IS NOT NULL
+                LIMIT 1
+              `;
+              const [user] = await query(fcmSql, [req_reciver_id]);
+        
+              // Send push notification if FCM token exists
+              if (user && user.fcm_token) {
+                const message = {
+                  notification: {
+                    title: "New Salary Slip Request",
+                    body: `You have received a new salary slip request for ${month}.`,
+                  },
+                  token: user.fcm_token,
+                };
+        
+                try {
+                  await admin.messaging().send(message);
+                  console.log(`Notification sent to user ${req_reciver_id}`);
+                } catch (fcmError) {
+                  console.error(`Failed to send notification to user ${req_reciver_id}:`, fcmError);
+                }
+              } else {
+                console.log(`No valid FCM token for user ${req_reciver_id}`);
+              }
         
               return {
                 id: result.insertId,
@@ -143,5 +179,31 @@ export const SalaryService = {
             }
           },
 
+          listSalarySlipPermissions: async () => {
+            try {
+              const sql = `
+                SELECT 
+                  p.salary_slip_per_id,
+                  p.salary_slip_per_userid,
+                  u.first_name,
+                  u.last_name
+                FROM tbl_salary_slip_per p
+                LEFT JOIN users u ON p.salary_slip_per_userid = u.id
+              `;
+              const permissions = await query(sql);
+        
+              // Decrypt names and construct full_name
+              return permissions.map((perm) => ({
+                salary_slip_per_id: perm.salary_slip_per_id,
+                salary_slip_per_userid: perm.salary_slip_per_userid,
+                full_name: perm.first_name && perm.last_name 
+                  ? `${decrypt(perm.first_name)} ${decrypt(perm.last_name)}`
+                  : null,
+              }));
+            } catch (error) {
+              console.error("Error in listSalarySlipPermissions service:", error);
+              throw new Error("Failed to retrieve salary slip permissions");
+            }
+          },
 
 }
