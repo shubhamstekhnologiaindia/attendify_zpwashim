@@ -127,32 +127,85 @@ export const SalaryController = {
     }
   },
 
-  uploadSalarySlip: async (req, res) => {
-    const files = req.files || [];
 
-    // 1. No files?
-    if (files.length === 0) {
-      return res.status(400).json({ status: false, message: 'No file uploaded.' });
+    
+      getListOfSalaryHeads: async (req, res) => {
+        try {
+          const data = await SalaryService.getListOfSalaryHeads();
+          res.status(200).json({ success: true, data });
+        } catch (error) {
+          console.error("Error fetching salary heads:", error);
+          res.status(500).json({ success: false, message: "Server Error" });
+        }
+      },
+
+   getSalarySlips :async (req, res) => {
+    const userId = req.user.id
+
+    console.log(req.user)
+  
+    if (!userId || isNaN(userId)) {
+      return res.status(400).json({ status: false, message: 'Invalid or missing userId' });
     }
-
-    // 2. More than one file?
-    if (files.length > 1) {
-      return res.status(400).json({ status: false, message: 'Only one file is allowed.' });
-    }
-
-    // 3. Exactly one file: proceed
-    const file = files[0];
     try {
-      const { user_id } = req.body;
-      const result = await SalaryService.uploadToAzure(user_id, file);
+      const slips = await SalaryService.FetchUsersForSalarySlip(userId);
+  
+      if (!slips || slips.length === 0) {
+        return res.status(404).json({ status: false, message: 'No salary slips found for this user.' });
+      }
+  
+      return res.status(200).json({ status: true, data: slips });
+    } catch (error) {
+      console.error('Error fetching salary slips:', error.message);
+      return res.status(500).json({ status: false, message: 'Internal server error' });
+    }
+  },
+
+
+  uploadSalarySlipToAzure: async (req, res) => {
+    try {
+      const files = req.files || [];
+  
+      // 1. Validate file count
+      if (files.length === 0) {
+        return res.status(400).json({
+          status: false,
+          message: 'No file uploaded.',
+        });
+      }
+  
+      if (files.length > 1) {
+        return res.status(400).json({
+          status: false,
+          message: 'Only one file is allowed.',
+        });
+      }
+  
+      const file = files[0];
+      const { application_id } = req.body;
+  
+      if (!application_id) {
+        return res.status(400).json({
+          status: false,
+          message: 'Missing user ID.',
+        });
+      }
+  
+      // 2. Upload to Azure and update DB
+      const result = await SalaryService.uploadSalarySlipToAzure(application_id, file);
+  
       return res.status(200).json({
-        status:  true,
+        status: true,
         message: 'File uploaded successfully!',
         blobUrl: result.blobUrl,
       });
+  
     } catch (error) {
-      console.error('Error uploading file:', error);
-      return res.status(500).json({ status: false, message: 'Error uploading file.' });
+      console.error('Error uploading salary slip:', error.message || error);
+      return res.status(500).json({
+        status: false,
+        message: 'Internal server error while uploading salary slip.',
+      });
     }
   },
   // fetch salary head in dropdown

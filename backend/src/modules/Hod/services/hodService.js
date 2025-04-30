@@ -143,32 +143,43 @@ export const hodService = {
 },
 
 
-updateFieldStatus: async ({ user_id, field_status }) => {
-  try {
-      // Check if user exists
-      const checkUserSql = `SELECT id FROM users WHERE id = ? LIMIT 1`;
-      const existingUser = await query(checkUserSql, [user_id]);
+  updateFieldStatus: async ({ user_id, field_status }) => {
+    try {
+        // Check if user exists
+        const checkUserSql = `SELECT id FROM users WHERE id = ? LIMIT 1`;
+        const existingUser = await query(checkUserSql, [user_id]);
 
-      if (existingUser.length === 0) {
-          throw new Error('User does not exist');
-      }
+        if (existingUser.length === 0) {
+            throw new Error('User does not exist');
+        }
 
-      // Update field_status
-      const updateSql = `
-          UPDATE users 
-          SET field_status = ?, updated_at = NOW()
-          WHERE id = ?
-      `;
-      const result = await query(updateSql, [field_status, user_id]);
+        // Update field_status
+        const updateSql = `
+            UPDATE users 
+            SET field_status = ?, updated_at = NOW()
+            WHERE id = ?
+        `;
+        const result = await query(updateSql, [field_status, user_id]);
 
-      if (result.affectedRows === 0) {
-          throw new Error('Failed to update field status');
-      }
+        if (result.affectedRows === 0) {
+            throw new Error('Failed to update field status');
+        }
 
-      return { success: true };
-  } catch (error) {
-      console.error('Error in updateFieldStatus service:', error);
-      throw new Error(`Failed to update field status: ${error.message}`);
+        return { success: true };
+    } catch (error) {
+        console.error('Error in updateFieldStatus service:', error);
+        throw new Error(`Failed to update field status: ${error.message}`);
+    }
+  },
+
+  getReportsPermissionForHod :async (user_id, status) => {
+    const sql = `
+      UPDATE users 
+      SET reports_permission_status = ? 
+      WHERE id = ? AND role_id = 102
+    `;
+  
+    const result = await query(sql, [status, user_id]);
+    return result.affectedRows > 0;
   }
-},
 };
