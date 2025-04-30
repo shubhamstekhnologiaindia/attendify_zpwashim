@@ -20,5 +20,8 @@ router.post('/Upload_Salary_Slip', upload.any(), SalaryController.uploadSalarySl
 router.get('/FetchUsersForSalarySlip', authMiddleware,SalaryController.getSalarySlips);
 
 
+router.get('/Salary-Heads', SalaryController.getListOfSalaryHeads);
+
+
 export default router;
 
