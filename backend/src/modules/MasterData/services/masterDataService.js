@@ -203,49 +203,56 @@ GetSansthaLocations: async (deptId) => {
 },
 
 
-GetOfficeLocationByDept:async(deptId)=>{
-  try{
-    const fetchOfficeLocation=await query( `SELECT loc_name_marathi, loc_id FROM office_location WHERE dept_id=?`,[deptId]);
-  return {
-    status: true,
-    data: fetchOfficeLocation,
-  };
-} catch (error) {
-  console.error("Service Error:", error);
-  throw {
-    status: false,
-    message: "Database error while fetching Sanstha locations",
-  };
-}
-},
-getUsersForSalaryRequest: async (dept_id, location_id, cader_id) => {
+// GetOfficeLocationByDept:async(deptId)=>{
+//   try{
+//     const fetchOfficeLocation=await query( `SELECT loc_name_marathi, loc_id FROM office_location WHERE dept_id=?`,[deptId]);
+//   return {
+//     status: true,
+//     data: fetchOfficeLocation,
+//   };
+// } catch (error) {
+//   console.error("Service Error:", error);
+//   throw {
+//     status: false,
+//     message: "Database error while fetching Sanstha locations",
+//   };
+// }
+// },
+
+
+getUsersForSalaryRequest: async (dept_ids) => {
   try {
-    const users = await query(
-      `CALL GetUsersForSalaryRequest(?, ?, ?)`,
-      [dept_id, location_id, cader_id]
-    );
+    if (!Array.isArray(dept_ids) || dept_ids.length === 0) {
+      throw new Error("Invalid or missing dept_ids");
+    }
 
-    const decryptedUsers = (users[0] || []).map(row => {
-      let first_name  = "Decryption Failed";
+    // Construct dynamic placeholders for the IN clause
+    const placeholders = dept_ids.map(() => '?').join(', ');
+    const sql = `SELECT * FROM users WHERE department_id IN (${placeholders})`;
+
+    const users = await query(sql, dept_ids);
+
+    const decryptedUsers = (users || []).map(row => {
+      let first_name = "Decryption Failed";
       let middle_name = "Decryption Failed";
-      let last_name    = "Decryption Failed";
-
+      let last_name = "Decryption Failed";
+    
       try {
-        first_name  = decrypt(row.first_name);
+        first_name = decrypt(row.first_name);
         middle_name = decrypt(row.middle_name);
-        last_name    = decrypt(row.last_name); // Assuming password is encrypted symmetrically
+        last_name = decrypt(row.last_name);
       } catch (e) {
         console.error("Decryption error in getUsersForSalaryRequest:", e);
       }
-
+    
       return {
-        ...row, // keep all other fields as is
+        id: row.id,
+        department_id: row.department_id,
         first_name,
         middle_name,
-        last_name
+        last_name,
       };
     });
-
     console.log("Fetched and Decrypted Users for Salary Request:", decryptedUsers);
 
     return {
@@ -260,6 +267,7 @@ getUsersForSalaryRequest: async (dept_id, location_id, cader_id) => {
     };
   }
 },
+
 
 
 };
