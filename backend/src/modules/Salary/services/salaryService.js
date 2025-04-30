@@ -1,4 +1,9 @@
 import { query } from "../../../../utils/database.js";
+import {
+  encryptDeterministic,
+  decryptDeterministic,
+  decrypt,
+} from "../../../../utils/crypto.js";
 
 
 export const SalaryService = {
@@ -143,5 +148,48 @@ export const SalaryService = {
             }
           },
 
+          getListOfSalaryHeads: async () => {
+            const sql = `
+              SELECT 
+                ssp.salary_slip_per_id,
+                ssp.salary_slip_per_userid,
+                ssp.salary_slip_per_departnment_id,
+                ssp.created_at,
+                ssp.created_by,
+                u.id,
+                u.mob_no,
+                u.first_name,
+                u.middle_name,
+                u.last_name,
+                d.dept_name_marathi
+              FROM 
+                tbl_salary_slip_per ssp
+              JOIN 
+                users u ON ssp.salary_slip_per_userid = u.id
+              JOIN 
+                departments d ON CAST(ssp.salary_slip_per_departnment_id AS UNSIGNED) = d.id
+              WHERE 
+                ssp.permission_status = 1
+            `;
+          
+            const rows = await query(sql);
+          
+            const decryptedRows = rows.map(row => ({
+              user_id: row.id,
+              salary_slip_per_id: row.salary_slip_per_id,
+              salary_slip_per_userid: row.salary_slip_per_userid,
+              salary_slip_per_departnment_id: row.salary_slip_per_departnment_id,
+              created_at: row.created_at,
+              created_by: row.created_by,
+              mob_no: decryptDeterministic(row.mob_no),
+              first_name: decrypt(row.first_name),
+              middle_name: decrypt(row.middle_name),
+              last_name: decrypt(row.last_name),
+              department_name: row.dept_name_marathi
+            }));
+          
+            return decryptedRows;
+          }
+          
 
-}
+};

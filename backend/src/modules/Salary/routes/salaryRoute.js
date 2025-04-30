@@ -13,6 +13,9 @@ router.post('/checking_salary_slip_per', SalaryController.checking_salary_slip_p
 
 router.post('/salary-slips-store', SalaryController.storeSalarySlipRequest);
 
+router.get('/Salary-Heads', SalaryController.getListOfSalaryHeads);
+
+
 export default router;
 
 

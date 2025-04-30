@@ -129,4 +129,16 @@ export const SalaryController = {
           });
         }
       },
+
+
+    
+      getListOfSalaryHeads: async (req, res) => {
+        try {
+          const data = await SalaryService.getListOfSalaryHeads();
+          res.status(200).json({ success: true, data });
+        } catch (error) {
+          console.error("Error fetching salary heads:", error);
+          res.status(500).json({ success: false, message: "Server Error" });
+        }
+      }
 }

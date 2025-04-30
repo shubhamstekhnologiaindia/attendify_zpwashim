@@ -101,4 +101,26 @@ export const hodController = {
         });
     }
 },
+
+getReportsPermissionForHod :async (req, res) => {
+  try {
+    const { user_id, status } = req.body;
+
+    if (![0, 1].includes(Number(status))) {
+      return res.status(400).json({ message: "Invalid status. Must be 0 or 1." });
+    }
+
+    const success = await hodService.getReportsPermissionForHod(user_id, status);
+
+    if (success) {
+      res.status(200).json({ message: "Report permission updated successfully." });
+    } else {
+      res.status(404).json({ message: "User is not HOD" });
+    }
+  } catch (error) {
+    console.error("Error updating report permission:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+}
+
 };

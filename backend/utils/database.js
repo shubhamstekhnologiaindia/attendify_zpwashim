@@ -6,7 +6,7 @@ const pool = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASS|| "Password@0157",
-    database: process.env.DB_NAME || 'attendify_zp_washim_new_1',
+    database: process.env.DB_NAME || 'attendify_zp_washim_new',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
