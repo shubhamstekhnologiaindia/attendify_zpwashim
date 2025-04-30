@@ -98,18 +98,17 @@ export const SalaryController = {
 
   storeSalarySlipRequest: async (req, res) => {
     try {
-      const { req_sender_id, req_reciver_id, salary_slip, month, description } = req.body;
+      const { req_sender_id, req_reciver_id,  month, description } = req.body;
 
-      if (!req_sender_id || !req_reciver_id || !salary_slip || !month) {
+      if (!req_sender_id || !req_reciver_id || !month) {
         return res.status(400).json({
           status: false,
-          message: "Missing required fields: req_sender_id, req_reciver_id, salary_slip, month",
+          message: "Missing required fields: req_sender_id, req_reciver_id, month",
         });
       }
       const result = await SalaryService.storeSalarySlipRequest({
         req_sender_id,
         req_reciver_id,
-        salary_slip,
         month,
         description,
       });

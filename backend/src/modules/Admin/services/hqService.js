@@ -7,28 +7,69 @@ import { decrypt, decryptDeterministic,encrypt } from "../../../../utils/crypto.
 
 export const HeadquarterService = {
     
+    // FetchHOD: async () => {
+    //     try {
+    //         const sql = "CALL FetchHODs()";
+    //         const [results] = await query(sql);
+
+    //         console.log(results);
+
+    //         const decryptedResults = results.map(hod => ({
+    //             user_id: hod.user_id,
+    //             full_name: `${decrypt(hod.first_name)} ${decrypt(hod.middle_name)} ${decrypt(hod.last_name)}`.trim(),
+    //             mob_no: decryptDeterministic(hod.mob_no),
+    //             email: decrypt(hod.email),
+    //             department_name: hod.department_name,
+    //             taluka_name: hod.taluka_name
+    //         }));
+
+    //         return decryptedResults;
+    //     } catch (error) {
+    //         console.error("Error fetching HOD details:", error);
+    //         throw new Error("Error fetching HOD details");
+    //     }
+    // }
+
+
     FetchHOD: async () => {
         try {
-            const sql = "CALL FetchHODs()";
-            const [results] = await query(sql);
-
-            console.log(results);
-
-            const decryptedResults = results.map(hod => ({
-                user_id: hod.user_id,
-                full_name: `${decrypt(hod.first_name)} ${decrypt(hod.middle_name)} ${decrypt(hod.last_name)}`.trim(),
-                mob_no: decryptDeterministic(hod.mob_no),
-                email: decrypt(hod.email),
-                department_name: hod.department_name,
-                taluka_name: hod.taluka_name
-            }));
-
-            return decryptedResults;
+          const sql = `
+            SELECT 
+              u.id AS user_id,
+              u.first_name,
+              u.last_name,
+              u.mob_no,
+              d.department_name,
+              c.cader_name,
+              CASE 
+                WHEN p.salary_slip_per_id IS NOT NULL AND p.permission_status = 1 THEN 1
+                ELSE 0
+              END AS reports_permission_status
+            FROM users u
+            LEFT JOIN departments d ON u.department_id = d.id
+            LEFT JOIN tbl_cader c ON u.cader_id = c.id
+            LEFT JOIN tbl_salary_slip_per p ON u.id = p.salary_slip_per_userid AND p.permission_status = 1
+            WHERE u.role_id = 102
+          `;
+          const users = await query(sql);
+    
+          // Decrypt fields and construct full_name
+          return users.map((user) => ({
+            user_id: user.user_id,
+            full_name: user.first_name && user.last_name 
+              ? `${decrypt(user.first_name)} ${decrypt(user.last_name)}`
+              : null,
+            department_name: user.department_name,
+            cader_name: user.cader_name,
+            mob_no: user.mob_no ? decrypt(user.mob_no) : null,
+            reports_permission_status: user.reports_permission_status,
+          }));
         } catch (error) {
-            console.error("Error fetching HOD details:", error);
-            throw new Error("Error fetching HOD details");
+          console.error("Error in listRole102Users service:", error);
+          throw new Error("Failed to retrieve users");
         }
-    }}
+      },
+}
     
 
 

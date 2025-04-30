@@ -141,7 +141,7 @@ export const SalaryService = {
   storeSalarySlipRequest: async ({
     req_sender_id,
     req_reciver_id,
-    salary_slip,
+    
     month,
     description,
   }) => {
@@ -149,13 +149,12 @@ export const SalaryService = {
       // Insert salary slip request
       const sql = `
           INSERT INTO tbl_salary_slips (
-            req_sender_id, req_reciver_id, salary_slip, month, description, status
-          ) VALUES (?, ?, ?, ?, ?, 0)
+            req_sender_id, req_reciver_id, month, description, status
+          ) VALUES (?, ?, ?, ?, 0)
         `;
       const result = await query(sql, [
         req_sender_id,
-        req_reciver_id,
-        salary_slip,
+        req_reciver_id,     
         month,
         description || null,
       ]);
@@ -196,7 +195,6 @@ export const SalaryService = {
         id: result.insertId,
         req_sender_id,
         req_reciver_id,
-        salary_slip,
         month,
         description,
         status: 0,
