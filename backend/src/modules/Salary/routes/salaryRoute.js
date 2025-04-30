@@ -1,6 +1,6 @@
 import express from "express";
 import {authMiddleware} from "../../../Middleware/authMiddleware.js";
-
+import multer from 'multer';
 import {SalaryController} from "../controllers/salaryController.js";
 
 const router = express.Router();
@@ -11,6 +11,14 @@ router.delete('/Delete_Users_For_Salary_Slip_Permission/:salary_slip_per_id', Sa
 
 router.post('/checking_salary_slip_per', SalaryController.checking_salary_slip_per);
 
-export default router;
+router.post('/salary-slips-store', SalaryController.storeSalarySlipRequest);
 
+
+const upload = multer({ storage: multer.memoryStorage() });
+router.post('/upload1', upload.any(), SalaryController.uploadSalarySlip);
+
+
+
+
+export default router;
 

@@ -1,10 +1,18 @@
 import { query } from "../../../../utils/database.js";
+import multer from "multer";
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+
+
+import { BlobServiceClient } from "@azure/storage-blob";
+
+// const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
+// const CONTAINER_NAME = process.env.CONTAINER_NAME;
 
 
 export const SalaryService = {
-
-        
-
         saveSalarySlipPermission : async (user_id, dept_ids) => {
             try {
               // Prepare the values for multiple departments
@@ -116,5 +124,77 @@ export const SalaryService = {
           };
         }
     },
+
+    storeSalarySlipRequest: async ({ req_sender_id, req_reciver_id, salary_slip, month, description }) => {
+      try {
+        const sql = `
+          INSERT INTO tbl_salary_slips (
+            req_sender_id, req_reciver_id, salary_slip, month, description, status
+          ) VALUES (?, ?, ?, ?, ?, 0)
+        `;
+        const result = await query(sql, [
+          req_sender_id,
+          req_reciver_id,
+          salary_slip,
+          month,
+          description || null,
+        ]);
+  
+        return {
+          id: result.insertId,
+          req_sender_id,
+          req_reciver_id,
+          salary_slip,
+          month,
+          description,
+          status: 0,
+          created_at: new Date(),
+        };
+      } catch (error) {
+        console.error("Error in storeSalarySlipRequest service:", error);
+        throw new Error("Failed to store salary slip request");
+      }
+    },
+
+    uploadToAzure: async (userId, file) => {
+      // 1. Load and trim env vars
+      const connStr   = (process.env.AZURE_STORAGE_CONNECTION_STRING || "").trim();
+      const container = (process.env.CONTAINER_NAME || "").trim();
+
+      console.log(connStr)
+      console.log(container)
+  
+      // 2. Validate
+      if (!connStr) {
+        throw new Error("Missing AZURE_STORAGE_CONNECTION_STRING");
+      }
+      if (!container) {
+        throw new Error("Missing CONTAINER_NAME");
+      }
+  
+      // 3. Create clients
+      const blobServiceClient = BlobServiceClient.fromConnectionString(connStr);
+      const containerClient   = blobServiceClient.getContainerClient(container);
+  
+      // 4. Build a unique blob name
+      const blobName        = `${Date.now()}-${file.originalname}`;
+      const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+  
+      // 5. Upload the buffer
+      await blockBlobClient.upload(file.buffer, file.size);
+  
+      // 6. Return the publicly addressable URL
+      return { blobUrl: blockBlobClient.url };
+    }
+
+
+
+
+
+
+
+
+
+
 
 }
