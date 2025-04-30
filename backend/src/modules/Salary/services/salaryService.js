@@ -1,6 +1,7 @@
 import { query } from "../../../../utils/database.js";
 import multer from "multer";
 import dotenv from 'dotenv';
+import { decrypt, decryptDeterministic,encrypt,encryptDeterministic } from "../../../../utils/crypto.js"; 
 
 dotenv.config();
 
@@ -8,8 +9,6 @@ dotenv.config();
 
 import { BlobServiceClient } from "@azure/storage-blob";
 
-// const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
-// const CONTAINER_NAME = process.env.CONTAINER_NAME;
 
 
 export const SalaryService = {
@@ -156,45 +155,70 @@ export const SalaryService = {
       }
     },
 
-    uploadToAzure: async (userId, file) => {
-      // 1. Load and trim env vars
-      const connStr   = (process.env.AZURE_STORAGE_CONNECTION_STRING || "").trim();
-      const container = (process.env.CONTAINER_NAME || "").trim();
 
-      console.log(connStr)
-      console.log(container)
-  
-      // 2. Validate
-      if (!connStr) {
-        throw new Error("Missing AZURE_STORAGE_CONNECTION_STRING");
+    FetchUsersForSalarySlip : async (userId) => {
+      const fetchQuery = 'CALL FetchUsersForSalarySlip(?)';
+      try {
+        const [rows] = await query(fetchQuery, [userId]);
+        return rows.map((r) => ({
+          application_id : r.id,
+          first_name:       decrypt(r.first_name),
+          middle_name:      r.middle_name ? decrypt(r.middle_name) : null,
+          last_name:        decrypt(r.last_name),
+          cader_name:       r.cader_name,         // assuming not encrypted
+          department_name:  r.department_name,    // assuming not encrypted
+          description:      r.description,        // assuming not encrypted
+          month:            r.month,              // format MM/YYYY
+        }));
+
+      } catch (error) {
+        console.error('Error executing stored procedure:', error);
+        throw new Error('Database error while fetching salary slips');
       }
-      if (!container) {
-        throw new Error("Missing CONTAINER_NAME");
+    },
+
+
+    uploadSalarySlipToAzure: async (application_id, file) => {
+      try {
+        // 1. Load and trim env vars
+        const connStr   = (process.env.AZURE_STORAGE_CONNECTION_STRING || "").trim();
+        const container = (process.env.CONTAINER_NAME || "").trim();
+    
+        if (!connStr) {
+          throw new Error("Missing AZURE_STORAGE_CONNECTION_STRING");
+        }
+        if (!container) {
+          throw new Error("Missing CONTAINER_NAME");
+        }
+    
+        // 2. Create clients
+        const blobServiceClient = BlobServiceClient.fromConnectionString(connStr);
+        const containerClient   = blobServiceClient.getContainerClient(container);
+    
+        // 3. Build a unique blob name
+        const blobName        = `${Date.now()}-${file.originalname}`;
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+    
+        // 4. Upload the buffer
+        await blockBlobClient.upload(file.buffer, file.size);
+    
+        // 5. Insert/Update in DB
+        const insertSalaryslipQuery = `UPDATE tbl_salary_slips SET salary_slip = ?, status = 2 WHERE id = ?`;
+
+        const result=  await query(insertSalaryslipQuery, [blockBlobClient.url, application_id]);
+  
+        // 3. Check if any rows were affected
+        if (result.affectedRows === 0) {
+          // Specific error for "not found"
+          const err = new Error(`No salary slip record found for applicationId=${application_id}`);
+          err.code = 'NOT_FOUND';
+          throw err;
+        }
+        return { blobUrl: blockBlobClient.url };
+      } catch (error) {
+        console.error("Error in uploadToAzure:", error.message || error);
+        throw new Error("Upload failed: " + (error.message || "Unknown error"));
       }
-  
-      // 3. Create clients
-      const blobServiceClient = BlobServiceClient.fromConnectionString(connStr);
-      const containerClient   = blobServiceClient.getContainerClient(container);
-  
-      // 4. Build a unique blob name
-      const blobName        = `${Date.now()}-${file.originalname}`;
-      const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-  
-      // 5. Upload the buffer
-      await blockBlobClient.upload(file.buffer, file.size);
-  
-      // 6. Return the publicly addressable URL
-      return { blobUrl: blockBlobClient.url };
     }
-
-
-
-
-
-
-
-
-
-
 
 }

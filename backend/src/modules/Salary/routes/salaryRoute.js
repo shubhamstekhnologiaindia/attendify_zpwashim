@@ -9,15 +9,15 @@ router.post('/Save_Users_For_Salary_Slip_Permission', SalaryController.saveSalar
 router.put('/Update_Users_For_Salary_Slip_Permission', SalaryController.updateSalarySlipPermission);
 router.delete('/Delete_Users_For_Salary_Slip_Permission/:salary_slip_per_id', SalaryController.deleteSalarySlipPermission);
 
-router.post('/checking_salary_slip_per', SalaryController.checking_salary_slip_per);
+router.get('/checking_salary_slip_per', SalaryController.checking_salary_slip_per);
 
 router.post('/salary-slips-store', SalaryController.storeSalarySlipRequest);
 
 
 const upload = multer({ storage: multer.memoryStorage() });
-router.post('/upload1', upload.any(), SalaryController.uploadSalarySlip);
+router.post('/Upload_Salary_Slip', upload.any(), SalaryController.uploadSalarySlipToAzure);
 
-
+router.get('/FetchUsersForSalarySlip', authMiddleware,SalaryController.getSalarySlips);
 
 
 export default router;
