@@ -18,7 +18,7 @@ router.get('/salary-slip-permitters', SalaryController.listSalarySlipPermissions
 const upload = multer({ storage: multer.memoryStorage() });
 router.post('/Upload_Salary_Slip', upload.any(), SalaryController.uploadSalarySlip);
 
-
+router.post('/salary-slips-request-history', SalaryController.listSalarySlipsBySender);
 
 
 export default router;

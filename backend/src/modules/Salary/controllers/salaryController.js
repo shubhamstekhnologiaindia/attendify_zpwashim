@@ -174,6 +174,36 @@ export const SalaryController = {
     }
   },
 
+
+  // show salry slips request in mobile
+
+  listSalarySlipsBySender: async (req, res) => {
+    try {
+      const { req_sender_id } = req.body;
+
+      if (!req_sender_id) {
+        return res.status(400).json({
+          status: false,
+          message: "req_sender_id is required",
+        });
+      }
+
+      const slips = await SalaryService.listSalarySlipsBySender(req_sender_id);
+
+      return res.status(200).json({
+        status: true,
+        message: "Salary slip requests retrieved successfully",
+        data: slips,
+      });
+    } catch (error) {
+      console.error("Error in listSalarySlipsBySender controller:", error.message);
+      return res.status(500).json({
+        status: false,
+        message: error.message || "Failed to retrieve salary slip requests",
+      });
+    }
+  },
+
 }
 
 

@@ -264,4 +264,63 @@ export const SalaryService = {
       throw new Error("Failed to retrieve salary slip permissions");
     }
   },
+
+
+// list request of salry slip in mobile
+listSalarySlipsBySender: async (req_sender_id) => {
+  try {
+    // Validate req_sender_id exists in users
+    const userCheckSql = `SELECT id FROM users WHERE id = ? LIMIT 1`;
+    const user = await query(userCheckSql, [req_sender_id]);
+    if (user.length === 0) {
+      throw new Error("Invalid req_sender_id: User not found");
+    }
+
+    // Fetch salary slips with sender and receiver names
+    const sql = `
+      SELECT 
+        s.req_sender_id,
+        s.req_reciver_id,
+        s.month,
+        s.status,
+        s.salary_slip,
+        us.first_name AS sender_first_name,
+        us.last_name AS sender_last_name,
+        ur.first_name AS receiver_first_name,
+        ur.last_name AS receiver_last_name
+      FROM tbl_salary_slips s
+      LEFT JOIN users us ON s.req_sender_id = us.id
+      LEFT JOIN users ur ON s.req_reciver_id = ur.id
+      WHERE s.req_sender_id = ?
+    `;
+    const slips = await query(sql, [req_sender_id]);
+
+    // Handle empty results
+    if (!slips || slips.length === 0) {
+      return [];
+    }
+
+    // Map results to include decrypted names, status text, and salary_slip
+    return slips.map((slip) => {
+      if (!slip || slip.status === undefined) {
+        console.error("Invalid slip data:", slip);
+        throw new Error("Invalid data returned from query");
+      }
+      return {
+        sender_name: slip.sender_first_name && slip.sender_last_name 
+          ? `${decrypt(slip.sender_first_name)} ${decrypt(slip.sender_last_name)}`
+          : null,
+        receiver_name: slip.receiver_first_name && slip.receiver_last_name 
+          ? `${decrypt(slip.receiver_first_name)} ${decrypt(slip.receiver_last_name)}`
+          : null,
+        month: slip.month,
+        status: slip.status === 0 ? "Pending" : "Approved",
+        salary_slip: slip.salary_slip,
+      };
+    });
+  } catch (error) {
+    console.error("Error in listSalarySlipsBySender service:", error);
+    throw error;
+  }
+},
 };
