@@ -106,23 +106,18 @@ export const SalaryService = {
             }
           },
 
-          checking_salary_slip_per:async(user_id)=>{
+          checking_salary_slip_per:async (userId) => {
+            const sql = 'CALL CheckSalarySlipAndReportPerms(?)';
             try {
-              const checkpermissionQuery = 'SELECT salary_slip_per_id AS salary_slip_permission_id,salary_slip_per_userid AS user_id,salary_slip_per_departnment_id AS departnment_id FROM tbl_salary_slip_per WHERE salary_slip_per_userid = ? AND permission_status = 1';
-              const [fetchPermission]= await query(checkpermissionQuery,[user_id])
-        
-         console.log(fetchPermission) 
-
-         return fetchPermission;
-        
-        } catch (error) {
-          console.error("Service Error (updateSalarySlipPermission):", error);
-          throw {
-            status: false,
-            message: error.message || "Database error while updating salary slip permission.",
-          };
-        }
-    },
+              const [rows] = await query(sql, [userId]);
+              const result = rows[0];             // first (and only) row from the SP
+              return result || null;             // null if no matching row
+            } catch (error) {
+              console.error('Service Error (checkSalaryAndReportPerms):', error);
+              throw new Error('Database error while checking permissions');
+            }
+          },
+    
 
     storeSalarySlipRequest: async ({ req_sender_id, req_reciver_id, salary_slip, month, description }) => {
       try {
