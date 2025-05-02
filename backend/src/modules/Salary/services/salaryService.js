@@ -143,7 +143,7 @@ export const SalaryService = {
       const sql = `
           INSERT INTO tbl_salary_slips (
             req_sender_id, req_reciver_id, month, description, status
-          ) VALUES (?, ?, ?, ?, 0)
+          ) VALUES (?, ?, ?, ?, 1)
         `;
       const result = await query(sql, [
         req_sender_id,
@@ -190,7 +190,7 @@ export const SalaryService = {
         req_reciver_id,
         month,
         description,
-        status: 0,
+        status: 1,
         created_at: new Date(),
       };
     } catch (error) {
