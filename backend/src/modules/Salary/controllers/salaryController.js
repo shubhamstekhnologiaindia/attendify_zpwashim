@@ -98,18 +98,17 @@ export const SalaryController = {
 
   storeSalarySlipRequest: async (req, res) => {
     try {
-      const { req_sender_id, req_reciver_id, salary_slip, month, description } = req.body;
+      const { req_sender_id, req_reciver_id,  month, description } = req.body;
 
-      if (!req_sender_id || !req_reciver_id || !salary_slip || !month) {
+      if (!req_sender_id || !req_reciver_id || !month) {
         return res.status(400).json({
           status: false,
-          message: "Missing required fields: req_sender_id, req_reciver_id, salary_slip, month",
+          message: "Missing required fields: req_sender_id, req_reciver_id, month",
         });
       }
       const result = await SalaryService.storeSalarySlipRequest({
         req_sender_id,
         req_reciver_id,
-        salary_slip,
         month,
         description,
       });
@@ -208,7 +207,55 @@ export const SalaryController = {
         message: 'Internal server error while uploading salary slip.',
       });
     }
-  }
+  },
+  // fetch salary head in dropdown
+  listSalarySlipPermissions: async (req, res) => {
+    try {
+      const permissions = await SalaryService.listSalarySlipPermissions();
+
+      return res.status(200).json({
+        status: true,
+        message: "Salary slip permissions retrieved successfully",
+        data: permissions,
+      });
+    } catch (error) {
+      console.error("Error in listSalarySlipPermissions controller:", error);
+      return res.status(500).json({
+        status: false,
+        message: "Failed to retrieve salary slip permissions",
+      });
+    }
+  },
+
+
+  // show salry slips request in mobile
+
+  listSalarySlipsBySender: async (req, res) => {
+    try {
+      const { req_sender_id } = req.body;
+
+      if (!req_sender_id) {
+        return res.status(400).json({
+          status: false,
+          message: "req_sender_id is required",
+        });
+      }
+
+      const slips = await SalaryService.listSalarySlipsBySender(req_sender_id);
+
+      return res.status(200).json({
+        status: true,
+        message: "Salary slip requests retrieved successfully",
+        data: slips,
+      });
+    } catch (error) {
+      console.error("Error in listSalarySlipsBySender controller:", error.message);
+      return res.status(500).json({
+        status: false,
+        message: error.message || "Failed to retrieve salary slip requests",
+      });
+    }
+  },
 
 }
 
