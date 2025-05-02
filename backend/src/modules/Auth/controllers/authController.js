@@ -215,7 +215,7 @@ export const AuthController = {
       // Encrypt mobile number
       const encryptedMobNo = encryptDeterministic(mob_no);
 
-      // Check if user exists, is active, and has role_id 101 or 102
+      // Check if user exists and is active
       const userSql = `
         SELECT id, first_name, last_name, password, role_id, department_id
         FROM users
@@ -233,23 +233,6 @@ export const AuthController = {
 
       const user = users[0];
 
-      // Check if role_id is 101 or 102
-      if (user.role_id !== 101 && user.role_id !== 102) {
-        return res.status(403).json({
-          status: false,
-          message: "Access denied: User role does not have login permission",
-        });
-      }
-
-      // Verify password
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return res.status(401).json({
-          status: false,
-          message: "Invalid mobile number or password",
-        });
-      }
-
       // Check permission in tbl_salary_slip_per
       const permissionSql = `
         SELECT salary_slip_per_id
@@ -259,11 +242,22 @@ export const AuthController = {
       `;
       const permissions = await query(permissionSql, [user.id]);
 
+      // If user is not in tbl_salary_slip_per, check role_id
       if (permissions.length === 0) {
-        return res.status(403).json({
+        if (user.role_id !== 101 && user.role_id !== 102) {
+          return res.status(403).json({
+            status: false,
+            message: "Access denied: User role does not have login permission",
+          });
+        }
+      }
+
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({
           status: false,
-          message:
-            "This user does not have permission to log in. Please get approval from headquarters.",
+          message: "Invalid mobile number or password",
         });
       }
 
