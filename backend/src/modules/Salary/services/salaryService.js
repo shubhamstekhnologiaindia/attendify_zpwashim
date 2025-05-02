@@ -316,12 +316,13 @@ export const SalaryService = {
     try {
       const sql = `
         SELECT 
-          p.salary_slip_per_id,
+          MAX(p.salary_slip_per_id) AS salary_slip_per_id,
           p.salary_slip_per_userid,
           u.first_name,
           u.last_name
         FROM tbl_salary_slip_per p
         LEFT JOIN users u ON p.salary_slip_per_userid = u.id
+        GROUP BY p.salary_slip_per_userid, u.first_name, u.last_name
       `;
       const permissions = await query(sql);
 
