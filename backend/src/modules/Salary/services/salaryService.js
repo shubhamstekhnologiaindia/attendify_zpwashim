@@ -379,6 +379,22 @@ export const SalaryService = {
           console.error("Invalid slip data:", slip);
           throw new Error("Invalid data returned from query");
         }
+
+        let statusText;
+        switch (slip.status) {
+          case 1:
+            statusText = "Pending";
+            break;
+          case 2:
+            statusText = "Approved";
+            break;
+          case 3:
+            statusText = "Rejected";
+            break;
+          default:
+            console.warn(`Unexpected status value: ${slip.status}`);
+            statusText = null;
+        }
         return {
           sender_name:
             slip.sender_first_name && slip.sender_last_name
@@ -393,7 +409,7 @@ export const SalaryService = {
                 )}`
               : null,
           month: slip.month,
-          status: slip.status === 0 ? "Pending" : "Approved",
+          status: statusText,
           salary_slip: slip.salary_slip,
         };
       });
