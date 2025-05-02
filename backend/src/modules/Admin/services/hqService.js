@@ -34,23 +34,19 @@ export const HeadquarterService = {
     FetchHOD: async () => {
         try {
           const sql = `
-            SELECT 
-              u.id AS user_id,
-              u.first_name,
-              u.last_name,
-              u.mob_no,
-              d.department_name,
-              c.cader_name,
-              CASE 
-                WHEN p.salary_slip_per_id IS NOT NULL AND p.permission_status = 1 THEN 1
-                ELSE 0
-              END AS reports_permission_status
-            FROM users u
-            LEFT JOIN departments d ON u.department_id = d.id
-            LEFT JOIN tbl_cader c ON u.cader_id = c.id
-            LEFT JOIN tbl_salary_slip_per p ON u.id = p.salary_slip_per_userid AND p.permission_status = 1
-            WHERE u.role_id = 102
-          `;
+               SELECT 
+        u.id AS user_id,
+        u.first_name,
+        u.last_name,
+        u.mob_no,
+        d.department_name,
+        c.cader_name,
+        u.reports_permission_status
+      FROM users u
+      LEFT JOIN departments d ON u.department_id = d.id
+      LEFT JOIN tbl_cader c ON u.cader_id = c.id
+      WHERE u.role_id = 102
+    `;
           const users = await query(sql);
     
           // Decrypt fields and construct full_name
@@ -61,7 +57,7 @@ export const HeadquarterService = {
               : null,
             department_name: user.department_name,
             cader_name: user.cader_name,
-            mob_no: user.mob_no ? decrypt(user.mob_no) : null,
+            mob_no: user.mob_no ? decryptDeterministic(user.mob_no) : null,
             reports_permission_status: user.reports_permission_status,
           }));
         } catch (error) {

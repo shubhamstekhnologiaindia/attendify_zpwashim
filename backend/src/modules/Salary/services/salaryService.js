@@ -119,17 +119,18 @@ export const SalaryService = {
     }
   },
 
-  checking_salary_slip_per:async (userId) => {
-    const sql = 'CALL CheckSalarySlipAndReportPerms(?)';
-    try {
-      const [rows] = await query(sql, [userId]);
-      const result = rows[0];             // first (and only) row from the SP
-      return result || null;             // null if no matching row
-    } catch (error) {
-      console.error('Service Error (checkSalaryAndReportPerms):', error);
-      throw new Error('Database error while checking permissions');
-    }
-  },
+          checking_salary_slip_per:async (userId) => {
+            const sql = 'CALL CheckSalarySlipAndReportPerms(?)';
+            try {
+              const [rows] = await query(sql, [userId]);
+              const result = rows[0];             // first (and only) row from the SP
+              return result || null;             // null if no matching row
+            } catch (error) {
+              console.error('Service Error (checkSalaryAndReportPerms):', error);
+              throw new Error('Database error while checking permissions');
+            }
+          },
+    
 
   storeSalarySlipRequest: async ({
     req_sender_id,
