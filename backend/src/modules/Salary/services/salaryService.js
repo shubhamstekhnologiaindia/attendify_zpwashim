@@ -319,6 +319,33 @@ export const SalaryService = {
     return decryptedRows;
   },
 
+
+  listSalarySlipPermissions: async () => {
+    try {
+      const sql = `
+        SELECT 
+          p.salary_slip_per_id,
+          p.salary_slip_per_userid,
+          u.first_name,
+          u.last_name
+        FROM tbl_salary_slip_per p
+        LEFT JOIN users u ON p.salary_slip_per_userid = u.id
+      `;
+      const permissions = await query(sql);
+
+      // Decrypt names and construct full_name
+      return permissions.map((perm) => ({
+        salary_slip_per_id: perm.salary_slip_per_id,
+        salary_slip_per_userid: perm.salary_slip_per_userid,
+        full_name: perm.first_name && perm.last_name 
+          ? `${decrypt(perm.first_name)} ${decrypt(perm.last_name)}`
+          : null,
+      }));
+    } catch (error) {
+      console.error("Error in listSalarySlipPermissions service:", error);
+      throw new Error("Failed to retrieve salary slip permissions");
+    }
+  },
   // list request of salry slip in mobile
   listSalarySlipsBySender: async (req_sender_id) => {
     try {
