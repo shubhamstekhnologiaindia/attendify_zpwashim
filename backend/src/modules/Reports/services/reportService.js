@@ -847,7 +847,7 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
     if (data_status === "daily") {
       dateRange = [formatDate(selectedDate)];
     } else if (data_status === "weekly") {
-      for (let i = 0; i < 9; i++) {
+      for (let i = 0; i < 7; i++) {
         const d = new Date(selectedDate);
         d.setDate(d.getDate() + i);
         dateRange.push(formatDate(d));
