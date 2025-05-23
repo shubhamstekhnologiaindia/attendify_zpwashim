@@ -247,7 +247,6 @@ getUsersForSalaryRequest: async (req, res) => {
         });
       }
     }
-
     const response = await masterDataService.getUsersForSalaryRequest(dept_ids);
 
     return res.status(200).json(response);
