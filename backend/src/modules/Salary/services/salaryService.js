@@ -119,25 +119,18 @@ export const SalaryService = {
     }
   },
 
-  checking_salary_slip_per: async (user_id) => {
-    try {
-      const checkpermissionQuery =
-        "SELECT salary_slip_per_id AS salary_slip_permission_id,salary_slip_per_userid AS user_id,salary_slip_per_departnment_id AS departnment_id FROM tbl_salary_slip_per WHERE salary_slip_per_userid = ? AND permission_status = 1";
-      const [fetchPermission] = await query(checkpermissionQuery, [user_id]);
-
-      console.log(fetchPermission);
-
-      return fetchPermission;
-    } catch (error) {
-      console.error("Service Error (updateSalarySlipPermission):", error);
-      throw {
-        status: false,
-        message:
-          error.message ||
-          "Database error while updating salary slip permission.",
-      };
-    }
-  },
+          checking_salary_slip_per:async (userId) => {
+            const sql = 'CALL CheckSalarySlipAndReportPerms(?)';
+            try {
+              const [rows] = await query(sql, [userId]);
+              const result = rows[0];             // first (and only) row from the SP
+              return result || null;             // null if no matching row
+            } catch (error) {
+              console.error('Service Error (checkSalaryAndReportPerms):', error);
+              throw new Error('Database error while checking permissions');
+            }
+          },
+    
 
   storeSalarySlipRequest: async ({
     req_sender_id,
@@ -151,7 +144,7 @@ export const SalaryService = {
       const sql = `
           INSERT INTO tbl_salary_slips (
             req_sender_id, req_reciver_id, month, description, status
-          ) VALUES (?, ?, ?, ?, 0)
+          ) VALUES (?, ?, ?, ?, 1)
         `;
       const result = await query(sql, [
         req_sender_id,
@@ -198,7 +191,7 @@ export const SalaryService = {
         req_reciver_id,
         month,
         description,
-        status: 0,
+        status: 1,
         created_at: new Date(),
       };
     } catch (error) {
@@ -319,6 +312,34 @@ export const SalaryService = {
     return decryptedRows;
   },
 
+
+  listSalarySlipPermissions: async () => {
+    try {
+      const sql = `
+        SELECT 
+          MAX(p.salary_slip_per_id) AS salary_slip_per_id,
+          p.salary_slip_per_userid,
+          u.first_name,
+          u.last_name
+        FROM tbl_salary_slip_per p
+        LEFT JOIN users u ON p.salary_slip_per_userid = u.id
+        GROUP BY p.salary_slip_per_userid, u.first_name, u.last_name
+      `;
+      const permissions = await query(sql);
+
+      // Decrypt names and construct full_name
+      return permissions.map((perm) => ({
+        salary_slip_per_id: perm.salary_slip_per_id,
+        salary_slip_per_userid: perm.salary_slip_per_userid,
+        full_name: perm.first_name && perm.last_name 
+          ? `${decrypt(perm.first_name)} ${decrypt(perm.last_name)}`
+          : null,
+      }));
+    } catch (error) {
+      console.error("Error in listSalarySlipPermissions service:", error);
+      throw new Error("Failed to retrieve salary slip permissions");
+    }
+  },
   // list request of salry slip in mobile
   listSalarySlipsBySender: async (req_sender_id) => {
     try {
@@ -359,6 +380,22 @@ export const SalaryService = {
           console.error("Invalid slip data:", slip);
           throw new Error("Invalid data returned from query");
         }
+
+        let statusText;
+        switch (slip.status) {
+          case 1:
+            statusText = "Pending";
+            break;
+          case 2:
+            statusText = "Approved";
+            break;
+          case 3:
+            statusText = "Rejected";
+            break;
+          default:
+            console.warn(`Unexpected status value: ${slip.status}`);
+            statusText = null;
+        }
         return {
           sender_name:
             slip.sender_first_name && slip.sender_last_name
@@ -373,7 +410,7 @@ export const SalaryService = {
                 )}`
               : null,
           month: slip.month,
-          status: slip.status === 0 ? "Pending" : "Approved",
+          status: statusText,
           salary_slip: slip.salary_slip,
         };
       });

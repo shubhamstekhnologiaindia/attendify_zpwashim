@@ -132,8 +132,21 @@ export const UserService = {
 
  
 getUserProfileById: async (id) => {
-  const user = await query(
-    "SELECT id, first_name, middle_name, last_name, mob_no, email,user_profile,DATE_FORMAT(birth_date, '%Y-%m-%d') AS birth_date FROM users WHERE id = ?",
+    const user = await query(
+    `SELECT 
+      u.id, 
+      u.first_name, 
+      u.middle_name, 
+      u.last_name, 
+      u.mob_no, 
+      u.email, 
+      u.user_profile, 
+      u.cader_id,
+      c.cader_name AS cader_name, 
+      DATE_FORMAT(u.birth_date, '%Y-%m-%d') AS birth_date 
+    FROM users u
+    LEFT JOIN tbl_cader c ON u.cader_id = c.id
+    WHERE u.id = ?`,
     [id]
   );
 
@@ -149,7 +162,9 @@ getUserProfileById: async (id) => {
     mob_no: decryptDeterministic(user[0].mob_no), 
     email: user[0].email ? decrypt(user[0].email) : null,
     birth_date: user[0].birth_date ,
-    user_profile: user[0].user_profile ? `/` + user[0].user_profile.replace(/\\/g, "/") : null
+    user_profile: user[0].user_profile ? `/` + user[0].user_profile.replace(/\\/g, "/") : null,
+    cader_name: user[0].cader_name || null
+
   }
 },
 

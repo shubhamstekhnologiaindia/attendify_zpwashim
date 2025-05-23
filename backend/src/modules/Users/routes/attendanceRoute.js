@@ -7,7 +7,7 @@ import {authMiddleware} from "../../../Middleware/authMiddleware.js";
 const router = express.Router();
 
 
-router.post("/Mark_Attendance",authMiddleware, AttendanceController.recordAttendance);
+router.post("/Mark_Attendance", AttendanceController.recordAttendance);
 
 // router.post("/record",authMiddleware, AttendanceController.recordAttendance);
 

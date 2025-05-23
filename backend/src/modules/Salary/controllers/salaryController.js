@@ -89,7 +89,7 @@ export const SalaryController = {
     try {
       const { user_id } = req.query
       const result = await SalaryService.checking_salary_slip_per(user_id);
-      return res.status(200).json({ status: true, data: result, message: 'Override deleted' })
+      return res.status(200).json({ status: true, data: result, message: 'Permission Fetched Successfully' })
     } catch (error) {
       return res.status(500).json({ status: false, message: error.message })
     }

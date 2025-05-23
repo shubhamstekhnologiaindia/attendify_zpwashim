@@ -4,7 +4,7 @@ import { authMiddleware } from "../../../Middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post('/send-otp',authMiddleware, otpController.sendOtp);
-router.post('/verify-otp',authMiddleware, otpController.verifyOtp);
+router.post('/send-otp', otpController.sendOtp);
+router.post('/verify-otp', otpController.verifyOtp);
 
 export default router;

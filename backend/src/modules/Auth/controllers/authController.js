@@ -107,6 +107,99 @@ export const AuthController = {
     }
   },
 
+  // webLogin: async (req, res) => {
+  //   try {
+  //     const { mob_no, password } = req.body;
+
+  //     // Validate required fields
+  //     if (!mob_no || !password) {
+  //       return res.status(400).json({
+  //         status: false,
+  //         message: "Mobile number and password are required",
+  //       });
+  //     }
+
+  //     // Encrypt mobile number
+  //     const encryptedMobNo = encryptDeterministic(mob_no);
+
+  //     // Check if user exists and is active
+  //     const userSql = `
+  //       SELECT id, first_name, last_name, password, role_id, department_id
+  //       FROM users
+  //       WHERE mob_no = ? AND status = 1
+  //       LIMIT 1
+  //     `;
+  //     const users = await query(userSql, [encryptedMobNo]);
+
+  //     if (users.length === 0) {
+  //       return res.status(401).json({
+  //         status: false,
+  //         message: "Invalid mobile number or password",
+  //       });
+  //     }
+
+  //     const user = users[0];
+
+  //     // Verify password
+  //     const isPasswordValid = await bcrypt.compare(password, user.password);
+  //     if (!isPasswordValid) {
+  //       return res.status(401).json({
+  //         status: false,
+  //         message: "Invalid mobile number or password",
+  //       });
+  //     }
+
+  //     // Check permission in tbl_salary_slip_per
+  //     const permissionSql = `
+  //       SELECT salary_slip_per_id
+  //       FROM tbl_salary_slip_per
+  //       WHERE salary_slip_per_userid = ? AND permission_status = 1
+  //       LIMIT 1
+  //     `;
+  //     const permissions = await query(permissionSql, [user.id]);
+
+  //     if (permissions.length === 0) {
+  //       return res.status(403).json({
+  //         status: false,
+  //         message:
+  //           "This user does not have permission to log in. Please get approval from headquarters.",
+  //       });
+  //     }
+
+  //     // Decrypt name fields
+  //     const firstName = decrypt(user.first_name);
+  //     const lastName = decrypt(user.last_name);
+  //     const fullName = `${firstName} ${lastName}`;
+
+  //     // Generate JWT token
+  //     const token = jwt.sign(
+  //       {
+  //         id: user.id,
+  //         role_id: user.role_id,
+  //         username: fullName,
+  //         department_id: user.department_id,
+  //       },
+  //       process.env.JWT_SECRET,
+  //       { expiresIn: "7d" }
+  //     );
+
+  //     // Return success response
+  //     return res.status(200).json({
+  //       status: true,
+  //       message: "Login successful",
+  //       token,
+  //     });
+  //   } catch (error) {
+  //     console.error("Error in webLogin controller:", error);
+  //     return res.status(500).json({
+  //       status: false,
+  //       message: "Failed to process login request",
+  //     });
+  //   }
+  // },
+
+
+
   webLogin: async (req, res) => {
     try {
       const { mob_no, password } = req.body;
@@ -140,15 +233,6 @@ export const AuthController = {
 
       const user = users[0];
 
-      // Verify password
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return res.status(401).json({
-          status: false,
-          message: "Invalid mobile number or password",
-        });
-      }
-
       // Check permission in tbl_salary_slip_per
       const permissionSql = `
         SELECT salary_slip_per_id
@@ -158,11 +242,22 @@ export const AuthController = {
       `;
       const permissions = await query(permissionSql, [user.id]);
 
+      // If user is not in tbl_salary_slip_per, check role_id
       if (permissions.length === 0) {
-        return res.status(403).json({
+        if (user.role_id !== 101 && user.role_id !== 102) {
+          return res.status(403).json({
+            status: false,
+            message: "Access denied: User role does not have login permission",
+          });
+        }
+      }
+
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({
           status: false,
-          message:
-            "This user does not have permission to log in. Please get approval from headquarters.",
+          message: "Invalid mobile number or password",
         });
       }
 
@@ -197,7 +292,6 @@ export const AuthController = {
       });
     }
   },
-
   logout: async (req, res) => {
     try {
       const { user_id } = req.body;
