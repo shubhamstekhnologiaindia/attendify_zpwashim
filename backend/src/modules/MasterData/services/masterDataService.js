@@ -220,17 +220,16 @@ GetSansthaLocations: async (deptId) => {
 // },
 
 
-getUsersForSalaryRequest: async (dept_ids) => {
+getUsersForSalaryRequest: async () => {
   try {
-    if (!Array.isArray(dept_ids) || dept_ids.length === 0) {
-      throw new Error("Invalid or missing dept_ids");
-    }
-
+    // if (!Array.isArray(dept_ids) || dept_ids.length === 0) {
+    //   throw new Error("Invalid or missing dept_ids");
+    // }
     // Construct dynamic placeholders for the IN clause
-    const placeholders = dept_ids.map(() => '?').join(', ');
-    const sql = `SELECT * FROM users WHERE department_id IN (${placeholders})`;
+    // const placeholders = dept_ids.map(() => '?').join(', ');
+    const sql = `SELECT * FROM users where status= 1`;
 
-    const users = await query(sql, dept_ids);
+    const users = await query(sql);
 
     const decryptedUsers = (users || []).map(row => {
       let first_name = "Decryption Failed";
