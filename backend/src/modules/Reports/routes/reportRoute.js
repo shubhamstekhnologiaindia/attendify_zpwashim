@@ -37,6 +37,9 @@ router.get('/Get_Reports_For_Week_Sanstha',authMiddleware,AttendanceReports.GetW
 router.get("/Get_Reports_For_Week_Cader_Wise",authMiddleware, AttendanceReports.GetWeeklyAttendanceByCader);
 router.get('/Get_Reports_For_Month_Location_Wise_Cader',authMiddleware, AttendanceReports.GetMonthlyAttendanceByCader);
 
+
+
+router.post("/attendance/history/by-user", AttendanceReports.listAttendanceByUser);
 export default router;
 
 

@@ -34,7 +34,7 @@ export const OverrideShiftController = {
   editOrrShift: async (req, res) => {
     try {
       const { edit_orrshift_id } = req.params;
-      const {override_shift_name,start_date, end_date,  morning_in_start, morning_in_end,late_cut_off,afternoon_in_start,afternoon_in_end,overtime_allowed_from,updated_by}= req.body
+      const {override_shift_name,start_date, end_date,  morning_in_start, morning_in_end,late_cut_off,afternoon_in_start,afternoon_in_end,overtime_allowed_from,updated_by,department_id}= req.body
 
       const result = await overrideShiftService.editOrrShift(
         Number(edit_orrshift_id),
@@ -47,7 +47,9 @@ export const OverrideShiftController = {
         afternoon_in_start,
         afternoon_in_end,
         overtime_allowed_from,
-        updated_by);
+        updated_by,
+        department_id
+      );
 
       return res.status(200).json({ status: true, data: result, message: 'Override updated' });
     } catch (error) {

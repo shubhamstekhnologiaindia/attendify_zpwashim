@@ -829,4 +829,28 @@ GetMonthlyAttendanceByCader: async (req, res) => {
   }
 },
 
+
+// show one user whole details with attendance shown on last report page
+
+listAttendanceByUser: async (req, res) => {
+  try {
+    const { userId, data_status, date, month, year } = req.body;
+    if (!userId || !data_status) {
+      return res.status(400).json({
+        status: false,
+        message: "userId and data_status are required",
+      });
+    }
+
+    const result = await reportService.listAttendanceByUser(userId, data_status, date, month, year);
+    return res.status(result.status ? 200 : 400).json(result);
+  } catch (error) {
+    console.error("Error in listAttendanceByUser controller:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Failed to retrieve attendance data",
+    });
+  }
+},
+
 };

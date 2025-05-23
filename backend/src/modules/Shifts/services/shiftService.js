@@ -40,14 +40,14 @@ export const shiftService = {
   },
 
   /** Get all active shifts */
-  getShifts: async () => {
-    try {
-      const [rows] = await query('CALL GetShifts()');
-      return rows;
-    } catch (error) {
-      throw { status: false, message: 'Error fetching shifts' };
-    }
-  },
+ getShifts: async () => {
+  try {
+    const [rows] = await query('CALL GetShifts()');
+    return rows;
+  } catch (error) {
+    throw { status: false, message: 'Error fetching shifts' };
+  }
+},
 
   /** Get a shift by ID */
   getShiftById: async (shiftId) => {
@@ -60,40 +60,82 @@ export const shiftService = {
   },
 
   /** Update shift details */
-  editShift: async (
-    edit_shift_id,
-    shiftName,
-    shiftStart,
-    shiftEnd,
-    morningInStart,
-    morningInEnd,
-    lateCutOff,
-    afternoonInStart,
-    afternoonInEnd,
-    overtimeAllowedFrom,
-    updatedBy
-  ) => {
-    try {
-      const sql = 'CALL UpdateShift(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-      const params = [
-        edit_shift_id,
-        shiftName,
-        shiftStart,
-        shiftEnd,
-        morningInStart,
-        morningInEnd,
-        lateCutOff,
-        afternoonInStart,
-        afternoonInEnd,
-        overtimeAllowedFrom,
-        updatedBy
-      ];
-      const [rows] = await query(sql, params);
-      return { affected: rows[0]?.affected || 0 };
-    } catch (error) {
-      throw { status: false, message: 'Error updating shift' };
-    }
-  },
+  // editShift: async (
+  //   edit_shift_id,
+  //   shiftName,
+  //   shiftStart,
+  //   shiftEnd,
+  //   morningInStart,
+  //   morningInEnd,
+  //   lateCutOff,
+  //   afternoonInStart,
+  //   afternoonInEnd,
+  //   overtimeAllowedFrom,
+  //   updatedBy,
+  //   department_id
+  // ) => {
+  //   try {
+  //     const sql = 'CALL UpdateShift(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  //     const params = [
+  //       edit_shift_id,
+  //       shiftName,
+  //       shiftStart,
+  //       shiftEnd,
+  //       morningInStart,
+  //       morningInEnd,
+  //       lateCutOff,
+  //       afternoonInStart,
+  //       afternoonInEnd,
+  //       overtimeAllowedFrom,
+  //       updatedBy,
+  //       departmentId
+  //     ];
+  //     const [rows] = await query(sql, params);
+  //     return { affected: rows[0]?.affected || 0 };
+  //   } catch (error) {
+  //     throw { status: false, message: 'Error updating shift' };
+  //   }
+  // },
+
+  /** Update shift details */
+editShift: async (
+  edit_shift_id,
+  shiftName,
+  shiftStart,
+  shiftEnd,
+  morningInStart,
+  morningInEnd,
+  lateCutOff,
+  afternoonInStart,
+  afternoonInEnd,
+  overtimeAllowedFrom,
+  updatedBy,
+  department_id
+) => {
+  try {
+    const sql = 'CALL UpdateShift(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const params = [
+      edit_shift_id,
+      shiftName,
+      shiftStart,
+      shiftEnd,
+      morningInStart,
+      morningInEnd,
+      lateCutOff,
+      afternoonInStart,
+      afternoonInEnd,
+      overtimeAllowedFrom,
+      updatedBy,
+      department_id
+    ];
+    const [rows] = await query(sql, params);
+    return { affected: rows[0]?.affected || 0 };
+  } catch (error) {
+    console.error('Error in editShift service:', error);
+    throw { status: false, message: 'Error updating shift' };
+  }
+},
+
 
   /** Delete (soft) a shift */
   deleteShift: async (delete_shift_id) => {
