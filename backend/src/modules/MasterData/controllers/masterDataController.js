@@ -59,7 +59,6 @@ export const MasterData = {
   // },
  
 
-
   getHeadquartersZpSanstha: async (req, res) => {
     try {
       const { departmentId } = req.params;
@@ -205,32 +204,7 @@ GetSansthaLocations: async (req, res) => {
   }
 },
 
-// GetOfficeLocationByDept:async(req,res)=>{
-//   try {
-//     const deptId = req.query.deptId; 
 
-//     if (!deptId) {
-//       return res.status(400).json({
-//         status: false,
-//         message: "Missing deptId",
-//       });
-//     }
-
-//     const result = await masterDataService.GetOfficeLocationByDept(deptId);
-
-//     return res.status(200).json({
-//       status: true,
-//       data: result.data,
-//       message: "Office Locations retrieved successfully",
-//     });
-//   } catch (error) {
-//     console.error("Controller Error:", error);
-//     return res.status(400).json({
-//       status: false,
-//       message: error.message || "Something went wrong",
-//     });
-//   }
-// },
 
 getUsersForSalaryRequest: async (req, res) => {
   try {
@@ -258,6 +232,4 @@ getUsersForSalaryRequest: async (req, res) => {
     });
   }
 },
-
-
 }

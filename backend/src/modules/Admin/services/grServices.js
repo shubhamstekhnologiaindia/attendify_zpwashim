@@ -4,58 +4,51 @@ import { query } from "../../../../utils/database.js";
 dotenv.config();
 import path from 'path';
 
+import { BlobServiceClient } from "@azure/storage-blob";
+
 export const GRService = {
-    
-    // insertGR: async (dept_id, subject, description, file_upload) => {
-    //     try {
-    //         const sql = `CALL StoreGR(?, ?, ?, ?)`; // Call stored procedure
-    //         const values = [dept_id, subject, description, file_upload];
-    //         const result = await query(sql, values);
-    //         return result;
-    //     } catch (error) {
-    //         throw new Error(error.message);
-    //     }
-    // },
-    
-    
-    // getGRByDepartment: async (dept_id) => {
-    //     try {
-    //         let sql = `SELECT * FROM tbl_gr`;
-    //         let params = [];
 
-    //         if (dept_id) {
-    //             sql += ` WHERE dept_id = ?`;
-    //             params.push(dept_id);
-    //         }
+ uploadGrToAzure: async (dept_id, subject, description, file_upload) => {
+    try {
+      const connStr = (
+        process.env.AZURE_STORAGE_CONNECTION_STRING || ""
+      ).trim();
+      const container = (process.env.GR_CONTAINER_NAME || "").trim();
 
-    //         const result = await query(sql, params);
+      if (!connStr) {
+        throw new Error("Missing AZURE_STORAGE_CONNECTION_STRING");
+      }
+      if (!container) {
+        throw new Error("Missing CONTAINER_NAME");
+      }
 
-    //         // Trim image path to get only filename (remove 'gr_uploads/')
-    //         return result.map(gr => ({
-    //             ...gr,
-    //             file_upload: gr.file_upload 
-    //                 ? path.basename(gr.file_upload.replace(/\\/g, '/').replace(/^gr_uploads\//, '').trim()) 
-    //                 : null
-    //         }));
+      // 2. Create clients
+      const blobServiceClient = BlobServiceClient.fromConnectionString(connStr);
+      const containerClient = blobServiceClient.getContainerClient(container);
 
-    //     } catch (error) {
-    //         throw new Error(error.message);
-    //     }
-    // },
+      // 3. Build a unique blob name
+      const blobName = `${Date.now()}-${file_upload.originalname}`;
+      const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+      // 4. Upload the buffer
+      await blockBlobClient.upload(file_upload.buffer, file_upload.size);
+
+      const azureUrl=blockBlobClient.url
+
+      // 5. Insert/Update in DB
+      const insertSalaryslipQuery = `INSERT INTO tbl_gr (dept_id,subject,description,file_upload) VALUES(?,?,?,?)`;
+
+      const result = await query(insertSalaryslipQuery, [ dept_id, subject, description,azureUrl ]);
+
+      return { azureUrl};
+    } catch (error) {
+      console.error("Error in uploadToAzure:", error.message || error);
+      throw new Error("Upload failed: " + (error.message || "Unknown error"));
+    }
+  },
 
 
-    insertGR: async (dept_id, subject, description, file_upload) => {
-        try {
-            const sql = `CALL StoreGR(?, ?, ?, ?)`; // Call stored procedure
-            const values = [dept_id, subject, description, file_upload];
-            const result = await query(sql, values);
-            return result;
-        } catch (error) {
-            throw new Error(error.message);
-        }
-    },
-    
-    getGRByDepartment: async (dept_id) => {
+ getGRByDepartment: async (dept_id) => {
         try {
             let sql = `SELECT * FROM tbl_gr`;
             let params = [];
@@ -66,19 +59,11 @@ export const GRService = {
             }
 
             const result = await query(sql, params);
-
-            // Get only filename (remove 'uploads/upload_gr/')
-            // return result.map(gr => ({
-            //     ...gr,
-            //     file_upload: gr.file_upload 
-            //         ? path.basename(gr.file_upload.replace(/\\/g, "/").replace(/^uploads\/upload_gr\//, "").trim()) 
-            //         : null
-            // }));
+            
+            // Return direct Azure URL without path manipulation
             return result.map(gr => ({
                 ...gr,
-                file_upload: gr.file_upload 
-                    ? `uploads/upload_gr/${path.basename(gr.file_upload)}`
-                    : null
+                file_upload: gr.file_upload || null // Already contains Azure URL
             }));
 
         } catch (error) {
@@ -88,27 +73,76 @@ export const GRService = {
 
     updateGR: async (gr_id, dept_id, subject, description, file_upload) => {
         try {
-            const sql = `CALL UpdateGR(?, ?, ?, ?, ?)`; // Call stored procedure
-            const values = [gr_id, dept_id, subject, description, file_upload];
-            const result = await query(sql, values);
-            return result;
+            // 1. Get existing file URL
+            const [existingGR] = await query('SELECT file_upload FROM tbl_gr WHERE gr_status=1,id = ?', [gr_id]);
+
+            // 2. Delete old file from Azure if exists
+            if (existingGR?.file_upload) {
+                const connStr = process.env.AZURE_STORAGE_CONNECTION_STRING.trim();
+                const blobServiceClient = BlobServiceClient.fromConnectionString(connStr);
+                const containerClient = blobServiceClient.getContainerClient(
+                    process.env.GR_CONTAINER_NAME.trim()
+                );
+
+                const blobName = existingGR.file_upload.split('/').pop();
+                const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+                await blockBlobClient.deleteIfExists();
+            }
+
+            // 3. Upload new file if provided
+         
+        const blobServiceClient = BlobServiceClient.fromConnectionString(connStr);
+      const containerClient = blobServiceClient.getContainerClient(container);
+
+      // 3. Build a unique blob name
+      const blobName = `${Date.now()}-${file_upload.originalname}`;
+      const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+      // 4. Upload the buffer
+      await blockBlobClient.upload(file_upload.buffer, file_upload.size);
+
+      const azureUrl=blockBlobClient.url
+
+            // 4. Update database record
+            const sql = `UPDATE tbl_gr SET 
+                dept_id = ?, 
+                subject = ?, 
+                description = ?, 
+                file_upload = ?
+                WHERE id = ?`;
+                
+            const values = [dept_id, subject, description, azureUrl, gr_id];
+            return await query(sql, values);
+
         } catch (error) {
             throw new Error(error.message);
         }
     },
 
-     deleteGRService: async (gr_id) => {
+    deleteGRService: async (gr_id) => {
         try {
-            const sql = `DELETE FROM tbl_gr WHERE id = ?`;
-            const values = [gr_id];
-            const result = await query(sql, values); // Remove destructuring
-    
-            console.log("Delete Query Result:", result); // Debugging
-    
-            return result;
+            // 1. Get file URL before deletion
+            const [grRecord] = await query('SELECT file_upload FROM tbl_gr WHERE id = ?', [gr_id]);
+
+            // 2. Delete from Azure
+            if (grRecord?.file_upload) {
+                const connStr = process.env.AZURE_STORAGE_CONNECTION_STRING.trim();
+                const blobServiceClient = BlobServiceClient.fromConnectionString(connStr);
+                const containerClient = blobServiceClient.getContainerClient(
+                    process.env.GR_CONTAINER_NAME.trim()
+                );
+
+                const blobName = grRecord.file_upload.split('/').pop();
+                const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+                await blockBlobClient.deleteIfExists();
+            }
+
+            // 3. Delete database record
+            const sql = `UPDATE tbl_gr SET gr_status=0 WHERE id=?`;
+            return await query(sql, [gr_id]);
+
         } catch (error) {
             throw new Error(error.message);
         }
-    }
-   
+    }  
 };
