@@ -163,6 +163,8 @@ getUserProfileById: async (id) => {
     email: user[0].email ? decrypt(user[0].email) : null,
     birth_date: user[0].birth_date ,
     user_profile: user[0].user_profile ? `/` + user[0].user_profile.replace(/\\/g, "/") : null,
+    // user_profile: user[0].user_profile ? '/' + user[0].user_profile.replace(/\\/g, "/") : null,
+
     cader_name: user[0].cader_name || null
 
   }
