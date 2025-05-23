@@ -199,10 +199,6 @@ export const AuthController = {
   // },
 
 
-
-// acc1dcc43e68ce46b2d1b9c27c143847
-// acc1dcc43e68ce46b2d1b9c27c143847
-
 webLogin: async (req, res) => {
   try {
     const { mob_no, password } = req.body;
