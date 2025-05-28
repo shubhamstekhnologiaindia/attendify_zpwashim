@@ -40,7 +40,7 @@ import path from "path";
 import fs from "fs";
 
 // max file size: 2 MB
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // bytes
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // bytes
 
 // Dynamic destination based on field name
 const storage = multer.diskStorage({

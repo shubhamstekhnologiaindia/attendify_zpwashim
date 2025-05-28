@@ -3,7 +3,25 @@ import { query } from "../../../../utils/database.js";
 import moment from "moment-timezone";
 
 
+import node_geocoder from "node-geocoder";
 
+
+
+// Example: using OpenStreetMap (free, no API key required)
+const geocoder = node_geocoder({
+  provider: 'openstreetmap'
+});
+
+async function getAddressFromCoords(lat, lon) {
+  try {
+    const [result] = await geocoder.reverse({ lat, lon });
+    return result.formattedAddress; 
+    // you can also pull out result.city, result.state, result.country, etc.
+  } catch (err) {
+    console.error('Geocoding error:', err);
+    throw err;
+  }
+}
 
 
 export const AttendanceService = {
@@ -11,8 +29,10 @@ export const AttendanceService = {
     try {
       console.log(istTime); // Log the IST time for debugging
 
-      await query("CALL MarkAttendance(?, ?, ?,?,?)", [user_id, inOutId, istTime,location_lat, location_lon]);
+        const address = await getAddressFromCoords(location_lat, location_lon);
+    console.log('User location:', address);
 
+      await query("CALL MarkAttendance(?, ?, ?,?,?)", [user_id, inOutId, istTime,location_lat, location_lon]);
       return {
         status: true,
         message:
