@@ -8,10 +8,11 @@ const router = express.Router();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post("/Upload_GR", upload.single("file_upload"),authMiddleware,GRController.uploadGrToAzure);
-router.put("/updateGR", upload.single("file_upload"),authMiddleware,GRController.updateGR);
-router.delete("/deleteGR/:gr_id",authMiddleware,GRController.deleteGR);
-router.get("/getGRByDepartment/:dept_id?",authMiddleware,GRController.getGRByDepartment);
+router.post("/Upload_GR", upload.single("file_upload"),GRController.uploadGrToAzure);
+router.put("/updateGR", upload.single("file_upload"),GRController.updateGR);
+router.delete("/deleteGR/:gr_id",GRController.deleteGR);
+router.get("/getGRByDepartment/:dept_id?",GRController.getGRByDepartment);
+
 
 export default router;
  
