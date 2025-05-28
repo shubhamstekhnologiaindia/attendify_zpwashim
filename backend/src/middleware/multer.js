@@ -39,6 +39,9 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
+// max file size: 2 MB
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // bytes
+
 // Dynamic destination based on field name
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -51,6 +54,7 @@ const storage = multer.diskStorage({
     }
 
     // Ensure directory exists
+
     fs.mkdirSync(uploadDir, { recursive: true });
 
     cb(null, uploadDir);
@@ -70,6 +74,8 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Multer middleware
-const upload = multer({ storage, fileFilter });
+const upload = multer({ storage, fileFilter, limits: {
+    fileSize: MAX_FILE_SIZE
+  } });
  
 export default upload;

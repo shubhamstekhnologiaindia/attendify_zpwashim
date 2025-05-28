@@ -3,6 +3,9 @@ import { decrypt, decryptDeterministic,encrypt,encryptDeterministic } from "../.
 import axios from "axios";
 import bcrypt from 'bcrypt';
 import path from "path";
+
+import { BlobServiceClient } from "@azure/storage-blob";
+
   // Mapping of dept_id to cader_id for role_id = 102
   const SPECIAL_CADER_ROLES = {
     1: 2,
@@ -21,59 +24,6 @@ import path from "path";
     14: 172
   };
 export const UserService = {
-
-
-  // RegisterUser: async (userData) => {
-  //   try {
-  //     const {
-  //       first_name, middle_name, last_name,
-  //       mob_no, email, birth_date,joining_date, department_id, office_location_id,
-  //       taluka_id, village_id, cader_id,
-  //       password, role_id, device_id,
-  //     } = userData;
-   
-  //     // ✅ Check if user exists with encrypted deterministic mobile number
-  //     const encryptedMobNo = encryptDeterministic(mob_no);
-  //     const checkUserSql = `SELECT * FROM users WHERE mob_no = ? LIMIT 1`;
-  //     const existingUser = await query(checkUserSql, [encryptedMobNo]);
-   
-  //     if (existingUser.length > 0) {
-  //       // User already exists
-  //       return { alreadyExists: true };
-  //     }
-   
-  //     // Continue registration
-  //     const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?)`;
-  //     const hashedPassword = await bcrypt.hash(password, 10);
-   
-  //     const results = await query(sql, [
-  //       encrypt(first_name),
-  //       encrypt(middle_name),
-  //       encrypt(last_name),
-  //       encryptedMobNo,
-  //       encrypt(email),
-  //       birth_date,
-  //       joining_date,
-  //       department_id,
-  //       office_location_id,
-  //       taluka_id,
-  //       village_id,
-  //       cader_id,
-  //       hashedPassword,
-  //       role_id,
-  //       device_id
-  //     ]);
-   
-  //     return { success: true, data: results };
-  //   } catch (error) {
-  //     console.error("Error in RegisterUser service:", error);
-  //     throw new Error("Failed to register user");
-  //   }
-  // },
-
-
-
-
 
   RegisterUser: async (userData) => {
     try {
@@ -162,13 +112,12 @@ getUserProfileById: async (id) => {
     mob_no: decryptDeterministic(user[0].mob_no), 
     email: user[0].email ? decrypt(user[0].email) : null,
     birth_date: user[0].birth_date ,
-    user_profile: user[0].user_profile ? `/` + user[0].user_profile.replace(/\\/g, "/") : null,
-    // user_profile: user[0].user_profile ? '/' + user[0].user_profile.replace(/\\/g, "/") : null,
-
+    user_profile: user[0].user_profile,
     cader_name: user[0].cader_name || null
 
   }
 },
+
 
 updateUserProfile: async (userId, data, file) => {
   try {
@@ -229,6 +178,51 @@ updateUserProfile: async (userId, data, file) => {
     throw error;
   }
 },
+
+  uploadProfilePicture: async (userId, file_upload) => {
+    const connStr   = (process.env.AZURE_STORAGE_CONNECTION_STRING || "").trim();
+    const container = (process.env.CONTAINER_NAME || "").trim();
+    if (!connStr)   throw new Error("Missing AZURE_STORAGE_CONNECTION_STRING");
+    if (!container) throw new Error("Missing CONTAINER_NAME");
+
+    const blobSvc = BlobServiceClient.fromConnectionString(connStr);
+    const contCli = blobSvc.getContainerClient(container);
+    await contCli.createIfNotExists({ access: "blob" });
+
+    // 1️⃣ Get old URL
+    const rows = await query(
+      "SELECT user_profile FROM users WHERE id = ? LIMIT 1",
+      [userId]
+    );
+    if (rows.length === 0) throw new Error("User not found");
+    const oldUrl     = rows[0].user_profile;
+    const isFirstTime = !oldUrl;
+
+    // 2️⃣ Delete old blob
+    if (oldUrl) {
+      const oldBlobName = oldUrl.split("/").slice(-2).join("/");
+      await contCli.getBlockBlobClient(oldBlobName).deleteIfExists();
+    }
+
+    // 3️⃣ Upload new file from disk
+    const blobName = `profiles/${userId}/${Date.now()}-${file_upload.originalname}`;
+    const blockCli = contCli.getBlockBlobClient(blobName);
+    // ← here’s the change:
+    await blockCli.uploadFile(file_upload.path);
+
+    const newUrl = blockCli.url;
+
+    // 4️⃣ Update DB
+    await query(
+      "UPDATE users SET user_profile = ?, updated_at = NOW() WHERE id = ?",
+      [newUrl, userId]
+    );
+
+    // 5️⃣ (Optional) Remove the local file if you don't need to keep it
+    try { fs.unlinkSync(file_upload.path); } catch {}
+
+    return { newUrl, isFirstTime };
+  },
 
 SendOtp: async (phoneNumber, otp) => {
    
