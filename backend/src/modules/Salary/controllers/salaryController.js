@@ -256,7 +256,6 @@ export const SalaryController = {
       });
     }
   },
-
 }
 
 

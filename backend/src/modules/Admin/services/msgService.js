@@ -29,8 +29,6 @@ export const MsgService1 = {
         params.push(...departmentIds);
       }
       
-      // Change here: matching zpIds with taluka_id instead of district_id
-      
       if (zpIds.length) {
         FetchPhoneNoQuery += ` AND taluka_id IN (${zpIds.map(() => "?").join(",")})`;
         params.push(...zpIds);

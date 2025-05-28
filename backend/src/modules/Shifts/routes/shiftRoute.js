@@ -1,6 +1,6 @@
 import express from "express";
 import  { shiftController}  from "../controllers/shiftController.js";
-import { authMiddleware } from "../../../Middleware/authMiddleware.js";
+import { authMiddleware } from "../../../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -12,4 +12,5 @@ router.get("/get_Shift",authMiddleware, shiftController.getShifts);
 
 router.delete("/Delete_Shift/:delete_shift_id",authMiddleware, shiftController.deleteShift);
 
-export default router;
+export default router
+

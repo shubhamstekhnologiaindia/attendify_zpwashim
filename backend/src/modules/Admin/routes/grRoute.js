@@ -1,14 +1,18 @@
 import express from "express";
-import { GRController } from "../controllers/GrController.js";
+import { GRController } from "../controllers/grController.js";
 import {authMiddleware} from "../../../Middleware/authMiddleware.js";
-import upload from "../../../middleware/multer.js";
+import multer from "multer";
 
+import os from 'os';
 const router = express.Router();
 
-router.post("/store", upload.single("file_upload"),authMiddleware, GRController.storeGR);
-router.put("/edit", upload.single("file_upload") ,authMiddleware,GRController.editGR);
-router.delete("/delete/:gr_id" ,authMiddleware,GRController.deleteGR);
-router.get("/gr/:dept_id?",authMiddleware, GRController.getGRByDepartment);
+const upload = multer({ storage: multer.memoryStorage() });
+
+router.post("/Upload_GR", upload.single("file_upload"),GRController.uploadGrToAzure);
+router.put("/updateGR", upload.single("file_upload"),GRController.updateGR);
+router.delete("/deleteGR/:gr_id",GRController.deleteGR);
+router.get("/getGRByDepartment/:dept_id?",GRController.getGRByDepartment);
 
 
 export default router;
+ 
