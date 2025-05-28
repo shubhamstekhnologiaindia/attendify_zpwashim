@@ -119,20 +119,77 @@ getUserProfileById: async (id) => {
 },
 
 
-updateUserProfile: async (userId, data, file) => {
-  try {
-    let user_profile = null;
-    if (file) {
-      // Normalize file path and store it correctly
-      user_profile = `uploads/user_profiles/${path.basename(file.path)}`;
-    }
+// updateUserProfile: async (userId, data, file) => {
+//   try {
+//     let user_profile = null;
+//     if (file) {
+//       // Normalize file path and store it correctly
+//       user_profile = `uploads/user_profiles/${path.basename(file.path)}`;
+//     }
 
+//     const {
+//       first_name,
+//       middle_name,
+//       last_name,
+//       email,
+//       birth_date
+//     } = data;
+
+//     // Encrypt fields if provided
+//     const encryptedFirstName = first_name ? encrypt(first_name) : null;
+//     const encryptedMiddleName = middle_name ? encrypt(middle_name) : null;
+//     const encryptedLastName = last_name ? encrypt(last_name) : null;
+//     const encryptedEmail = email ? encrypt(email) : null;
+
+//     const sql = `
+//       UPDATE users
+//       SET
+//         first_name = COALESCE(?, first_name),
+//         middle_name = COALESCE(?, middle_name),
+//         last_name = COALESCE(?, last_name),
+//         email = COALESCE(?, email),
+//         user_profile = COALESCE(?, user_profile),
+//         birth_date = COALESCE(?, birth_date),
+//         updated_at = NOW()
+//       WHERE id = ?
+//     `;
+
+//     await query(sql, [
+//       encryptedFirstName,
+//       encryptedMiddleName,
+//       encryptedLastName,
+//       encryptedEmail,
+//       user_profile,
+//       birth_date || null,
+//       userId
+//     ]);
+//     console.log("SQL values:", {
+//       encryptedFirstName,
+//       encryptedMiddleName,
+//       encryptedLastName,
+//       encryptedEmail,
+//       user_profile,
+//       birth_date,
+//       userId
+//     });
+    
+//   } catch (error) {
+//     console.error("Error updating user profile:", error.message);
+//     throw error;
+//   }
+// },
+
+
+
+
+updateUserProfile: async (userId, data) => {
+  try {
     const {
       first_name,
       middle_name,
       last_name,
       email,
-      birth_date
+      birth_date,
     } = data;
 
     // Encrypt fields if provided
@@ -148,7 +205,6 @@ updateUserProfile: async (userId, data, file) => {
         middle_name = COALESCE(?, middle_name),
         last_name = COALESCE(?, last_name),
         email = COALESCE(?, email),
-        user_profile = COALESCE(?, user_profile),
         birth_date = COALESCE(?, birth_date),
         updated_at = NOW()
       WHERE id = ?
@@ -159,7 +215,6 @@ updateUserProfile: async (userId, data, file) => {
       encryptedMiddleName,
       encryptedLastName,
       encryptedEmail,
-      user_profile,
       birth_date || null,
       userId
     ]);
@@ -168,11 +223,10 @@ updateUserProfile: async (userId, data, file) => {
       encryptedMiddleName,
       encryptedLastName,
       encryptedEmail,
-      user_profile,
       birth_date,
       userId
     });
-    
+
   } catch (error) {
     console.error("Error updating user profile:", error.message);
     throw error;
@@ -223,6 +277,8 @@ updateUserProfile: async (userId, data, file) => {
 
     return { newUrl, isFirstTime };
   },
+
+
 
 SendOtp: async (phoneNumber, otp) => {
    
