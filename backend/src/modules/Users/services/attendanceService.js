@@ -30,9 +30,11 @@ export const AttendanceService = {
       console.log(istTime); // Log the IST time for debugging
 
         const address = await getAddressFromCoords(location_lat, location_lon);
+      
+
     console.log('User location:', address);
 
-      await query("CALL MarkAttendance(?, ?, ?,?,?)", [user_id, inOutId, istTime,location_lat, location_lon]);
+      await query("CALL MarkAttendance(?, ?, ?,?)", [user_id, inOutId, istTime,address]);
       return {
         status: true,
         message:
