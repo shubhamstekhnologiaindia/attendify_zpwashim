@@ -131,8 +131,7 @@ export const UserController = {
         });
     }
 },
-  
-    
+     
 getUserProfile: async (req, res) => {
   try {
     const { id } = req.params;
@@ -180,5 +179,5 @@ SendOtp: async (req, res) => {
           });
       }
   }
-  }; 
+  }
 

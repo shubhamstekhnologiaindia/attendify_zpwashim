@@ -18,6 +18,8 @@ export const MasterData = {
       });
     }
   },
+
+
   // getHeadquartersAndOfficeLocations: async (req, res) => {
   //   try {
   //     const { departmentId } = req.params;
@@ -58,7 +60,6 @@ export const MasterData = {
   //   }
   // },
  
-
 
   getHeadquartersZpSanstha: async (req, res) => {
     try {
@@ -117,6 +118,7 @@ export const MasterData = {
     }
   },
 
+
   getVillagesByTalukaId: async (req, res) => {
     try {
       const { talukaId } = req.params;
@@ -142,7 +144,7 @@ export const MasterData = {
     }
   },
 
- // controller.js
+
 getCadresByDeptId: async (req, res) => {
     try {
         const { deptId } = req.params;
@@ -150,7 +152,6 @@ getCadresByDeptId: async (req, res) => {
         if (!deptId) {
             return res.status(400).json({ status: false, message: "deptId is required" });
         }
-
         const result = await masterDataService.getCadresByDeptId(deptId);
         return res.status(200).json(result);
     } catch (error) {
@@ -158,6 +159,7 @@ getCadresByDeptId: async (req, res) => {
         return res.status(400).json({ status: false, message: error.message });
     }
 },
+
 GetPanchayatSamitiLocations: async (req, res) => {
   try {
     const result = await masterDataService.GetPanchayatSamitiLocations();
@@ -205,32 +207,7 @@ GetSansthaLocations: async (req, res) => {
   }
 },
 
-// GetOfficeLocationByDept:async(req,res)=>{
-//   try {
-//     const deptId = req.query.deptId; 
 
-//     if (!deptId) {
-//       return res.status(400).json({
-//         status: false,
-//         message: "Missing deptId",
-//       });
-//     }
-
-//     const result = await masterDataService.GetOfficeLocationByDept(deptId);
-
-//     return res.status(200).json({
-//       status: true,
-//       data: result.data,
-//       message: "Office Locations retrieved successfully",
-//     });
-//   } catch (error) {
-//     console.error("Controller Error:", error);
-//     return res.status(400).json({
-//       status: false,
-//       message: error.message || "Something went wrong",
-//     });
-//   }
-// },
 
 getUsersForSalaryRequest: async (req, res) => {
   try {
@@ -247,7 +224,6 @@ getUsersForSalaryRequest: async (req, res) => {
         });
       }
     }
-
     const response = await masterDataService.getUsersForSalaryRequest(dept_ids);
 
     return res.status(200).json(response);
@@ -258,6 +234,4 @@ getUsersForSalaryRequest: async (req, res) => {
     });
   }
 },
-
-
 }

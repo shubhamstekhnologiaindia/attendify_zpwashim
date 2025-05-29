@@ -46,7 +46,7 @@ export const HeadquarterService = {
       LEFT JOIN departments d ON u.department_id = d.id
       LEFT JOIN tbl_cader c ON u.cader_id = c.id
       WHERE u.role_id = 102
-    `;
+    `; 
           const users = await query(sql);
     
           // Decrypt fields and construct full_name

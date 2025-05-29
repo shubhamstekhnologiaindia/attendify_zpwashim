@@ -58,51 +58,106 @@ export const shiftController = {
   },
 
   getShifts: async (req, res) => {
-    try {
-      const shifts = await shiftService.getShifts();
-      return res.status(200).json({ status: true, data: shifts });
-    } catch (error) {
-      return res.status(500).json({ status: false, message: error.message });
-    }
-  },
+  try {
+    const shifts = await shiftService.getShifts();
+    return res.status(200).json({ status: true, data: shifts });
+  } catch (error) {
+    return res.status(500).json({ status: false, message: error.message });
+  }
+},
 
 
 
   /** Update shift */
-  editShift: async (req, res) => {
-    try {
-      const { edit_shift_id } = req.params;
-      const {
-        shift_name,
-        shift_start,
-        shift_end,
-        morning_in_start,
-        morning_in_end,
-        late_cut_Off,
-        afternoon_in_start,
-        afternoon_in_end,
-        overtime_allowed_from,
-        updated_by
-      } = req.body;
+  // editShift: async (req, res) => {
+  //   try {
+  //     const { edit_shift_id } = req.params;
+  //     const {
+  //       shift_name,
+  //       shift_start,
+  //       shift_end,
+  //       morning_in_start,
+  //       morning_in_end,
+  //       late_cut_Off,
+  //       afternoon_in_start,
+  //       afternoon_in_end,
+  //       overtime_allowed_from,
+  //       updated_by,
+  //       department_id // new param
+  //     } = req.body;
 
-      const result = await shiftService.editShift(
-        Number(edit_shift_id),
-        shift_name,
-        shift_start,
-        shift_end,
-        morning_in_start,
-        morning_in_end,
-        late_cut_Off,
-        afternoon_in_start,
-        afternoon_in_end,
-        overtime_allowed_from,
-        updated_by
-      );
-      return res.status(200).json({ status: true, data: result, message: 'Shift updated' });
-    } catch (error) {
-      return res.status(400).json({ status: false, message: error.message });
+  //     const result = await shiftService.editShift(
+  //       Number(edit_shift_id),
+  //       shift_name,
+  //       shift_start,
+  //       shift_end,
+  //       morning_in_start,
+  //       morning_in_end,
+  //       late_cut_Off,
+  //       afternoon_in_start,
+  //       afternoon_in_end,
+  //       overtime_allowed_from,
+  //       updated_by,
+  //       department_id // new param
+  //     );
+  //     return res.status(200).json({ status: true, data: result, message: 'Shift updated' });
+  //   } catch (error) {
+  //     return res.status(400).json({ status: false, message: error.message });
+  //   }
+  // },
+
+
+  /** Update shift */
+editShift: async (req, res) => {
+  try {
+    const { edit_shift_id } = req.params;
+    const {
+      shift_name,
+      shift_start,
+      shift_end,
+      morning_in_start,
+      morning_in_end,
+      late_cut_Off,
+      afternoon_in_start,
+      afternoon_in_end,
+      overtime_allowed_from,
+      updated_by,
+      department_id
+    } = req.body;
+
+    // Convert and validate numeric fields
+    const shiftId = Number(edit_shift_id);
+    const updatedBy = Number(updated_by);
+    const departmentId = Number(department_id);
+
+    if (isNaN(shiftId) || isNaN(updatedBy) || isNaN(departmentId)) {
+      return res.status(400).json({
+        status: false,
+        message: 'Invalid input: shift_id, updated_by, and department_id must be numbers'
+      });
     }
-  },
+
+    const result = await shiftService.editShift(
+      shiftId,
+      shift_name,
+      shift_start,
+      shift_end,
+      morning_in_start,
+      morning_in_end,
+      late_cut_Off,
+      afternoon_in_start,
+      afternoon_in_end,
+      overtime_allowed_from,
+      updatedBy,
+      departmentId
+    );
+
+    return res.status(200).json({ status: true, data: result, message: 'Shift updated' });
+  } catch (error) {
+    console.error('Error in editShift controller:', error);
+    return res.status(400).json({ status: false, message: error.message || 'Error updating shift' });
+  }
+},
 
   /** Delete shift */
   deleteShift: async (req, res) => {

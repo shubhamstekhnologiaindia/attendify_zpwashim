@@ -3,122 +3,120 @@ import path from "path";
 import multer from "multer";
 import fs from "fs";
 
-// Ensure upload directory exists
-const uploadDir = "uploads/upload_gr";
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Multer storage configuration
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + "_" + file.originalname.replace(/\s+/g, "_"));
-    }
-});
-
-// File filter (allow only images and PDFs)
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = ["image/jpeg", "image/png", "application/pdf"];
-    if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-    } else {
-        cb(new Error("Invalid file type. Only PDF, JPG, and PNG are allowed."), false);
-    }
-};
-
-// Multer middleware
-const upload = multer({ storage, fileFilter });
 
 export const GRController = {
-    storeGR: async (req, res) => {
-        try {
-            const { dept_id, subject, description } = req.body;
 
-            // Validate required fields
-            if (!dept_id || !subject || !description) {
-                return res.status(400).json({ status: false, message: "All fields are required" });
-            }
+   uploadGrToAzure: async (req, res) => {
+    try {
+  
+        const file_upload = req.file;
 
-            let file_upload = req.file ? req.file.path.replace(/\\/g, "/") : null;
-            if (file_upload) {
-                file_upload = `uploads/upload_gr/${path.basename(file_upload)}`;
-            }
-
-            await GRService.insertGR(dept_id, subject, description, file_upload);
-
-            return res.status(200).json({ 
-                status: true, 
-                message: "GR record stored successfully",
-                file: file_upload
+        if (!file_upload) {
+            return res.status(400).json({
+                status: false,
+                message: 'No file uploaded.',
             });
-
-        } catch (error) {
-            return res.status(500).json({ status: false, message: error.message });
         }
-    },
-
-    getGRByDepartment: async (req, res) => {
-        try {
-            const { dept_id } = req.params;
-
-            const grRecords = await GRService.getGRByDepartment(dept_id);
-
-            return res.status(200).json({ 
-                status: true, 
-                data: grRecords 
-            });
-
-        } catch (error) {
-            return res.status(500).json({ status: false, message: error.message });
+        const { dept_id, subject, description } = req.body;
+        if (!dept_id || !subject || !description) {
+            return res.status(400).json({ status: false, message: "All fields are required" });
         }
-    },
 
-    editGR: async (req, res) => {
-        try {
-            const { gr_id, dept_id, subject, description } = req.body;
+        const result = await GRService.uploadGrToAzure(dept_id, subject, description, file_upload);
+        return res.status(200).json({
+            status: true,
+            message: 'File uploaded successfully!',
+            blobUrl: result.blobUrl,
+        });
+    } catch (error) {
+        console.error('Error uploading file:', error.message || error);
+        return res.status(500).json({
+            status: false,
+            message: 'Internal server error while uploading file.',
+        });
+    }
+},
+  getGRByDepartment: async (req, res) => {
+    try {
+      // dept_id can come from a route param or query string
+      const deptId = req.params.dept_id
+      const records = await GRService.getGRByDepartment(deptId);
 
-            if (!gr_id || !dept_id || !subject || !description) {
-                return res.status(400).json({ status: false, message: "All fields are required" });
-            }
+      return res.status(200).json({
+        status: true,
+        data: records,
+      });
+    } catch (error) {
+      console.error('Error fetching GR records:', error);
+      return res.status(500).json({
+        status: false,
+        message: 'Internal server error while fetching records.',
+      });
+    }
+  },
 
-            let file_upload = req.file ? req.file.path.replace(/\\/g, "/") : null;
-            if (file_upload) {
-                file_upload = `uploads/upload_gr/${path.basename(file_upload)}`;
-            }
+  // 2. Update an existing GR record (with optional new file)
+  updateGR: async (req, res) => {
+    try {
+    
+      const { dept_id, subject, description,gr_id } = req.body;
+      const fileUpload = req.file; // may be undefined if no new file sent
 
-            await GRService.updateGR(gr_id, dept_id, subject, description, file_upload);
+      // Basic validation
+      if (!gr_id || !dept_id || !subject || !description) {
+        return res.status(400).json({
+          status: false,
+          message: 'gr_id, dept_id, subject and description are all required.',
+        });
+      }
 
-            return res.status(200).json({ 
-                status: true, 
-                message: "GR record updated successfully",
-            });
+      // Call service — it will delete old blob if fileUpload is present
+      await GRService.updateGR(
+        gr_id,
+        dept_id,
+        subject,
+        description,
+        fileUpload
+      );
 
-        } catch (error) {
-            return res.status(500).json({ status: false, message: error.message });
-        }
-    },
+      return res.status(200).json({
+        status: true,
+        message: 'GR record updated successfully.',
+      });
+    } catch (error) {
+      console.error('Error updating GR record:', error);
+      return res.status(500).json({
+        status: false,
+        message: 'Internal server error while updating record.',
+      });
+    }
+  },
 
-    deleteGR: async (req, res) => {
-        try {
-            const { gr_id } = req.params;
+  // 3. Delete a GR record (and its blob in Azure)
+  deleteGR: async (req, res) => {
+    try {
+      const gr_id = req.params.gr_id;
+      if (!gr_id) {
+        return res.status(400).json({
+          status: false,
+          message: 'gr_id is required.',
+        });
+      }
 
-            if (!gr_id) {
-                return res.status(400).json({ status: false, message: "GR ID is required" });
-            }
+      await GRService.deleteGRService(gr_id);
 
-            const result = await GRService.deleteGRService(gr_id); 
-
-            if (result.affectedRows > 0) {
-                return res.status(200).json({ status: true, message: "GR deleted successfully" });
-            } else {
-                return res.status(404).json({ status: false, message: "GR not found" });
-            }
-
-        } catch (error) {
-            return res.status(500).json({ status: false, message: error.message });
-        }
-    },
+      return res.status(200).json({
+        status: true,
+        message: 'GR record deleted successfully.',
+      });
+    } catch (error) {
+      console.error('Error deleting GR record:', error);
+      return res.status(500).json({
+        status: false,
+        message: 'Internal server error while deleting record.',
+      });
+    }
+  },
 };
+
+
