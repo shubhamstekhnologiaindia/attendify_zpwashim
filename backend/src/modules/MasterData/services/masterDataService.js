@@ -267,6 +267,4 @@ getUsersForSalaryRequest: async () => {
   }
 },
 
-
-
 };
