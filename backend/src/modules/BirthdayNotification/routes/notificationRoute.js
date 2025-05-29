@@ -36,7 +36,7 @@ router.post('/send-test-notification', async (req, res) => {
 
     const { fcm_token } = users[0];
     const title = 'Test Notification';
-    const message = 'plz mark attendance';
+    const message = 'Please Mark Attendance';
 
     const result = await sendPushNotification(fcm_token, title, message);
 
