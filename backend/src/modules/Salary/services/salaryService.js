@@ -422,7 +422,7 @@ export const SalaryService = {
    rejectSalarySlipRequest: async (id) => {
   try {
     const result = await query(
-      'UPDATE tbl_salary_slips SET status = 0 WHERE id = ?',
+      'UPDATE tbl_salary_slips SET status = 3 WHERE id = ?',
       [id]
     );
     return result;  // result is directly the response from DB
