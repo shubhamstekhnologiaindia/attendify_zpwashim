@@ -889,7 +889,7 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
     }
 
     // Call stored procedure
-    const spSql = `CALL user_atendance_total_history(?, ?, ?, ?, ?)`;
+    const spSql = `CALL user_atendance_total_history(?, ?, ?, ?, ? )`;
     const spParams = [
       userId,
       data_status,
@@ -915,6 +915,9 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
           att_morning_in_time: null,
           att_afternoon_in_time: null,
           att_out_time: null,
+          att_morning_location:null,
+          att_afternoon_location:null,
+          att_evening_location:null,
           total_hours: null,
           attendance_status: "Absent",
         };
@@ -946,6 +949,11 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
         att_morning_in_time: formatDateTime(record.att_morning_in_time),
         att_afternoon_in_time: formatDateTime(record.att_afternoon_in_time),
         att_out_time: formatDateTime(record.att_out_time),
+        att_morning_location:record.att_morning_location,
+        att_afternoon_location:record.att_afternoon_location,
+        att_evening_location:record.att_evening_location,
+
+       
         total_hours: totalHours ? parseFloat(totalHours) : null,
         attendance_status: record.att_morning_in_time || record.att_afternoon_in_time || record.att_out_time ? "Present" : "Absent",
       };
@@ -962,6 +970,7 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
         cader: decryptedData.cader || null,
         data_status,
         attendance,
+
       },
     };
   } catch (error) {

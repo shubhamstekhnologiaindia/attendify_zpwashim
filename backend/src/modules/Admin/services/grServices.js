@@ -47,7 +47,6 @@ export const GRService = {
     }
   },
  
- 
  getGRByDepartment: async (dept_id) => {
         try {
             let sql = `SELECT * FROM tbl_gr`;
@@ -112,8 +111,6 @@ export const GRService = {
             throw new Error(error.message);
         }
     },
-     
- 
     deleteGRService: async (gr_id) => {
         try {
             // 1. Get file URL before deletion

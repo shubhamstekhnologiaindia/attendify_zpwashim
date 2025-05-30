@@ -9,68 +9,6 @@ import multer from "multer";
 
 
 export const UserController = {
-  // RegisterUser: async (req, res) => {
-  //   try {
-  //     const {
-  //       first_name, middle_name, last_name,
-  //       mob_no, email, birth_date,joining_date, department_id,
-  //       office_location_id, taluka_id, village_id,
-  //       cader_id, password
-  //     } = req.body;
-  
-  //     // List of mandatory fields
-  //     const requiredFields = {
-  //       first_name,
-  //       middle_name,
-  //       last_name,
-  //       mob_no,
-  //       email,
-  //       birth_date,
-  //       department_id,
-  //       office_location_id,
-  //       taluka_id,
-  //       village_id,
-  //       cader_id,
-  //       joining_date,
-  //       password
-  //     };
-  
-  //     // Check for missing or undefined/null fields
-  //     const missingFields = Object.entries(requiredFields)
-  //       .filter(([key, value]) => value === undefined || value === null || value === "")
-  //       .map(([key]) => key);
-  
-  //     if (missingFields.length > 0) {
-  //       return res.status(400).json({
-  //         status: false,
-  //         message: `Missing mandatory fields: ${missingFields.join(", ")}`
-  //       });
-  //     }
-  
-  //     const result = await UserService.RegisterUser(req.body);
- 
-  //     if (result.alreadyExists) {
-  //       return res.status(409).json({
-  //         status: false,
-  //         message: "User already exists with this mobile number"
-  //       });
-  //     }
- 
-  //     return res.status(201).json({
-  //       status: true,
-  //       message: "User registered successfully"
-  //     });
-  //   } catch (error) {
-  //     console.error("Error in RegisterUser controller:", error);
-  //     return res.status(500).json({
-  //       status: false,
-  //       message: "Failed to register user"
-  //     });
-  //   }
-  // },
-
-
-
 
   RegisterUser: async (req, res) => {
     try {
@@ -159,6 +97,35 @@ updateUserProfile: async (req, res) => {
     res.status(500).json({ success: false, message: "Something went wrong" });
   }
 },
+
+  uploadProfilePicture: async (req, res) => {
+    try {
+      const userId      = req.params.id;
+      const file_upload = req.file;  // multer put it here
+
+      if (!file_upload) {
+        return res
+          .status(400)
+          .json({ success: false, message: "No file provided under ‘user_profile’" });
+      }
+
+      const { newUrl, isFirstTime } =
+        await UserService.uploadProfilePicture(userId, file_upload);
+
+      return res.status(200).json({
+        success: true,
+        message: isFirstTime
+          ? "Profile picture added successfully"
+          : "Profile picture updated successfully",
+        url: newUrl
+      });
+    } catch (err) {
+      console.error("Error in uploadProfilePicture controller:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Upload failed" });
+    }
+  },
 
 SendOtp: async (req, res) => {
       try {

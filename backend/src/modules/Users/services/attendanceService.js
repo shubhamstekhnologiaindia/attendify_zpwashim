@@ -2,102 +2,53 @@ import { query } from "../../../../utils/database.js";
 
 import moment from "moment-timezone";
 
-function adjustEpochForIST(epoch) {
-  if (epoch === null) return null;
-  const IST_OFFSET = 5.5 * 3600; // 19800 seconds
-  const SECONDS_IN_DAY = 86400;
 
-  // Shift into IST
-  const istTime = epoch + IST_OFFSET;
-  // Find IST‐midnight epoch
-  const istMidnight = istTime - (istTime % SECONDS_IN_DAY);
-  // Convert back to UTC epoch for that IST‐midnight
-  const utcMidnightForIST = istMidnight - IST_OFFSET;
+import node_geocoder from "node-geocoder";
 
-  // If original epoch is before that UTC‐midnight, it belongs to the *previous* IST day
-  if (epoch < utcMidnightForIST) return epoch + SECONDS_IN_DAY;
-  // If it’s past the next IST day boundary, shift back
-  if (epoch >= utcMidnightForIST + SECONDS_IN_DAY)
-    return epoch - SECONDS_IN_DAY;
-  return epoch;
-}
 
-function convertEpochToIST(epoch) {
-  if (epoch === null) return null;
-  const IST_OFFSET = 5.5 * 3600; // 19800 seconds
-  return epoch + IST_OFFSET;
+
+// Example: using OpenStreetMap (free, no API key required)
+const geocoder = node_geocoder({
+  provider: 'openstreetmap'
+});
+
+async function getAddressFromCoords(lat, lon) {
+  try {
+    const [result] = await geocoder.reverse({ lat, lon });
+    return result.formattedAddress; 
+  } catch (err) {
+    console.error('Geocoding error:', err);
+    throw err;
+  }
 }
 
 export const AttendanceService = {
-  recordAttendance: async (user_id, inOutId, istTime,location_lat, location_lon) => {
-    try {
-      console.log(istTime); // Log the IST time for debugging
-
-      await query("CALL MarkAttendance(?, ?, ?,?,?)", [user_id, inOutId, istTime,location_lat, location_lon]);
-
-      return {
-        status: true,
-        message:
-          inOutId === 3
-            ? "Out time recorded successfully"
-            : "In time recorded successfully",
-      };
-    } catch (error) {
-      if (error.sqlState === "45000") {
-        throw { status: false, message: error.sqlMessage };
-      }
-      throw { status: false, message: "Database error" };
+ recordAttendance: async (user_id, inOutId, istTime, location_lat, location_lon) => {
+  try {
+    let address = null;
+ 
+    if (location_lat != null && location_lon != null) {
+      address = await getAddressFromCoords(location_lat, location_lon);
     }
-  },
+    console.log('Resolved address:', address);
+    await query(
+      "CALL MarkAttendance(?, ?, ?, ?)",
+      [user_id, inOutId, istTime, address]
+    );
 
-  // getUserAttendance: async (employee_id) => {
-  //   try {
-  //     if (!employee_id) {
-  //       throw new Error("Employee ID is required");
-  //     }
-  //     const [attendanceRecords] = await query(
-  //       "CALL get_attendance_by_employee(?)",
-  //       [employee_id]
-  //     );
-
-  //     console.log(attendanceRecords);
-
-  //     return attendanceRecords;
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // },
-
-//   getUserAttendance: async (employee_id) => {
-//     try {
-//         if (!employee_id || isNaN(employee_id)) {
-//             throw new Error('Valid employee_id is required');
-//         }
-
-//         // Fetch field_status from users table
-//         const userSql = `SELECT field_status FROM users WHERE id = ? LIMIT 1`;
-//         const userResult = await query(userSql, [employee_id]);
-
-//         if (userResult.length === 0) {
-//             throw new Error('User not found');
-//         }
-
-//         const field_status = userResult[0].field_status;
-
-//         // Fetch attendance records using stored procedure
-//         const [attendanceRecords] = await query(
-//             'CALL get_attendance_by_employee(?)',
-//             [employee_id]
-//         );
-
-//         console.log(attendanceRecords);
-
-//         return { field_status, attendanceData: attendanceRecords };
-//     } catch (error) {
-//         console.error('Error in getUserAttendance service:', error);
-//         throw error;
-//     }
-// },
+    return {
+      status: true,
+      message: inOutId === 3
+        ? "Out time recorded successfully"
+        : "In time recorded successfully",
+    };
+  } catch (error) {
+    if (error.sqlState === "45000") {
+      throw { status: false, message: error.sqlMessage };
+    }
+    throw { status: false, message: "Database error" };
+  }
+},
 
 getUserAttendance: async (employee_id) => {
   try {
@@ -130,18 +81,53 @@ getUserAttendance: async (employee_id) => {
   }
 },
 
-  recordOfflineAttendance: async (user_id, morning_in_time, afternoon_in_time, out_time) => {
+  recordOfflineAttendance: async (
+    user_id,
+    morning_in_time,
+    morning_lat,
+    morning_lon,
+    afternoon_in_time,
+    afternoon_lat,
+    afternoon_lon,
+    out_time,
+    out_lat,
+    out_lon
+  ) => {
     try {
       // Handle NULL values for optional time fields
       const morning_in_time_sql = morning_in_time || null;
       const afternoon_in_time_sql = afternoon_in_time || null;
       const out_time_sql = out_time || null;
 
-      await query("CALL MarkOfflineAttendance(?, ?, ?, ?)", [
+      // Fetch addresses for each provided lat/lon pair
+      let morning_address = null;
+      let afternoon_address = null;
+      let out_address = null;
+
+      // Morning address
+      if (morning_in_time_sql && morning_lat && morning_lon) {
+        morning_address = await getAddressFromCoords(morning_lat, morning_lon);
+      }
+
+      // Afternoon address
+      if (afternoon_in_time_sql && afternoon_lat && afternoon_lon) {
+        afternoon_address = await getAddressFromCoords(afternoon_lat, afternoon_lon);
+      }
+
+      // Out address
+      if (out_time_sql && out_lat && out_lon) {
+        out_address = await getAddressFromCoords(out_lat, out_lon);
+      }
+
+      // Call the stored procedure with the new address parameters
+      await query("CALL MarkOfflineAttendance(?, ?, ?, ?, ?, ?, ?)", [
         user_id,
         morning_in_time_sql,
         afternoon_in_time_sql,
         out_time_sql,
+        morning_address,
+        afternoon_address,
+        out_address,
       ]);
 
       return {
@@ -155,6 +141,7 @@ getUserAttendance: async (employee_id) => {
       throw { status: false, message: "Database error" };
     }
   },
+
   getAttendanceReport: async (date, department_id, cader_id) => {
     try {
       console.log(
@@ -189,66 +176,3 @@ getUserAttendance: async (employee_id) => {
   },
 };
 
-// UTC to Epoch conversion
-export const utcToEpoch = (utcString) => {
-  return Math.floor(new Date(utcString).getTime() / 1000);
-};
-
-// Epoch to UTC conversion
-export const epochToUTC = (epoch) => {
-  return new Date(epoch * 1000).toISOString();
-};
-
-// IST to Epoch conversion
-export const istToEpoch = (istString) => {
-  const date = new Date(`${istString} +05:30`);
-  return Math.floor(date.getTime() / 1000);
-};
-
-// Epoch to IST conversion
-export const epochToIST = (epoch) => {
-  const date = new Date(epoch * 1000);
-  return date.toLocaleString("en-IN", {
-    timeZone: "Asia/Kolkata",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-};
-
-// Get current IST epoch
-export const getCurrentISTEpoch = () => {
-  // Get current date in IST
-  const istDate = new Date().toLocaleString("en-US", {
-    timeZone: "Asia/Kolkata",
-  });
-  // Convert IST string to Date object
-  const date = new Date(istDate);
-  // Convert to epoch (seconds since Unix epoch)
-  return Math.floor(date.getTime() / 1000);
-};
-
-// Get current time in all formats
-export const getCurrentTime = () => {
-  const now = getCurrentISTEpoch(); // Current IST epoch
-
-  return {
-    epoch: now,
-    utc: epochToUTC(now),
-    ist: epochToIST(now),
-  };
-};
-
-// Example usage
-const example = () => {
-  const istEpoch = getCurrentISTEpoch();
-
-  // Current time in all formats
-  const current = getCurrentTime();
-};
-
-example();

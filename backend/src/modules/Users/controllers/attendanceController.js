@@ -106,7 +106,9 @@ export const AttendanceController = {
 
   recordOfflineAttendance: async (req, res) => {
     try {
-      const { user_id, morning_in_time, afternoon_in_time, out_time } = req.body;
+      const { user_id, morning_in_time,morning_lat,morning_lon, afternoon_in_time,afternoon_lat,afternoon_lon, out_time,out_lat,out_lon } = req.body;
+
+
 
       if (!user_id) {
         return res.status(400).json({ status: false, message: "user_id is required" });
@@ -115,8 +117,11 @@ export const AttendanceController = {
       const result = await AttendanceService.recordOfflineAttendance(
         user_id,
         morning_in_time,
+        morning_lat,morning_lon,
         afternoon_in_time,
-        out_time
+        afternoon_lat,afternoon_lon,
+        out_time,
+        out_lat,out_lon
       );
       return res.status(200).json(result);
     } catch (error) {

@@ -10,4 +10,7 @@ router.post("/register", UserController.RegisterUser);
 router.post("/Send_Registration_OTP", UserController.SendOtp); 
 router.put("/update-user/:id",authMiddleware, upload.single("user_profile"), UserController.updateUserProfile);
 
+router.put( "/Update_Profile_Picture/:id", upload.single("user_profile"), UserController.uploadProfilePicture);
+
+
 export default router;

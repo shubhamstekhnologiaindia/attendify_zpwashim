@@ -363,48 +363,6 @@ export const AttendanceReports = {
     }
   },
   
-
-  // GetAttReportFormonthSecondScreen: async (req, res) => {
-  //   try {
-  //     const {
-  //       month,
-  //       department_id,
-  //       attendance_period,
-  //     location_id,
-  //       cader_id,
-  //     } = req.query;
- 
-  //     console.log(req.query);
- 
-  //     // Validate required fields
-  //     if (!month || !department_id || !attendance_period) {
-  //       return res
-  //         .status(400)
-  //         .json({
-  //           status: false,
-  //           message: "date, department_id, and attendance_period are required",
-  //         });
-  //     }
- 
-  //     // Call the service with the parameters
-  //     const result = await reportService.GetAttReportFormonthSecondScreen(
-  //       month,
-  //       department_id,
-  //       attendance_period,
-  //      location_id,
-  //       cader_id || null
-  //     );
- 
-  //     return res.status(200).json({
-  //       status: true,
-  //       data: result,
-  //       message: "Attendance report retrieved successfully",
-  //     });
-  //   } catch (error) {
-  //     return res.status(400).json({ status: false, message: error.message });
-  //   }
-  // },
-
   GetAttendanceReportForYearSecondScreen: async (req, res) => {
     try {
       const { year, department_id, attendance_period, location_id, cader_id } = req.query;
@@ -515,37 +473,6 @@ export const AttendanceReports = {
 },
 
 
-// GetAttendanceReportForWeekDateForthScreen: async (req, res) => {
-//   try {
-//     let {
-//       start_date = null,
-//       department_id = null,
-//       cader_id = null,
-//       attendance_period = null,
-//       location_id = null
-//     } = req.query;
-
-//     const result = await reportService.GetAttendanceReportForWeekDateForthScreen(
-//       start_date,
-//       department_id,
-//       cader_id,
-//       attendance_period,
-//       location_id
-//     );
-
-//     return res.status(200).json({
-//       status: true,
-//       data: result,
-//       message: "Attendance report fetched successfully"
-//     });
-
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: false,
-//       message: error.message || "Error fetching attendance data"
-//     });
-//   }
-// }, 
 
 GetAttendanceReportForWeekDateForthScreen: async (req, res) => {
   try {
