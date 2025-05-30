@@ -86,22 +86,7 @@ export const AttendanceController = {
     }
 },
 
-  // recordOfflineAttendance: async (req, res) => {
-  //   try {
-  //     const { user_id, attendance } = req.body;
-  
-  //     // Validate required fields
-  //     if (!user_id || !attendance || typeof attendance !== 'object') {
-  //       return res.status(400).json({ status: false, message: "user_id and attendance object are required" });
-  //     }
-  
-  //     // Call the correct service function
-  //     const result = await AttendanceService.recordOfflineAttendance(user_id, attendance);
-  //     return res.status(200).json(result);
-  //   } catch (error) {
-  //     return res.status(500).json({ status: false, message: error.message });
-  //   }
-  // },
+
 
 
   recordOfflineAttendance: async (req, res) => {

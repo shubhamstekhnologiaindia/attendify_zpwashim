@@ -14,7 +14,7 @@ export const shiftService = {
     afternoonInEnd,
     overtimeAllowedFrom,
     createdBy,
-    departmentId
+    department_id
   ) => {
     try {
       const sql = 'CALL CreateShift(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
@@ -29,15 +29,33 @@ export const shiftService = {
         afternoonInEnd,
         overtimeAllowedFrom,
         createdBy,
-        departmentId
+        department_id
       ];
-      const [result] = await query(sql, params);
-      const shiftId = result[0]?.shift_id;
-      return { shiftId };
-    } catch (error) {
-      throw { status: false, message: error.sqlMessage || 'Error creating shift' };
+      const [rows] = await query(sql, params);
+    const first = rows[0] || {};
+
+    // If SP returned an overlap message, treat it as an error:
+    if (first.message) {
+      return {
+        status: false,
+        data: {},
+        message: first.message
+      };
     }
-  },
+
+    // Otherwise success:
+    return {
+      status: true,
+      data: { override_shift_id: first.override_shift_id },
+      message: 'Override created'
+    };
+  } catch (error) {
+    throw {
+      status: false,
+      message: error.sqlMessage || 'Error creating override'
+    };
+  }
+},
 
   /** Get all active shifts */
  getShifts: async () => {
@@ -112,6 +130,19 @@ editShift: async (
   updatedBy,
   department_id
 ) => {
+console.log( edit_shift_id,
+  shiftName,
+  shiftStart,
+  shiftEnd,
+  morningInStart,
+  morningInEnd,
+  lateCutOff,
+  afternoonInStart,
+  afternoonInEnd,
+  overtimeAllowedFrom,
+  updatedBy,
+  department_id)
+
   try {
     const sql = 'CALL UpdateShift(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     const params = [

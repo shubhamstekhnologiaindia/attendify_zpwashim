@@ -1,16 +1,32 @@
 import { overrideShiftService } from '../services/orrShiftService.js';
 
 export const OverrideShiftController = {
-    createOrrShift: async (req, res) =>{
-    try {
-      const data = req.body;
-      const result = await overrideShiftService.createOrrShift(data)
-      return res.status(201).json({ status: true, data: result, message: 'Override created' })
-    } catch (error) {
-      const statusCode = error.status === false ? 400 : 500;
-      return res.status(statusCode).json({ status: false, message: error.message });
+createOrrShift: async (req, res) => {
+  try {
+    const data = req.body;
+    const result = await overrideShiftService.createOrrShift(data);
+    
+    if (result.status === false) {
+      return res
+        .status(400)
+        .json({ status: false, data: {}, message: result.message });
     }
-  },
+    return res
+      .status(201)
+      .json({
+        status: true,
+        data: { override_shift_id: result.override_shift_id },
+        message: 'Override created'
+      });
+  } catch (error) {
+
+    const statusCode = error.status === false ? 400 : 500;
+    return res
+      .status(statusCode)
+      .json({ status: false, data: {}, message: error.message });
+  }
+},
+
   getOrrShifts: async (req, res) => {
     try {
       const overrides = await overrideShiftService.getOrrShifts()

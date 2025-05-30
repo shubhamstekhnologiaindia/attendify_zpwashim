@@ -1,9 +1,35 @@
 import { query } from '../../../../utils/database.js'
 
 export const overrideShiftService = {
-  createOrrShift: async data => {
-    const {
+ createOrrShift: async data => {
+  const {
+    cader_id,
+       department_id,
+    override_shift_name,
+    start_date,
+    end_date,
+    morning_in_start,
+    morning_in_end,
+    late_cut_off,
+    afternoon_in_start,
+    afternoon_in_end,
+    overtime_allowed_from,
+    created_by,
+ 
+  } = data;    
+  
+
+
+  try {
+    const sql = `
+      CALL CreateOverrideShift(
+        ?, ?, ?, ?, ?, 
+        ?, ?, ?, ?, ?, 
+        ?,?
+      )`;                  
+    const params = [
       cader_id,
+            department_id ,
       override_shift_name,
       start_date,
       end_date,
@@ -13,34 +39,33 @@ export const overrideShiftService = {
       afternoon_in_start,
       afternoon_in_end,
       overtime_allowed_from,
-      created_by,
-      department_id
-    } = data
-    try {
-      const sql = 'CALL CreateOverrideShift(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-      const params = [
-        cader_id,
-        override_shift_name,
-        start_date,
-        end_date,
-        morning_in_start,
-        morning_in_end,
-        late_cut_off,
-        afternoon_in_start,
-        afternoon_in_end,
-        overtime_allowed_from,
-        created_by,
-        department_id
-      ]
-      const [result] = await query(sql, params)
-      return { override_shift_id: result[0].override_shift_id }
-    } catch (error) {
-      throw {
+      created_by
+    ];
+   const [rows] = await query(sql, params);
+    const first = rows[0] || {};
+
+    // If SP returned an overlap message, treat it as an error:
+    if (first.message) {
+      return {
         status: false,
-        message: error.sqlMessage || 'Error creating override'
-      }
+        data: {},
+        message: first.message
+      };
     }
-  },
+
+    // Otherwise success:
+    return {
+      status: true,
+      data: { override_shift_id: first.override_shift_id },
+      message: 'Override created'
+    };
+  } catch (error) {
+    throw {
+      status: false,
+      message: error.sqlMessage || 'Error creating override'
+    };
+  }
+},
 
   getOrrShifts: async () => {
     try {

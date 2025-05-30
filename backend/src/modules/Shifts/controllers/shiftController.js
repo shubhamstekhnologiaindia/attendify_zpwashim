@@ -50,13 +50,26 @@ export const shiftController = {
         created_by,
         department_id
       );
-      return res.status(201).json({ status: true, data: result, message: 'Shift created' });
-    } catch (error) {
-      const statusCode = error.status === false ? 400 : 500;
-      return res.status(statusCode).json({ status: false, message: error.message });
+      if (result.status === false) {
+      return res
+        .status(400)
+        .json({ status: false, data: {}, message: result.message });
     }
-  },
+    return res
+      .status(201)
+      .json({
+        status: true,
+        data: { override_shift_id: result.override_shift_id },
+        message: 'Shift created'
+      });
+  } catch (error) {
 
+    const statusCode = error.status === false ? 400 : 500;
+    return res
+      .status(statusCode)
+      .json({ status: false, data: {}, message: error.message });
+  }
+},
   getShifts: async (req, res) => {
   try {
     const shifts = await shiftService.getShifts();
@@ -65,46 +78,6 @@ export const shiftController = {
     return res.status(500).json({ status: false, message: error.message });
   }
 },
-
-
-
-  /** Update shift */
-  // editShift: async (req, res) => {
-  //   try {
-  //     const { edit_shift_id } = req.params;
-  //     const {
-  //       shift_name,
-  //       shift_start,
-  //       shift_end,
-  //       morning_in_start,
-  //       morning_in_end,
-  //       late_cut_Off,
-  //       afternoon_in_start,
-  //       afternoon_in_end,
-  //       overtime_allowed_from,
-  //       updated_by,
-  //       department_id // new param
-  //     } = req.body;
-
-  //     const result = await shiftService.editShift(
-  //       Number(edit_shift_id),
-  //       shift_name,
-  //       shift_start,
-  //       shift_end,
-  //       morning_in_start,
-  //       morning_in_end,
-  //       late_cut_Off,
-  //       afternoon_in_start,
-  //       afternoon_in_end,
-  //       overtime_allowed_from,
-  //       updated_by,
-  //       department_id // new param
-  //     );
-  //     return res.status(200).json({ status: true, data: result, message: 'Shift updated' });
-  //   } catch (error) {
-  //     return res.status(400).json({ status: false, message: error.message });
-  //   }
-  // },
 
 
   /** Update shift */
@@ -124,6 +97,8 @@ editShift: async (req, res) => {
       updated_by,
       department_id
     } = req.body;
+
+    console.log(req.body)
 
     // Convert and validate numeric fields
     const shiftId = Number(edit_shift_id);
