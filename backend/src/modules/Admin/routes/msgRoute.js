@@ -2,7 +2,7 @@
 
 import express from "express";
 import  {MsgController}  from "../controllers/MsgController.js";
-import {authMiddleware} from "../../../Middleware/authMiddleware.js";
+import {authMiddleware} from "../../../middleware/authMiddleware.js";
 import upload from "../../../middleware/multer.js";
 
 const router = express.Router();
