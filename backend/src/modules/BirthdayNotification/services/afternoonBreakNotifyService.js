@@ -64,6 +64,7 @@ export const hasMorningAttendance = async (userId, currentDate) => {
 export const scheduleNotificationsForShift = async (shift) => {
   try {
     const { shift_id, afternoon_in_start } = shift;
+    console.log('error ',typeof afternoon_in_start)
 
     // Parse afternoon_in_start (e.g., '18:18:00') and set notification 5 minutes earlier
     const [hours, minutes, seconds] = afternoon_in_start.split(':').map(Number);
