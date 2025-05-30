@@ -229,6 +229,7 @@ export const SalaryService = {
 
       if (!connStr) {
         throw new Error("Missing AZURE_STORAGE_CONNECTION_STRING");
+        
       }
       if (!container) {
         throw new Error("Missing CONTAINER_NAME");
@@ -417,5 +418,17 @@ export const SalaryService = {
       console.error("Error in listSalarySlipsBySender service:", error);
       throw error;
     }
+  },
+
+   rejectSalarySlipRequest: async (id) => {
+  try {
+    const result = await query(
+      'UPDATE tbl_salary_slips SET status = 3 WHERE id = ?',
+      [id]
+    );
+    return result;  // result is directly the response from DB
+  } catch (error) {
+    throw error;
+  }
   },
 };

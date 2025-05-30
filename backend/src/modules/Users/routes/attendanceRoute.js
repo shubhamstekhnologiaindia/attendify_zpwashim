@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post("/Mark_Attendance",authMiddleware, AttendanceController.recordAttendance);
 
-// router.post("/record",authMiddleware, AttendanceController.recordAttendance);
+// router.post("/record",authMiddleware, AttendanceController.recordAttendance)
 
 router.get("/Fetch_Attendance/:employee_id",authMiddleware, AttendanceController.getUserAttendance);
 

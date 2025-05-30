@@ -256,6 +256,26 @@ export const SalaryController = {
       });
     }
   },
+    rejectSalarySlipRequest: async (req, res) => {
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({ message: 'Missing salary slip id' });
+    }
+
+    try {
+      const result = await SalaryService.rejectSalarySlipRequest(id);
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Salary slip not found' });
+      }
+
+      return res.status(200).json({ message: 'Salary slip Request Rejected Successdully' });
+    } catch (error) {
+      console.error('Error updating salary slip status:', error);
+      return res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+  },
 }
 
 
