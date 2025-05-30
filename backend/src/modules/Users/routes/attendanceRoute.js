@@ -7,13 +7,13 @@ import {authMiddleware} from "../../../Middleware/authMiddleware.js";
 const router = express.Router();
 
 
-router.post("/Mark_Attendance", AttendanceController.recordAttendance);
+router.post("/Mark_Attendance",authMiddleware, AttendanceController.recordAttendance);
 
 // router.post("/record",authMiddleware, AttendanceController.recordAttendance);
 
 router.get("/Fetch_Attendance/:employee_id",authMiddleware, AttendanceController.getUserAttendance);
 
-router.post("/Mark_Offline_Attendance", AttendanceController.recordOfflineAttendance);
+router.post("/Mark_Offline_Attendance", authMiddleware, AttendanceController.recordOfflineAttendance);
 
 export default router; 
 
