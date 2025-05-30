@@ -418,4 +418,16 @@ export const SalaryService = {
       throw error;
     }
   },
+
+   rejectSalarySlipRequest: async (id) => {
+  try {
+    const result = await query(
+      'UPDATE tbl_salary_slips SET status = 0 WHERE id = ?',
+      [id]
+    );
+    return result;  // result is directly the response from DB
+  } catch (error) {
+    throw error;
+  }
+  },
 };

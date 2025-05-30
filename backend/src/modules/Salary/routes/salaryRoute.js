@@ -23,6 +23,7 @@ router.get('/FetchUsersForSalarySlip', authMiddleware,SalaryController.getSalary
 router.post('/salary-slips-request-history', SalaryController.listSalarySlipsBySender);
 router.get('/Salary-Heads', SalaryController.getListOfSalaryHeads);
 
+router.put('/salary-slip/request-reject', SalaryController.rejectSalarySlipRequest);
 
 export default router;
 
