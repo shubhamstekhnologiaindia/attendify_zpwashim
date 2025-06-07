@@ -52,36 +52,68 @@ export const AttendanceService = {
   }
 },
 
-getUserAttendance: async (employee_id) => {
-  try {
-      if (!employee_id || isNaN(employee_id)) {
-          throw new Error('Valid employee_id is required');
-      }
+// getUserAttendance: async (employee_id) => {
+//   try {
+//       if (!employee_id || isNaN(employee_id)) {
+//           throw new Error('Valid employee_id is required');
+//       }
 
-      // Fetch field_status from users table
-      const userSql = `SELECT field_status FROM users WHERE id = ? LIMIT 1`;
-      const userResult = await query(userSql, [employee_id]);
+//       // Fetch field_status from users table
+//       const userSql = `SELECT field_status FROM users WHERE id = ? LIMIT 1`;
+//       const userResult = await query(userSql, [employee_id]);
 
-      if (userResult.length === 0) {
-          throw new Error('User not found');
-      }
+//       if (userResult.length === 0) {
+//           throw new Error('User not found');
+//       }
 
-      const field_status = userResult[0].field_status;
+//       const field_status = userResult[0].field_status;
 
-      // Fetch attendance records using stored procedure
-      const [attendanceRecords] = await query(
-          'CALL get_attendance_by_employee(?)',
-          [employee_id]
-      );
+//       // Fetch attendance records using stored procedure
+//       const [attendanceRecords] = await query(
+//           'CALL get_attendance_by_employee(?)',
+//           [employee_id]
+//       );
 
-      console.log(attendanceRecords);
+//       console.log(attendanceRecords);
 
-      return { field_status, attendanceData: attendanceRecords || [] };
-  } catch (error) {
-      console.error('Error in getUserAttendance service:', error);
-      throw error;
-  }
+//       return { field_status, attendanceData: attendanceRecords || [] };
+//   } catch (error) {
+//       console.error('Error in getUserAttendance service:', error);
+//       throw error;
+//   }
+// },
+
+ getUserAttendance : async (employee_id, month, year) => {
+    try {
+        if (!employee_id || isNaN(employee_id)) {
+            throw new Error('Valid employee_id is required');
+        }
+
+        // Fetch field_status from users table
+        const userSql = `SELECT field_status FROM users WHERE id = ? LIMIT 1`;
+        const userResult = await query(userSql, [employee_id]);
+
+        if (userResult.length === 0) {
+            throw new Error('User not found');
+        }
+
+        const field_status = userResult[0].field_status;
+
+        // Fetch attendance records using stored procedure
+        const [attendanceRecords] = await query(
+            'CALL get_attendance_by_employee(?, ?, ?)',
+            [employee_id, month, year]
+        );
+
+        console.log(attendanceRecords);
+
+        return { field_status, attendanceData: attendanceRecords || [] };
+    } catch (error) {
+        console.error('Error in getUserAttendance service:', error);
+        throw error;
+    }
 },
+
 
  recordOfflineAttendance : async(
   user_id,

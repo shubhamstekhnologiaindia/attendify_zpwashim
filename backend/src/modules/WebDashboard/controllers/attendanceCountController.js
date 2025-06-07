@@ -47,7 +47,53 @@ export const AttendanceCountController = {
             error: error.message
           });
         }
-      }
+      },
       
+
+      // add code for show dashbord count on dept wise
       
+      getHQCountsByDepartment: async (req, res) => {
+  try {
+    const { department_id } = req.query;
+
+    if (!department_id) {
+      return res.status(400).json({ success: false, message: "department_id is required" });
+    }
+
+    const counts = await AttendanceCountService.getHQCountsFilteredByDepartment(parseInt(department_id));
+
+    return res.status(200).json({
+      success: true,
+      message: "HQ user attendance counts by department fetched successfully",
+      data: counts
+    });
+
+  } catch (error) {
+    console.error("Error in getHQCountsByDepartment:", error);
+    return res.status(500).json({ success: false, message: "Failed", error: error.message });
+  }
+},
+
+getDistrictCountsByDepartment: async (req, res) => {
+  try {
+    const { department_id } = req.query;
+
+    if (!department_id) {
+      return res.status(400).json({ success: false, message: "department_id is required" });
+    }
+
+    const counts = await AttendanceCountService.getDistrictCountsFilteredByDepartment(parseInt(department_id));
+
+    return res.status(200).json({
+      success: true,
+      message: "District user attendance counts by department fetched successfully",
+      data: counts
+    });
+
+  } catch (error) {
+    console.error("Error in getDistrictCountsByDepartment:", error);
+    return res.status(500).json({ success: false, message: "Failed", error: error.message });
+  }
+}
+
 }

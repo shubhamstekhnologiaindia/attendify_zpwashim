@@ -1,9 +1,5 @@
 
-
-
-
 import { loginPermission } from "../services/loginPermissionService.js";
-
 
 export const loginPermissionController = {
 
@@ -12,7 +8,7 @@ export const loginPermissionController = {
             const { permitter_id } = req.params; // Assuming mentorUser Id is passed as a URL parameter
 
 
-            console.log("hdgwuih")
+            // console.log("hdgwuih")
             if (!permitter_id) {
                 return res.status(400).json({ status: false, message: "mentorUser Id is required" });
             }
@@ -27,5 +23,22 @@ export const loginPermissionController = {
         } catch (error) {
             return res.status(500).json({ status: false, message: error.message });
         }
-    }
+    },
+
+    getAllUsersByDepartment: async (req, res) => {
+        try {
+            const { department_id } = req.query;
+
+            const users = await loginPermission.getAllUsersByDepartment(department_id || null);
+
+            if (!users || users.length === 0) {
+                return res.status(404).json({ status: false, message: "No users found" });
+            }
+
+            return res.status(200).json({ status: true, data: users });
+        } catch (error) {
+            return res.status(500).json({ status: false, message: error.message });
+        }
+    },
+
 };

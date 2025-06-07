@@ -5,6 +5,6 @@ import { authMiddleware } from "../../../Middleware/authMiddleware.js";
 const router = express.Router();
 
 
-router.post("/forgot-password",authMiddleware, ForgotPasswordController.forgotPassword); 
+router.post("/forgot-password", ForgotPasswordController.forgotPassword); 
 
 export default router;

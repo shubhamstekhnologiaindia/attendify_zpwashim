@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.get("/getUserForLoginPermissions/:permitter_id",authMiddleware, loginPermissionController.getUserForLoginPermissions);
 
+router.get("/getAllUsers/:department_id?", authMiddleware, loginPermissionController.getAllUsersByDepartment);
 
 
 export default router;

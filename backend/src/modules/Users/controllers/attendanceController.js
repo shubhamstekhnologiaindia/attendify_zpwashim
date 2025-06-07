@@ -58,9 +58,38 @@ export const AttendanceController = {
   },
   
 
-  getUserAttendance: async (req, res) => {
+//   getUserAttendance: async (req, res) => {
+//     try {
+//         const { employee_id } = req.params;
+
+//         if (!employee_id || isNaN(employee_id)) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'Valid employee_id is required'
+//             });
+//         }
+
+//         const { field_status, attendanceData } = await AttendanceService.getUserAttendance(employee_id);
+
+//         res.status(200).json({
+//             success: true,
+//             message: attendanceData.length ? 'Attendance records fetched successfully' : 'Attendance records not found',
+//             field_status,
+//             data: attendanceData
+//         });
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             message: 'Internal server error',
+//             details: error.message
+//         });
+//     }
+// },
+
+getUserAttendance : async (req, res) => {
     try {
         const { employee_id } = req.params;
+        const { month, year } = req.query;
 
         if (!employee_id || isNaN(employee_id)) {
             return res.status(400).json({
@@ -69,7 +98,26 @@ export const AttendanceController = {
             });
         }
 
-        const { field_status, attendanceData } = await AttendanceService.getUserAttendance(employee_id);
+        // Set default to current month/year if not provided
+        const currentDate = new Date();
+        const selectedMonth = month ? parseInt(month) : currentDate.getMonth() + 1;
+        const selectedYear = year ? parseInt(year) : currentDate.getFullYear();
+
+        if (month && (isNaN(selectedMonth) || selectedMonth < 1 || selectedMonth > 12)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid month provided (must be 1-12)'
+            });
+        }
+
+        if (year && (isNaN(selectedYear) || selectedYear < 1900 || selectedYear > currentDate.getFullYear())) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid year provided'
+            });
+        }
+
+        const { field_status, attendanceData } = await AttendanceService.getUserAttendance(employee_id, selectedMonth, selectedYear);
 
         res.status(200).json({
             success: true,
@@ -85,6 +133,9 @@ export const AttendanceController = {
         });
     }
 },
+
+
+
 
 
 
