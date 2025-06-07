@@ -29,6 +29,8 @@ export const AttendanceService = {
  recordAttendance: async (user_id, inOutId, istTime, location_lat, location_lon) => {
   try {
     let address = null;
+
+    console.log("jhioqhoi")
  
     if (location_lat != null && location_lon != null) {
       address = await getAddressFromCoords(location_lat, location_lon);

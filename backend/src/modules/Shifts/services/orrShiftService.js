@@ -6,6 +6,8 @@ export const overrideShiftService = {
     cader_id,
        department_id,
     override_shift_name,
+    shift_start,
+  shift_end,
     start_date,
     end_date,
     morning_in_start,
@@ -18,12 +20,10 @@ export const overrideShiftService = {
  
   } = data;    
   
-
-
   try {
     const sql = `
       CALL CreateOverrideShift(
-        ?, ?, ?, ?, ?, 
+        ?,?,? ,?, ?, ?, ?, 
         ?, ?, ?, ?, ?, 
         ?,?
       )`;                  
@@ -31,6 +31,8 @@ export const overrideShiftService = {
       cader_id,
             department_id ,
       override_shift_name,
+      shift_start,
+  shift_end,
       start_date,
       end_date,
       morning_in_start,

@@ -1,7 +1,9 @@
 
 import express from "express";
 import  { OverrideShiftController}  from "../controllers/orrShiftController.js";
-import { authMiddleware } from "../../../middleware/authMiddleware.js"
+// import { authMiddleware } from "../../../middleware/authMiddleware.js"
+
+import { authMiddleware } from "../../../Middleware/authMiddleware.js";
 
 const router = express.Router();
 
