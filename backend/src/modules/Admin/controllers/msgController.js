@@ -26,7 +26,6 @@ export const MsgController = {
           return res.status(500).json({ status: false, message: "Internal server error" });
         }
       }
-    
     }
 
 

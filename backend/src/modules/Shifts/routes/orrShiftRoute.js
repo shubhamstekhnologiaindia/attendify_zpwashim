@@ -1,11 +1,13 @@
 
 import express from "express";
 import  { OverrideShiftController}  from "../controllers/orrShiftController.js";
-import { authMiddleware } from "../../../middleware/authMiddleware.js"
+// import { authMiddleware } from "../../../middleware/authMiddleware.js"
+
+import { authMiddleware } from "../../../Middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/Create_OrrShift",authMiddleware, OverrideShiftController.createOrrShift);
+router.post("/Create_OrrShift", OverrideShiftController.createOrrShift);
 
 router.put("/Edit_OrrShift/:edit_orrshift_id",authMiddleware, OverrideShiftController.editOrrShift);
 
