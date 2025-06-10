@@ -8,7 +8,7 @@ const pool = mysql.createPool({
     password: process.env.DB_PASS|| '',
     database: process.env.DB_NAME || 'attends-zp-washim-uat',
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: 10,    
     queueLimit: 0,
     // timezone: 'local' 
 });

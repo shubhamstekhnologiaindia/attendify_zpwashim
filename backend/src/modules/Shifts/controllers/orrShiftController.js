@@ -47,12 +47,38 @@ createOrrShift: async (req, res) => {
 //     }
 //   },
 
-  editOrrShift: async (req, res) => {
+  // editOrrShift: async (req, res) => {
+  //   try {
+  //     const { edit_orrshift_id } = req.params;
+  //     const {override_shift_name, shift_start, shift_end,start_date, end_date,  morning_in_start, morning_in_end,late_cut_off,afternoon_in_start,afternoon_in_end,overtime_allowed_from,updated_by,department_id}= req.body
+
+  //     const result = await overrideShiftService.editOrrShift(
+  //       Number(edit_orrshift_id),
+  //       override_shift_name,
+  //       start_date,
+  //       end_date,
+  //       morning_in_start,
+  //       morning_in_end,
+  //       late_cut_off,
+  //       afternoon_in_start,
+  //       afternoon_in_end,
+  //       overtime_allowed_from,
+  //       updated_by,
+  //       department_id
+  //     );
+
+  //     return res.status(200).json({ status: true, data: result, message: 'Override updated' });
+  //   } catch (error) {
+  //     return res.status(400).json({ status: false, message: error.message })
+  //   }
+  // },
+
+   editOrrShift: async (req, res) => {
     try {
       const { edit_orrshift_id } = req.params;
-      const {override_shift_name,start_date, end_date,  morning_in_start, morning_in_end,late_cut_off,afternoon_in_start,afternoon_in_end,overtime_allowed_from,updated_by,department_id, ovrr_shift_start,
-        ovrr_shift_end}= req.body
-
+      const {override_shift_name,start_date, end_date,  morning_in_start, morning_in_end,late_cut_off,afternoon_in_start,afternoon_in_end,overtime_allowed_from,updated_by,department_id, shift_start,
+        shift_end}= req.body
+ 
       const result = await overrideShiftService.editOrrShift(
         Number(edit_orrshift_id),
         override_shift_name,
@@ -66,10 +92,10 @@ createOrrShift: async (req, res) => {
         overtime_allowed_from,
         updated_by,
         department_id,
-         ovrr_shift_start,
-        ovrr_shift_end
+        shift_start,
+        shift_end
       );
-
+ 
       return res.status(200).json({ status: true, data: result, message: 'Override updated' });
     } catch (error) {
       return res.status(400).json({ status: false, message: error.message })

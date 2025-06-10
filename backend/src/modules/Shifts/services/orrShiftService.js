@@ -32,7 +32,7 @@ export const overrideShiftService = {
             department_id ,
       override_shift_name,
       shift_start,
-  shift_end,
+      shift_end,
       start_date,
       end_date,
       morning_in_start,
@@ -78,6 +78,46 @@ export const overrideShiftService = {
     }
   },
 
+  // editOrrShift: async (
+  //   edit_orrshift_id,
+  //   override_shift_name,
+  //   shift_start,
+  //   shift_end,
+  //   start_date,
+  //   end_date,
+  //   morning_in_start,
+  //   morning_in_end,
+  //   late_cut_off,
+  //   afternoon_in_start,
+  //   afternoon_in_end,
+  //   overtime_allowed_from,
+  //   updated_by,
+  //   department_id
+  // ) => {
+  //   try {
+  //     const sql = 'CALL UpdateOverrideShift(?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  //     const params = [
+  //       edit_orrshift_id,
+  //       override_shift_name,
+  //       shift_start,
+  //       shift_end,
+  //       start_date,
+  //       end_date,
+  //       morning_in_start,
+  //       morning_in_end,
+  //       late_cut_off,
+  //       afternoon_in_start,
+  //       afternoon_in_end,
+  //       overtime_allowed_from,
+  //       updated_by,
+  //       department_id
+  //     ]
+  //     const [rows] = await query(sql, params)
+  //     return { affected: rows[0].affected }
+  //   } catch (error) {
+  //     throw { status: false, message: 'Error updating override' }
+  //   }
+  // },
   editOrrShift: async (
     edit_orrshift_id,
     override_shift_name,
@@ -118,7 +158,6 @@ export const overrideShiftService = {
       throw { status: false, message: 'Error updating override' }
     }
   },
-
   deleteOrrShift: async delete_orrshift_id => {
     try {
       const sql = 'CALL DeleteOverrideShift(?)'
