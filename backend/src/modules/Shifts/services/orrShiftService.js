@@ -90,10 +90,12 @@ export const overrideShiftService = {
     afternoon_in_end,
     overtime_allowed_from,
     updated_by,
-    department_id
+    department_id,
+     shift_start,
+  shift_end
   ) => {
     try {
-      const sql = 'CALL UpdateOverrideShift(?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      const sql = 'CALL UpdateOverrideShift(?,?,? ,?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)'
       const params = [
         edit_orrshift_id,
         override_shift_name,
@@ -106,7 +108,9 @@ export const overrideShiftService = {
         afternoon_in_end,
         overtime_allowed_from,
         updated_by,
-        department_id
+        department_id,
+         shift_start,
+        shift_end
       ]
       const [rows] = await query(sql, params)
       return { affected: rows[0].affected }
