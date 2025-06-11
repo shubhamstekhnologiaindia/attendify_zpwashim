@@ -12,6 +12,11 @@ router.get("/total-hq-user-counts-by-department", authMiddleware, AttendanceCoun
 router.get("/total-ps-user-counts-by-department", authMiddleware, AttendanceCountController.getDistrictCountsByDepartment);
 
 router.get("/Get_User_List_HQ",authMiddleware,AttendanceCountController.getUserAttendanceListHQ)
-router.get("/Get_User_List_District",authMiddleware,AttendanceCountController.getUserAttendanceListDistrict)
+router.get("/Get_User_List_PS",authMiddleware,AttendanceCountController.getUserAttendanceListDistrict)
+
+
+router.get("/Get_User_List_HQ_By_Department",AttendanceCountController.getUserListHQByDepartment)
+router.get("/Get_User_List_PS_By_Department",AttendanceCountController.getUserListDistrictByDepartment)
+
 
 export default router;

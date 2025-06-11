@@ -127,4 +127,51 @@ export const AttendanceCountController = {
         });
       }
     },
+   
+    // getUserListHQByDepartment: async (req, res) => {
+    //   const { department_id } = req.query;
+    //   if (!department_id) {
+    //     return res.status(400).json({ success: false, message: "department_id is required" });
+    //   }
+
+    //   try {
+    //     const data = await AttendanceCountService.getUserAttendanceListHQ(parseInt(department_id));
+    //     return res.status(200).json({ success: true, data });
+    //   } catch (error) {
+    //     console.error("Error:", error);
+    //     return res.status(500).json({ success: false, message: error.message });
+    //   }
+    // },
+getUserListHQByDepartment: async (req, res) => {
+  const { department_id } = req.query;
+
+  if (!department_id) {
+    return res.status(400).json({ success: false, message: "department_id is required" });
+  }
+
+  try {
+    const data = await AttendanceCountService.getUserAttendanceListHQ(parseInt(department_id));
+    return res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+},
+  getUserListDistrictByDepartment: async (req, res) => {
+  const { department_id } = req.query;
+  if (!department_id) {
+    return res.status(400).json({ success: false, message: "department_id is required" });
+  }
+
+  try {
+    const data = await AttendanceCountService.getUserAttendanceListDistrictByDepartment(parseInt(department_id));
+    return res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+
+
 };
