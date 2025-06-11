@@ -1,6 +1,8 @@
 import { sendPushNotification } from "../../../../utils/firebase.js";
 import { query } from "../../../../utils/database.js";
 import { decrypt } from "../../../../utils/crypto.js";
+import moment from "moment-timezone";
+
 
 // export const getTodaysBirthdayUsers = async () => {
 //   try {
@@ -453,6 +455,8 @@ export const sendAnnouncement = async (
     const batchSize = 100;
     const notifications = [];
     const announcementEntries = [];
+    // Generate India timestamp
+const createdAt = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
 
     for (let i = 0; i < users.length; i += batchSize) {
       const batch = users.slice(i, i + batchSize);
@@ -477,6 +481,7 @@ export const sendAnnouncement = async (
           subject,
           message,
           allUsers,
+          createdAt
         ]);
 
         return sendPushNotification(
@@ -499,7 +504,7 @@ export const sendAnnouncement = async (
     // Store announcements
     if (announcementEntries.length > 0) {
       const insertAnnouncementSql = `
-        INSERT INTO tbl_announcement (sender_user_id, receiver_user_id, dept_id, taluka_id, sanstha_id, cader_id, subject, description, all_users)
+        INSERT INTO tbl_announcement (sender_user_id, receiver_user_id, dept_id, taluka_id, sanstha_id, cader_id, subject, description, all_users,created_at)
         VALUES ?
       `;
       await query(insertAnnouncementSql, [announcementEntries]);
@@ -573,22 +578,28 @@ export const getUserAnnouncements = async (userId) => {
       };
     }
 
-    const formattedAnnouncements = announcements.map((announcement) => ({
-      id: announcement.id,
-      subject: announcement.subject,
-      description: announcement.description,
-      createdAt: announcement.created_at,
-      matchedFilter:
-        announcement.all_users === 1
-          ? "all_users"
-          : announcement.dept_id
-          ? "department"
-          : announcement.taluka_id
-          ? "taluka"
-          : announcement.sanstha_id
-          ? "sanstha"
-          : "cader",
-    }));
+    // Process announcements
+    const formattedAnnouncements = announcements.map((announcement) => {
+      // Format created_at without applying timezone conversion
+      const formattedDate = moment(announcement.created_at).format("YYYY-MM-DD HH:mm:ss");
+
+      return {
+        id: announcement.id,
+        subject: announcement.subject,
+        description: announcement.description,
+        createdAt: formattedDate,
+        matchedFilter:
+          announcement.all_users === 1
+            ? "all_users"
+            : announcement.dept_id
+            ? "department"
+            : announcement.taluka_id
+            ? "taluka"
+            : announcement.sanstha_id
+            ? "sanstha"
+            : "cader",
+      };
+    });
 
     return {
       success: true,
