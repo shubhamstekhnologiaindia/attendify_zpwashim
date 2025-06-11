@@ -132,6 +132,108 @@ getDistrictCountsFilteredByDepartment: async (departmentId) => {
       evening_absent: districtAttendance.evening_absent_count,
     },
   ];
+},
+// getUserAttendanceList: async (locationId) => {
+//   const rows = await query("CALL get_today_user_attendance_list(?)", [locationId]);
+
+//   const decryptedRows = rows[0].map(row => ({
+//     ...row,
+//     first_name: decrypt(row.first_name),
+//     middle_name: decrypt(row.middle_name),
+//     last_name: decrypt(row.last_name),
+//     mob_no: decryptDeterministic(row.mob_no),
+//   }));
+
+//   return decryptedRows;
+// },
+// getUserAttendanceListForDistrict: async (locationId) => {
+//   const rows = await query("CALL get_today_user_attendance_list(?)", [locationId]);
+
+//   const decryptedRows = rows[0].map(row => ({
+//     ...row,
+//     first_name: decrypt(row.first_name),
+//     middle_name: decrypt(row.middle_name),
+//     last_name: decrypt(row.last_name),
+//     mob_no: decryptDeterministic(row.mob_no),
+//   }));
+
+//   return decryptedRows;
+// },
+
+getUserAttendanceListHQ: async () => {
+  const locationId = 1; // Hardcoded for HQ
+  const rows = await query("CALL get_today_user_attendance_list_all(?)", [locationId]);
+
+  const decryptedRows = rows[0].map(row => ({
+    ...row,
+    first_name: decrypt(row.first_name),
+    middle_name: decrypt(row.middle_name),
+    last_name: decrypt(row.last_name),
+    mob_no: decryptDeterministic(row.mob_no),
+  }));
+
+  return decryptedRows;
+},
+
+getUserAttendanceListDistrict: async () => {
+  const locationId = 2; // Any value != 1 for District
+  const rows = await query("CALL get_today_user_attendance_list_all(?)", [locationId]);
+
+  const decryptedRows = rows[0].map(row => ({
+    ...row,
+    first_name: decrypt(row.first_name),
+    middle_name: decrypt(row.middle_name),
+    last_name: decrypt(row.last_name),
+    mob_no: decryptDeterministic(row.mob_no),
+  }));
+
+  return decryptedRows;
+},
+// getUserAttendanceListDepartmentHQ: async (departmentId) => {
+//   const locationId = 1; // HQ
+//   const rows = await query("CALL get_today_user_attendance_list_By_Department(?, ?)", [locationId, departmentId]);
+
+//   const decryptedRows = rows[0].map(row => ({
+//     ...row,
+//     first_name: decrypt(row.first_name),
+//     middle_name: decrypt(row.middle_name),
+//     last_name: decrypt(row.last_name),
+//     mob_no: decryptDeterministic(row.mob_no),
+//   }));
+
+//   return decryptedRows;
+// },
+getUserAttendanceListHQDepartment: async (departmentId) => {
+  const locationId = 1; // fixed for HQ
+
+  const rows = await query("CALL get_today_user_attendance_list_By_Departments(?, ?)", [locationId, departmentId]);
+
+  const decryptedRows = rows[0].map(row => ({
+    ...row,
+    first_name: decrypt(row.first_name),
+    middle_name: decrypt(row.middle_name),
+    last_name: decrypt(row.last_name),
+    mob_no: decryptDeterministic(row.mob_no),
+  }));
+
+  return decryptedRows;
+}
+,
+getUserAttendanceListDistrictByDepartment: async (departmentId) => {
+  const locationId = 2; // District
+  const rows = await query("CALL get_today_user_attendance_list_By_Departments(?, ?)", [locationId, departmentId]);
+
+  const decryptedRows = rows[0].map(row => ({
+    ...row,
+    first_name: decrypt(row.first_name),
+    middle_name: decrypt(row.middle_name),
+    last_name: decrypt(row.last_name),
+    mob_no: decryptDeterministic(row.mob_no),
+  }));
+
+  return decryptedRows;
 }
 
+
 };
+
