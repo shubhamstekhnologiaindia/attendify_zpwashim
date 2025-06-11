@@ -150,7 +150,7 @@ getUserListHQByDepartment: async (req, res) => {
   }
 
   try {
-    const data = await AttendanceCountService.getUserAttendanceListHQ(parseInt(department_id));
+    const data = await AttendanceCountService.getUserAttendanceListHQDepartment(parseInt(department_id));
     return res.status(200).json({ success: true, data });
   } catch (error) {
     console.error("Error:", error);

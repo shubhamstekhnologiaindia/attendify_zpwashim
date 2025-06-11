@@ -203,7 +203,7 @@ getUserAttendanceListDistrict: async () => {
 
 //   return decryptedRows;
 // },
-getUserAttendanceListHQ: async (departmentId) => {
+getUserAttendanceListHQDepartment: async (departmentId) => {
   const locationId = 1; // fixed for HQ
 
   const rows = await query("CALL get_today_user_attendance_list_By_Departments(?, ?)", [locationId, departmentId]);
