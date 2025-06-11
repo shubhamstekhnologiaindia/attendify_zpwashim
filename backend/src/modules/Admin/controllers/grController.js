@@ -18,7 +18,7 @@ export const GRController = {
             });
         }
         const { dept_id, subject, description } = req.body;
-        if (!dept_id || !subject || !description) {
+        if (!dept_id || !subject ) {
             return res.status(400).json({ status: false, message: "All fields are required" });
         }
 
