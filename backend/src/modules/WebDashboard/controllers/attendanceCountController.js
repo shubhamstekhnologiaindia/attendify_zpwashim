@@ -48,11 +48,7 @@ export const AttendanceCountController = {
           });
         }
       },
-      
-
-      // add code for show dashbord count on dept wise
-      
-      getHQCountsByDepartment: async (req, res) => {
+    getHQCountsByDepartment: async (req, res) => {
   try {
     const { department_id } = req.query;
 
@@ -72,28 +68,63 @@ export const AttendanceCountController = {
     console.error("Error in getHQCountsByDepartment:", error);
     return res.status(500).json({ success: false, message: "Failed", error: error.message });
   }
-},
+      },
 
-getDistrictCountsByDepartment: async (req, res) => {
-  try {
-    const { department_id } = req.query;
+    getDistrictCountsByDepartment: async (req, res) => {
+      try {
+        const { department_id } = req.query;
 
-    if (!department_id) {
-      return res.status(400).json({ success: false, message: "department_id is required" });
-    }
+        if (!department_id) {
+          return res.status(400).json({ success: false, message: "department_id is required" });
+        }
 
-    const counts = await AttendanceCountService.getDistrictCountsFilteredByDepartment(parseInt(department_id));
+        const counts = await AttendanceCountService.getDistrictCountsFilteredByDepartment(parseInt(department_id));
 
-    return res.status(200).json({
-      success: true,
-      message: "District user attendance counts by department fetched successfully",
-      data: counts
-    });
+        return res.status(200).json({
+          success: true,
+          message: "District user attendance counts by department fetched successfully",
+          data: counts
+        });
 
-  } catch (error) {
-    console.error("Error in getDistrictCountsByDepartment:", error);
-    return res.status(500).json({ success: false, message: "Failed", error: error.message });
-  }
-}
+      } catch (error) {
+        console.error("Error in getDistrictCountsByDepartment:", error);
+        return res.status(500).json({ success: false, message: "Failed", error: error.message });
+      }
+    },
 
-}
+    getUserAttendanceListHQ: async (req, res) => {
+      try {
+        const data = await AttendanceCountService.getUserAttendanceListHQ();
+        return res.status(200).json({
+          success: true,
+          message: "HQ user attendance list fetched successfully",
+          data: data,
+        });
+      } catch (error) {
+        console.error("Error in getUserAttendanceListHQ:", error);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to fetch HQ attendance list",
+          error: error.message,
+        });
+      }
+    },
+
+    getUserAttendanceListDistrict: async (req, res) => {
+      try {
+        const data = await AttendanceCountService.getUserAttendanceListDistrict();
+        return res.status(200).json({
+          success: true,
+          message: "District user attendance list fetched successfully",
+          data: data,
+        });
+      } catch (error) {
+        console.error("Error in getUserAttendanceListDistrict:", error);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to fetch district attendance list",
+          error: error.message,
+        });
+      }
+    },
+};
