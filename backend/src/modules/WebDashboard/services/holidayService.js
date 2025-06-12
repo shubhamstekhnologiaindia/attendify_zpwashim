@@ -23,6 +23,36 @@ export const HolidayService = {
             name_marathi: holiday.holiday_name_mr
         }));
     },
+    createHoliday: async ({ holiday_name_mr, holiday_name_eng, holiday_date }) => {
+        const sql = `INSERT INTO holidays (holiday_name_mr, holiday_name_eng, holiday_date) VALUES (?, ?, ?)`;
+        await query(sql, [holiday_name_mr, holiday_name_eng, holiday_date]);
+    },
+
+    updateHoliday: async (id, { holiday_name_mr, holiday_name_eng, holiday_date }) => {
+        const sql = `
+      UPDATE holidays 
+      SET holiday_name_mr = ?, holiday_name_eng = ?, holiday_date = ?, updated_at = NOW()
+      WHERE id = ?
+    `;
+        await query(sql, [holiday_name_mr, holiday_name_eng, holiday_date, id]);
+    },
+
+    deleteHoliday: async (id) => {
+        const sql = `DELETE FROM holidays WHERE id = ?`;
+        await query(sql, [id]);
+    },
+    showHolidaysList: async () => {
+  const sql = `
+    SELECT 
+      id,
+      holiday_name_mr, 
+      holiday_name_eng, 
+      DATE_FORMAT(holiday_date, '%Y-%m-%d') AS holiday_date 
+    FROM holidays 
+    ORDER BY holiday_date ASC
+  `;
+  return await query(sql);
+},
 
     getRadius: async () => {
         const sql = `SELECT radius FROM tbl_loc_radius ORDER BY id DESC LIMIT 1`;
@@ -71,7 +101,7 @@ export const HolidayService = {
         try {
             const sql = `SELECT id, radius FROM tbl_loc_radius`;
             const result = await query(sql);
-    
+
             return {
                 success: true,
                 message: result.length ? "Radius list retrieved successfully" : "No radius data found",

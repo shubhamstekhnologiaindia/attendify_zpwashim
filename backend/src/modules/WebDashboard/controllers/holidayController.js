@@ -34,6 +34,69 @@ export const HolidayController = {
             });
         }
     },
+     createHoliday: async (req, res) => {
+    try {
+      const { holiday_name_mr, holiday_name_eng, holiday_date } = req.body;
+      await HolidayService.createHoliday({ holiday_name_mr, holiday_name_eng, holiday_date });
+
+      res.status(201).json({ success: true, message: 'Holiday created successfully' });
+    } catch (error) {
+      console.error("Create error:", error);
+      res.status(500).json({ success: false, message: "Failed to create holiday" });
+    }
+  },
+  updateHoliday: async (req, res) => {
+  try {
+    const id = req.query.id;
+    const { holiday_name_mr, holiday_name_eng, holiday_date } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ success: false, message: "Holiday ID is required in query" });
+    }
+
+    await HolidayService.updateHoliday(id, { holiday_name_mr, holiday_name_eng, holiday_date });
+
+    res.status(200).json({ success: true, message: 'Holiday updated successfully' });
+  } catch (error) {
+    console.error("Update error:", error);
+    res.status(500).json({ success: false, message: "Failed to update holiday" });
+  }
+},
+
+deleteHoliday: async (req, res) => {
+  try {
+    const id = req.query.id;
+
+    if (!id) {
+      return res.status(400).json({ success: false, message: "Holiday ID is required in query" });
+    }
+
+    await HolidayService.deleteHoliday(id);
+
+    res.status(200).json({ success: true, message: 'Holiday deleted successfully' });
+  } catch (error) {
+    console.error("Delete error:", error);
+    res.status(500).json({ success: false, message: "Failed to delete holiday" });
+  }
+},
+
+showHolidaysList: async (req, res) => {
+  try {
+    const holidays = await HolidayService.showHolidaysList();
+
+    res.status(200).json({
+      success: true,
+      total: holidays.length,
+      holidays
+    });
+  } catch (error) {
+    console.error("Error fetching holiday list:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch holiday list"
+    });
+  }
+},
 
     updateRadius: async (req, res) => {
         try {
