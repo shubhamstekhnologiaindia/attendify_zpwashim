@@ -769,9 +769,221 @@ GetAttendanceReportForMonthCaderWise: async (month, year, department_id, cader_i
 
 
 // show one user whole details with attendance shown on last report page
+// listAttendanceByUser: async (userId, data_status, date, month, year) => {
+//   try {
+//     // Validate inputs
+//     if (!userId || isNaN(userId)) {
+//       throw new Error("Invalid userId: Must be a number");
+//     }
+//     const validStatuses = ["daily", "weekly", "monthly", "yearly"];
+//     if (!validStatuses.includes(data_status)) {
+//       throw new Error("Invalid data_status: Must be daily, weekly, monthly, or yearly");
+//     }
+
+//     // Set default date/month/year
+//     const now = new Date();
+//     let selectedDate = date ? new Date(date) : now;
+//     let selectedMonth = month ? parseInt(month, 10) : now.getMonth() + 1;
+//     let selectedYear = year ? parseInt(year, 10) : now.getFullYear();
+
+//     // Validate inputs
+//     if (data_status === "daily" || data_status === "weekly") {
+//       if (date && isNaN(selectedDate)) {
+//         throw new Error("Invalid date: Must be in YYYY-MM-DD format");
+//       }
+//     }
+//     if (data_status === "monthly") {
+//       if (!month || isNaN(selectedMonth) || selectedMonth < 1 || selectedMonth > 12) {
+//         throw new Error("Invalid month: Must be 01 to 12");
+//       }
+//       if (!year || isNaN(selectedYear) || selectedYear < 1900 || selectedYear > 9999) {
+//         throw new Error("Invalid year: Must be a valid four-digit year");
+//       }
+//     }
+//     if (data_status === "yearly") {
+//       if (!year || isNaN(selectedYear) || selectedYear < 1900 || selectedYear > 9999) {
+//         throw new Error("Invalid year: Must be a valid four-digit year");
+//       }
+//     }
+
+//     // Log inputs
+//     console.log("listAttendanceByUser called with:", { userId, data_status, date, month, year });
+
+//     // Fetch user with department and cader names
+//     const userSql = `
+//       SELECT 
+//         u.first_name, 
+//         u.middle_name, 
+//         u.last_name, 
+//         u.mob_no, 
+//         d.dept_name_marathi AS department, 
+//         c.cader_name AS cader
+//       FROM users u
+//       LEFT JOIN departments d ON u.department_id = d.id
+//       LEFT JOIN tbl_cader c ON u.cader_id = c.id
+//       WHERE u.id = ?
+//       LIMIT 1
+//     `;
+//     console.log("Executing user query with userId:", userId);
+//     const users = await query(userSql, [userId]);
+
+//     console.log("Raw user query result:", users);
+//     if (users.length === 0) {
+//       throw new Error(`User not found for userId: ${userId}`);
+//     }
+
+//     const user = users[0];
+
+//     // Decrypt user data
+//     const decryptedData = {
+//       first_name: user.first_name ? decrypt(user.first_name) : "",
+//       middle_name: user.middle_name ? decrypt(user.middle_name) : "",
+//       last_name: user.last_name ? decrypt(user.last_name) : "",
+//       mob_no: user.mob_no ? decryptDeterministic(user.mob_no) : null,
+//       department: user.department,
+//       cader: user.cader
+//     };
+//     console.log("Decrypted user data:", decryptedData);
+
+//     // Determine date range for mapping
+//     let dateRange = [];
+//     const formatDate = (d) => d.toISOString().split("T")[0];
+
+//     if (data_status === "daily") {
+//       dateRange = [formatDate(selectedDate)];
+//     } else if (data_status === "weekly") {
+//       for (let i = 0; i < 7; i++) {
+//         const d = new Date(selectedDate);
+//         d.setDate(d.getDate() + i);
+//         dateRange.push(formatDate(d));
+//       }
+//     } else if (data_status === "monthly") {
+//       const currentYear = now.getFullYear();
+//       const currentMonth = now.getMonth() + 1;
+//       const currentDay = now.getDate();
+//       let endDay;
+//       if (selectedYear === currentYear && selectedMonth === currentMonth) {
+//         endDay = currentDay; // Up to current date
+//       } else {
+//         endDay = new Date(selectedYear, selectedMonth, 0).getDate(); // Full month
+//       }
+//       for (let i = 1; i <= endDay; i++) {
+//         dateRange.push(`${selectedYear}-${selectedMonth.toString().padStart(2, "0")}-${i.toString().padStart(2, "0")}`);
+//       }
+//     } else if (data_status === "yearly") {
+//       const currentYear = now.getFullYear();
+//       const currentMonth = now.getMonth() + 1;
+//       const currentDay = now.getDate();
+//       let endMonth = 12;
+//       let endDay = 31;
+//       if (selectedYear === currentYear) {
+//         endMonth = currentMonth;
+//         endDay = currentDay;
+//       }
+//       for (let month = 1; month <= endMonth; month++) {
+//         const daysInMonth = month === endMonth ? endDay : new Date(selectedYear, month, 0).getDate();
+//         for (let day = 1; day <= daysInMonth; day++) {
+//           dateRange.push(`${selectedYear}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`);
+//         }
+//       }
+//     }
+
+//     // Call stored procedure
+//     const spSql = `CALL user_atendance_total_history(?, ?, ?, ?, ? )`;
+//     const spParams = [
+//       userId,
+//       data_status,
+//       data_status === "daily" || data_status === "weekly" ? formatDate(selectedDate) : null,
+//       data_status === "monthly" ? selectedMonth : null,
+//       data_status === "monthly" || data_status === "yearly" ? selectedYear : null
+//     ];
+
+//     console.log("Executing stored procedure:", { sql: spSql, params: spParams });
+//     const [attendanceRecords] = await query(spSql, spParams);
+
+//     console.log("Attendance records:", attendanceRecords);
+
+//     // Map attendance records and fill absent days
+//     const attendance = dateRange.map((date) => {
+//       const record = attendanceRecords.find((r) => r.att_attendance_date === date);
+
+//       console.log(`Mapping date: ${date}, Found record:`, record);
+
+//       if (!record) {
+//         return {
+//           att_attendance_date: date,
+//           att_morning_in_time: null,
+//           att_afternoon_in_time: null,
+//           att_out_time: null,
+//           att_morning_location:null,
+//           att_afternoon_location:null,
+//           att_evening_location:null,
+//           total_hours: null,
+//           attendance_status: "Absent",
+//         };
+//       }
+
+//       // Format date-time as YYYY-MM-DD HH:mm:ss
+//       const formatDateTime = (datetime) => {
+//         if (!datetime) return null;
+//         const d = new Date(datetime);
+//         return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}`;
+//       };
+
+//       // Calculate total hours
+//       // let totalHours = null;
+//       let totalHours = record.total_hours ? record.total_hours.slice(0, 5) : null; // keep only HH:MM
+//       if (record.att_morning_in_time && record.att_out_time) {
+//         const start = new Date(record.att_morning_in_time);
+//         const end = new Date(record.att_out_time);
+//         totalHours = ((end - start) / (1000 * 60 * 60)).toFixed(2);
+//         if (totalHours < 0) totalHours = null;
+//       } else if (record.att_afternoon_in_time && record.att_out_time) {
+//         const start = new Date(record.att_afternoon_in_time);
+//         const end = new Date(record.att_out_time);
+//         totalHours = ((end - start) / (1000 * 60 * 60)).toFixed(2);
+//         if (totalHours < 0) totalHours = null;
+//       }
+
+//       return {
+//         att_attendance_date: date,
+//         att_morning_in_time: formatDateTime(record.att_morning_in_time),
+//         att_afternoon_in_time: formatDateTime(record.att_afternoon_in_time),
+//         att_out_time: formatDateTime(record.att_out_time),
+//         att_morning_location:record.att_morning_location,
+//         att_afternoon_location:record.att_afternoon_location,
+//         att_evening_location:record.att_evening_location,
+
+       
+//         total_hours: totalHours ? parseFloat(totalHours) : null,
+//         attendance_status: record.att_morning_in_time || record.att_afternoon_in_time || record.att_out_time ? "Present" : "Absent",
+//       };
+//     });
+
+//     // Construct response
+//     return {
+//       status: true,
+//       message: "Attendance data retrieved successfully",
+//       data: {
+//         name: `${decryptedData.first_name} ${decryptedData.middle_name} ${decryptedData.last_name}`.trim(),
+//         mob_no: decryptedData.mob_no,
+//         department: decryptedData.department || null,
+//         cader: decryptedData.cader || null,
+//         data_status,
+//         attendance,
+
+//       },
+//     };
+//   } catch (error) {
+//     console.error("Error in listAttendanceByUser service:", error);
+//     return {
+//       status: false,
+//       message: error.message || "Failed to retrieve attendance data",
+//     };
+//   }
+// },
 listAttendanceByUser: async (userId, data_status, date, month, year) => {
   try {
-    // Validate inputs
     if (!userId || isNaN(userId)) {
       throw new Error("Invalid userId: Must be a number");
     }
@@ -780,13 +992,11 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
       throw new Error("Invalid data_status: Must be daily, weekly, monthly, or yearly");
     }
 
-    // Set default date/month/year
     const now = new Date();
     let selectedDate = date ? new Date(date) : now;
     let selectedMonth = month ? parseInt(month, 10) : now.getMonth() + 1;
     let selectedYear = year ? parseInt(year, 10) : now.getFullYear();
 
-    // Validate inputs
     if (data_status === "daily" || data_status === "weekly") {
       if (date && isNaN(selectedDate)) {
         throw new Error("Invalid date: Must be in YYYY-MM-DD format");
@@ -806,10 +1016,6 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
       }
     }
 
-    // Log inputs
-    console.log("listAttendanceByUser called with:", { userId, data_status, date, month, year });
-
-    // Fetch user with department and cader names
     const userSql = `
       SELECT 
         u.first_name, 
@@ -824,17 +1030,12 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
       WHERE u.id = ?
       LIMIT 1
     `;
-    console.log("Executing user query with userId:", userId);
     const users = await query(userSql, [userId]);
-
-    console.log("Raw user query result:", users);
     if (users.length === 0) {
       throw new Error(`User not found for userId: ${userId}`);
     }
 
     const user = users[0];
-
-    // Decrypt user data
     const decryptedData = {
       first_name: user.first_name ? decrypt(user.first_name) : "",
       middle_name: user.middle_name ? decrypt(user.middle_name) : "",
@@ -843,9 +1044,7 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
       department: user.department,
       cader: user.cader
     };
-    console.log("Decrypted user data:", decryptedData);
 
-    // Determine date range for mapping
     let dateRange = [];
     const formatDate = (d) => d.toISOString().split("T")[0];
 
@@ -861,12 +1060,10 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
       const currentYear = now.getFullYear();
       const currentMonth = now.getMonth() + 1;
       const currentDay = now.getDate();
-      let endDay;
-      if (selectedYear === currentYear && selectedMonth === currentMonth) {
-        endDay = currentDay; // Up to current date
-      } else {
-        endDay = new Date(selectedYear, selectedMonth, 0).getDate(); // Full month
-      }
+      let endDay = (selectedYear === currentYear && selectedMonth === currentMonth)
+        ? currentDay
+        : new Date(selectedYear, selectedMonth, 0).getDate();
+
       for (let i = 1; i <= endDay; i++) {
         dateRange.push(`${selectedYear}-${selectedMonth.toString().padStart(2, "0")}-${i.toString().padStart(2, "0")}`);
       }
@@ -874,12 +1071,9 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
       const currentYear = now.getFullYear();
       const currentMonth = now.getMonth() + 1;
       const currentDay = now.getDate();
-      let endMonth = 12;
-      let endDay = 31;
-      if (selectedYear === currentYear) {
-        endMonth = currentMonth;
-        endDay = currentDay;
-      }
+      let endMonth = (selectedYear === currentYear) ? currentMonth : 12;
+      let endDay = (selectedYear === currentYear) ? currentDay : 31;
+
       for (let month = 1; month <= endMonth; month++) {
         const daysInMonth = month === endMonth ? endDay : new Date(selectedYear, month, 0).getDate();
         for (let day = 1; day <= daysInMonth; day++) {
@@ -888,8 +1082,7 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
       }
     }
 
-    // Call stored procedure
-    const spSql = `CALL user_atendance_total_history(?, ?, ?, ?, ? )`;
+    const spSql = `CALL user_atendance_total_history(?, ?, ?, ?, ?)`;
     const spParams = [
       userId,
       data_status,
@@ -897,17 +1090,10 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
       data_status === "monthly" ? selectedMonth : null,
       data_status === "monthly" || data_status === "yearly" ? selectedYear : null
     ];
-
-    console.log("Executing stored procedure:", { sql: spSql, params: spParams });
     const [attendanceRecords] = await query(spSql, spParams);
 
-    console.log("Attendance records:", attendanceRecords);
-
-    // Map attendance records and fill absent days
     const attendance = dateRange.map((date) => {
       const record = attendanceRecords.find((r) => r.att_attendance_date === date);
-
-      console.log(`Mapping date: ${date}, Found record:`, record);
 
       if (!record) {
         return {
@@ -915,51 +1101,33 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
           att_morning_in_time: null,
           att_afternoon_in_time: null,
           att_out_time: null,
-          att_morning_location:null,
-          att_afternoon_location:null,
-          att_evening_location:null,
+          att_morning_location: null,
+          att_afternoon_location: null,
+          att_evening_location: null,
           total_hours: null,
           attendance_status: "Absent",
         };
       }
 
-      // Format date-time as YYYY-MM-DD HH:mm:ss
       const formatDateTime = (datetime) => {
         if (!datetime) return null;
         const d = new Date(datetime);
         return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}`;
       };
 
-      // Calculate total hours
-      let totalHours = null;
-      if (record.att_morning_in_time && record.att_out_time) {
-        const start = new Date(record.att_morning_in_time);
-        const end = new Date(record.att_out_time);
-        totalHours = ((end - start) / (1000 * 60 * 60)).toFixed(2);
-        if (totalHours < 0) totalHours = null;
-      } else if (record.att_afternoon_in_time && record.att_out_time) {
-        const start = new Date(record.att_afternoon_in_time);
-        const end = new Date(record.att_out_time);
-        totalHours = ((end - start) / (1000 * 60 * 60)).toFixed(2);
-        if (totalHours < 0) totalHours = null;
-      }
-
       return {
         att_attendance_date: date,
         att_morning_in_time: formatDateTime(record.att_morning_in_time),
         att_afternoon_in_time: formatDateTime(record.att_afternoon_in_time),
         att_out_time: formatDateTime(record.att_out_time),
-        att_morning_location:record.att_morning_location,
-        att_afternoon_location:record.att_afternoon_location,
-        att_evening_location:record.att_evening_location,
-
-       
-        total_hours: totalHours ? parseFloat(totalHours) : null,
+        att_morning_location: record.att_morning_location,
+        att_afternoon_location: record.att_afternoon_location,
+        att_evening_location: record.att_evening_location,
+        total_hours: record.total_hours ? record.total_hours.slice(0, 5) : null, // Just HH:MM
         attendance_status: record.att_morning_in_time || record.att_afternoon_in_time || record.att_out_time ? "Present" : "Absent",
       };
     });
 
-    // Construct response
     return {
       status: true,
       message: "Attendance data retrieved successfully",
@@ -970,7 +1138,6 @@ listAttendanceByUser: async (userId, data_status, date, month, year) => {
         cader: decryptedData.cader || null,
         data_status,
         attendance,
-
       },
     };
   } catch (error) {
