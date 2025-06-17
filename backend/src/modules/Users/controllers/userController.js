@@ -127,24 +127,24 @@ updateUserProfile: async (req, res) => {
     }
   },
 
-SendOtp: async (req, res) => {
-      try {
-          const { phoneNumber, otp } = req.body; 
+// SendOtp: async (req, res) => {
+//       try {
+//           const { phoneNumber, otp } = req.body; 
 
-          const result = await UserService.SendOtp(phoneNumber, otp);
+//           const result = await UserService.SendOtp(phoneNumber, otp);
 
-          return res.status(200).json({
-              status: true,
-              message: "OTP sent successfully",
-              data: result
-          });
-      } catch (error) {
-          console.error("Error in SendOtp controller:", error);
-          return res.status(500).json({
-              status: false,
-              message: "Failed to send OTP"
-          });
-      }
-  }
+//           return res.status(200).json({
+//               status: true,
+//               message: "OTP sent successfully",
+//               data: result
+//           });
+//       } catch (error) {
+//           console.error("Error in SendOtp controller:", error);
+//           return res.status(500).json({
+//               status: false,
+//               message: "Failed to send OTP"
+//           });
+//       }
+//   }
   }
 
