@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import { query } from "../../../../utils/database.js";
 import { mobileOtpService } from './mobileOtpService.js';
 import { emailOtpService } from './emailOtpService.js';
-import { decryptDeterministic } from "../../../../utils/crypto.js";
+import { decryptDeterministic, decrypt} from "../../../../utils/crypto.js";
 dotenv.config();
 
 export class FlushDBService {
@@ -10,27 +10,27 @@ export class FlushDBService {
     this.verificationState = new Map();
   }
 // ✅ Always fetch user with role_id = 101 and decrypt mob_no
-  async getFirstUser() {
-    const rows = await query(`SELECT * FROM users WHERE role_id = 101 ORDER BY id ASC LIMIT 1`);
+ async getFirstUser() {
+  const rows = await query(`SELECT * FROM users WHERE role_id = 101 ORDER BY id ASC LIMIT 1`);
 
-    if (!rows || rows.length === 0) {
-      throw new Error("No user found with role_id 101");
-    }
-
-    const user = rows[0];
-
-    if (!user.mob_no) {
-      throw new Error("Mobile number not found for selected user");
-    }
-
-    try {
-      user.mob_no = decryptDeterministic(user.mob_no);
-    } catch (err) {
-      throw new Error("Error decrypting mobile number: " + err.message);
-    }
-
-    return user;
+  if (!rows || rows.length === 0) {
+    throw new Error("No user found with role_id 101");
   }
+
+  const user = rows[0];
+
+  if (!user.mob_no) throw new Error("Mobile number not found for selected user");
+  if (!user.email) throw new Error("Email not found for selected user");
+
+  try {
+    user.mob_no = decryptDeterministic(user.mob_no);
+    user.email = decrypt(user.email);// ✅ ADD THIS LINE
+  } catch (err) {
+    throw new Error("Error decrypting user data: " + err.message);
+  }
+
+  return user;
+}
 
   async flushTable(tableName) {
     const user = await this.getFirstUser();

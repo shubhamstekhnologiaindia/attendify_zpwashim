@@ -19,6 +19,11 @@ export class EmailOtpService {
     const otp = this.generateOtp();
     this.otpStore.set(email, { otp, timestamp: Date.now() });
 
+
+      // ⚠️ Debug: log OTP
+  console.log(`🔐 [Email OTP] For ${email}: ${otp}`);
+
+  
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {

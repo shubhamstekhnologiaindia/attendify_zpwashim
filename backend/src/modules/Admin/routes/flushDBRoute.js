@@ -12,6 +12,6 @@ const router = express.Router();
 router.post('/send-mobile-otp', FlushDBController.sendMobileOtp);
 router.post('/verify-mobile-otp', FlushDBController.verifyMobileOtp);
 router.post('/verify-email-otp', FlushDBController.verifyEmailOtp);
-router.post('/flush', FlushDBController.flushTable);
+router.post('/flush-data', FlushDBController.flushTable);
 
 export default router;
