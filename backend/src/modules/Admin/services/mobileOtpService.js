@@ -18,6 +18,8 @@ export class MobileOtpService {
 
   // Send OTP via SMS API
   async sendOtp(mobile) {
+
+    console.log(mobile);
     if (!this.validateMobile(mobile)) {
       throw new Error("Invalid mobile number");
     }
@@ -29,10 +31,10 @@ export class MobileOtpService {
 
      
     const encodedMessage = encodeURIComponent(
-      `आपला ओटीपी क्रमांक आहे: ${otp} कृपया हा ओटीपी पुढील प्रक्रियेसाठी वापरा. - Attends Zp-Washim`
+      `आपला ओटीपी क्रमांक आहे: ${otp} कृपया हा ओटीपी पुढील प्रक्रियेसाठी वापरा. - SHRI NILKANTHESHWAR`
     );
 
-     const url = `http://bulksms.saakshisoftware.com/api/mt/SendSMS?user=TECHNOLOGIA&password=70837513&senderid=SNILKN&channel=Trans&DCS=8&flashsms=0&number=${mobile}&text=${encodedMessage}&route=04&DLTTemplateId=1707174402543957427&PEID=1701172491385434035`;
+        const url = `http://bulksms.saakshisoftware.com/api/mt/SendSMS?user=TECHNOLOGIA&password=70837513&senderid=SNILKN&channel=Trans&DCS=8&flashsms=0&number=${mobile}&text=${encodedMessage}&route=04&DLTTemplateId=1707174402543957427&PEID=1701172491385434035`;
 
     try {
      const response = await axios.get(url); 

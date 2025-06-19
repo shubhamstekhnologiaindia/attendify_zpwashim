@@ -32,50 +32,70 @@ export class FlushDBService {
   return user;
 }
 
-  async flushTable(tableName) {
-    const user = await this.getFirstUser();
-    const state = this.verificationState.get(user.id);
+async flushTable(tableNames) {
+  const user = await this.getFirstUser();
+  const state = this.verificationState.get(user.id);
 
-    if (!state?.mobileVerified || !state?.emailVerified) {
-      throw new Error("Both OTP verifications must be completed.");
-    }
+  if (!state?.mobileVerified || !state?.emailVerified) {
+    return {
+      status: 403,
+      success: false,
+      message: "Please verify both mobile and email OTPs before proceeding.",
+    };
+  }
 
-    try {
+  const tables = Array.isArray(tableNames) ? tableNames : [tableNames];
+
+  const results = [];
+
+  try {
+    for (const tableName of tables) {
       if (tableName === "users") {
-        // ✅ Get first user id with role_id = 101
-        const [firstUser] = await query(`SELECT id FROM users WHERE role_id = 101 ORDER BY id ASC LIMIT 1`);
+        const [firstUser] = await query(
+          `SELECT id FROM users WHERE role_id = 101 ORDER BY id ASC LIMIT 1`
+        );
         const firstUserId = firstUser?.id || 0;
 
-        // ❌ Delete all users except this id or any user with role_id = 101
-        await query(`
-          DELETE FROM users 
-          WHERE id != ? 
-          AND role_id != 101
-        `, [firstUserId]);
+        await query(
+          `DELETE FROM users WHERE id != ? AND role_id != 101`,
+          [firstUserId]
+        );
 
-        // ✅ Delete all login permissions except the first record
-        const [firstLoginPer] = await query(`SELECT login_per_id FROM tbl_user_login_per ORDER BY login_per_id ASC LIMIT 1`);
+        const [firstLoginPer] = await query(
+          `SELECT login_per_id FROM tbl_user_login_per ORDER BY login_per_id ASC LIMIT 1`
+        );
         const firstLoginPerId = firstLoginPer?.login_per_id || 0;
 
-        await query(`
-          DELETE FROM tbl_user_login_per 
-          WHERE login_per_id != ?
-        `, [firstLoginPerId]);
+        await query(
+          `DELETE FROM tbl_user_login_per WHERE login_per_id != ?`,
+          [firstLoginPerId]
+        );
 
+        results.push(`users flushed`);
       } else if (tableName === "tbl_attendance_records") {
         await query(`DELETE FROM tbl_attendance_records`);
+        results.push(`tbl_attendance_records flushed`);
       } else {
-        throw new Error("Invalid table name");
+        results.push(`Invalid table: ${tableName}`);
       }
-
-      // ✅ Clear OTP state
-      this.verificationState.delete(user.id);
-
-      return { message: `${tableName} flushed successfully.` };
-    } catch (error) {
-      throw new Error("Flush failed: " + error.message);
     }
+
+    this.verificationState.delete(user.id);
+
+    return {
+      status: 200,
+      success: true,
+      message: results.join(", "),
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      success: false,
+      message: `Flush failed: ${error.message}`,
+    };
   }
+}
+
 
 
   // Send mobile OTP

@@ -57,16 +57,33 @@ export const FlushDBController = {
     }
   },
 
-  flushTable: async (req, res) => {
-    try {
-      const { tableName } = req.body;
-      const result = await flushDBService.flushTable(tableName);
-      res.status(200).json({
-        success: true,
-        message: result.message
+ flushTable: async (req, res) => {
+  try {
+    const { tableName } = req.body;
+
+    // ✅ Validate: must be a non-empty array of strings
+    if (!Array.isArray(tableName) || tableName.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "'tableName' must be a non-empty array.",
       });
-    } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
     }
+
+    // 🔁 Call service with array of table names
+    const result = await flushDBService.flushTable(tableName);
+
+    // 📨 Return result from service
+    return res.status(result.status).json({
+      success: result.success,
+      message: result.message,
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: `Internal Server Error: ${err.message}`,
+    });
   }
+}
+
 };
