@@ -181,7 +181,7 @@ getUserAttendanceByDepartment: async (req, res) => {
 
   try {
     console.log()
-    const data = await AttendanceCountService.getUserSpecificDateAttendanceDepartment(parseInt(department_id), date, parseInt(cader_id));
+    const data = await AttendanceCountService.getUserSpecificDateAttendanceDepartment(parseInt(department_id), date, cader_id);
     return res.status(200).json({ success: true, data });
   } catch (error) {
     console.error("Error:", error);
