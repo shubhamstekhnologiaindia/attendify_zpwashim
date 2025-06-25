@@ -170,7 +170,24 @@ getUserListHQByDepartment: async (req, res) => {
     console.error("Error:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
-}
+},
+
+getUserAttendanceByDepartment: async (req, res) => {
+  const { department_id, date } = req.query;
+
+  if (!department_id || !date) {
+    return res.status(400).json({ success: false, message: "department_id and date is required" });
+  }
+
+  try {
+    console.log()
+    const data = await AttendanceCountService.getUserSpecificDateAttendanceDepartment(parseInt(department_id), date);
+    return res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+},
 
 
 

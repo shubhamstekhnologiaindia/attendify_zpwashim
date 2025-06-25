@@ -18,5 +18,6 @@ router.get("/Get_User_List_PS",authMiddleware,AttendanceCountController.getUserA
 router.get("/Get_User_List_HQ_By_Department",AttendanceCountController.getUserListHQByDepartment)
 router.get("/Get_User_List_PS_By_Department",AttendanceCountController.getUserListDistrictByDepartment)
 
+router.get("/Get_User_Specific_Date_Attendance_By_Department",AttendanceCountController.getUserAttendanceByDepartment)
 
 export default router;

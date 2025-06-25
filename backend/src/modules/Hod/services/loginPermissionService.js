@@ -55,7 +55,7 @@ export const loginPermission = {
             email: user.email ? decrypt(user.email) : null,
             status: user.status,
             village_name: user.village_name,
-            sanstha_name: user.sanstha_name,
+            sanstha_name: user.location_name,
             cader_name: user.cader_name,
             department_name: user.department_name,
         }));
