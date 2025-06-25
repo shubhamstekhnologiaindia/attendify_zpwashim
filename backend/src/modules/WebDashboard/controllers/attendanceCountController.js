@@ -173,7 +173,7 @@ getUserListHQByDepartment: async (req, res) => {
 },
 
 getUserAttendanceByDepartment: async (req, res) => {
-  const { department_id, date } = req.query;
+  const { department_id, date, cader_id } = req.query;
 
   if (!department_id || !date) {
     return res.status(400).json({ success: false, message: "department_id and date is required" });
@@ -181,7 +181,7 @@ getUserAttendanceByDepartment: async (req, res) => {
 
   try {
     console.log()
-    const data = await AttendanceCountService.getUserSpecificDateAttendanceDepartment(parseInt(department_id), date);
+    const data = await AttendanceCountService.getUserSpecificDateAttendanceDepartment(parseInt(department_id), date, parseInt(cader_id));
     return res.status(200).json({ success: true, data });
   } catch (error) {
     console.error("Error:", error);

@@ -234,9 +234,9 @@ getUserAttendanceListDistrictByDepartment: async (departmentId) => {
   return decryptedRows;
 },
 
-getUserSpecificDateAttendanceDepartment: async (department_id, date) => {
+getUserSpecificDateAttendanceDepartment: async (department_id, date, cader_id) => {
 
-  const rows = await query("CALL get_user_attendance_report_by_departments(?, ?)", [department_id, date]);
+  const rows = await query("CALL get_user_attendance_report_by_departments(?, ?, ?)", [department_id, date, cader_id]);
 
   const decryptedRows = rows[0].map(row => ({
     ...row,
