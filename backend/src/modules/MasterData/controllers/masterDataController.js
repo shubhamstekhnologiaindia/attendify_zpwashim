@@ -234,4 +234,26 @@ getUsersForSalaryRequest: async (req, res) => {
     });
   }
 },
+
+
+
+
+
+ getUnassignedCadres: async (req, res) => {
+  try {
+    const result = await masterDataService.getUnassignedCadres();
+
+    return res.status(200).json({
+      status: result.status,
+      message: result.message,
+      data: result.data,
+    });
+  } catch (error) {
+    console.error("Controller Error:", error);
+    return res.status(500).json({
+      status: false,
+      message: error.message || "Server error",
+    });
+  }
+}
 }

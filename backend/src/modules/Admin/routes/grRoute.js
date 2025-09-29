@@ -1,6 +1,6 @@
 import express from "express";
 import { GRController } from "../controllers/grController.js";
-import {authMiddleware} from "../../../middleware/authMiddleware.js";
+import {authMiddleware} from "../../../Middleware/authMiddleware.js";
 import multer from "multer";
 
 import os from 'os';

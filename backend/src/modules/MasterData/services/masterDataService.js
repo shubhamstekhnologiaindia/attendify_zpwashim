@@ -267,4 +267,49 @@ getUsersForSalaryRequest: async () => {
   }
 },
 
-};
+getUnassignedCadres : async (req, res) => {
+  try {
+    const rows = await query(`
+      SELECT 
+        d.department_name,
+        c.cader_name
+      FROM department_cadre dc
+      INNER JOIN departments d ON d.id = dc.department_id
+      INNER JOIN tbl_cader c ON c.id = dc.cader_id
+      LEFT JOIN users u 
+        ON u.department_id = dc.department_id 
+        AND u.cader_id = dc.cader_id
+      WHERE u.id IS NULL
+    `);
+
+    console.log("Raw Unassigned Cadres:", rows);
+
+    // Group by department_name
+    const grouped = rows.reduce((acc, row) => {
+      const dept = acc.find(d => d.department_name === row.department_name);
+      if (dept) {
+        dept.unassigned_caders.push(row.cader_name);
+      } else {
+        acc.push({
+          department_name: row.department_name,
+          unassigned_caders: [row.cader_name]
+        });
+      }
+      return acc;
+    }, []);
+
+    return {
+      status: true,
+      message: "Grouped unassigned cadres fetched successfully",
+      data: grouped,
+    };
+  } catch (error) {
+    console.error("Service Error:", error);
+    return {
+      status: false,
+      message: error.message || "Database error while fetching grouped unassigned cadres",
+      data: [],
+    };
+  }
+}
+}
