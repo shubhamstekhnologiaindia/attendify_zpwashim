@@ -12,5 +12,6 @@ router.put("/update-user/:id",authMiddleware, upload.single("user_profile"), Use
 
 router.put( "/Update_Profile_Picture/:id",authMiddleware, upload.single("user_profile"), UserController.uploadProfilePicture);
 
+router.put("/update-user-status", UserController.updateUserStatus);
 
 export default router;

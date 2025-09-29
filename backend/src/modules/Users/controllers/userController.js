@@ -12,95 +12,95 @@ export const UserController = {
 
   RegisterUser: async (req, res) => {
     try {
-        const {
-            first_name, middle_name, last_name,
-            mob_no, email, birth_date, joining_date, department_id,
-            office_location_id, taluka_id, village_id,
-            cader_id, password
-        } = req.body;
+      const {
+        first_name, middle_name, last_name,
+        mob_no, email, birth_date, joining_date, department_id,
+        office_location_id, taluka_id, village_id,
+        cader_id, password
+      } = req.body;
 
-        // List of mandatory fields
-        const requiredFields = {
-            first_name,
-            middle_name,
-            last_name,
-            mob_no,
-            email,
-            birth_date,
-            department_id,
-            office_location_id,
-            taluka_id,
-            village_id,
-            cader_id,
-            joining_date,
-            password
-        };
+      // List of mandatory fields
+      const requiredFields = {
+        first_name,
+        middle_name,
+        last_name,
+        mob_no,
+        email,
+        birth_date,
+        department_id,
+        office_location_id,
+        taluka_id,
+        village_id,
+        cader_id,
+        joining_date,
+        password
+      };
 
-        // Check for missing or undefined/null fields
-        const missingFields = Object.entries(requiredFields)
-            .filter(([key, value]) => value === undefined || value === null || value === "")
-            .map(([key]) => key);
+      // Check for missing or undefined/null fields
+      const missingFields = Object.entries(requiredFields)
+        .filter(([key, value]) => value === undefined || value === null || value === "")
+        .map(([key]) => key);
 
-        if (missingFields.length > 0) {
-            return res.status(400).json({
-                status: false,
-                message: `Missing mandatory fields: ${missingFields.join(", ")}`
-            });
-        }
-
-        const result = await UserService.RegisterUser(req.body);
-
-        if (result.alreadyExists) {
-            return res.status(409).json({
-                status: false,
-                message: "User already exists with this mobile number"
-            });
-        }
-
-        return res.status(201).json({
-            status: true,
-            message: "User registered successfully"
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          status: false,
+          message: `Missing mandatory fields: ${missingFields.join(", ")}`
         });
+      }
+
+      const result = await UserService.RegisterUser(req.body);
+
+      if (result.alreadyExists) {
+        return res.status(409).json({
+          status: false,
+          message: "User already exists with this mobile number"
+        });
+      }
+
+      return res.status(201).json({
+        status: true,
+        message: "User registered successfully"
+      });
     } catch (error) {
-        console.error("Error in RegisterUser controller:", error);
-        return res.status(500).json({
-            status: false,
-            message: "Failed to register user"
-        });
+      console.error("Error in RegisterUser controller:", error);
+      return res.status(500).json({
+        status: false,
+        message: "Failed to register user"
+      });
     }
-},
-     
-getUserProfile: async (req, res) => {
-  try {
-    const { id } = req.params;
-    const user = await UserService.getUserProfileById(id);
+  },
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+  getUserProfile: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = await UserService.getUserProfileById(id);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      return res.status(200).json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      return res.status(500).json({ message: "Internal server error", error: error.message });
     }
+  },
 
-    return res.status(200).json(user);
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    return res.status(500).json({ message: "Internal server error", error: error.message });
-  }
-},
+  updateUserProfile: async (req, res) => {
+    try {
+      const userId = req.params.id;
+      await UserService.updateUserProfile(userId, req.body, req.file);
 
-updateUserProfile: async (req, res) => {
-  try {
-    const userId = req.params.id;
-    await UserService.updateUserProfile(userId, req.body, req.file);
-
-    res.status(200).json({ success: true, message: "User profile updated successfully" });
-  } catch (err) {
-    console.error("Update error:", err);
-    res.status(500).json({ success: false, message: "Something went wrong" });
-  }
-},
+      res.status(200).json({ success: true, message: "User profile updated successfully" });
+    } catch (err) {
+      console.error("Update error:", err);
+      res.status(500).json({ success: false, message: "Something went wrong" });
+    }
+  },
 
   uploadProfilePicture: async (req, res) => {
     try {
-      const userId      = req.params.id;
+      const userId = req.params.id;
       const file_upload = req.file;  // multer put it here
 
       if (!file_upload) {
@@ -126,25 +126,50 @@ updateUserProfile: async (req, res) => {
         .json({ success: false, message: "Upload failed" });
     }
   },
+updateUserStatus: async (req, res) => {
+ try {
+    // 1️⃣ Extract userId from request parameters
+    const { userId } = req.query;
+    if (!userId || isNaN(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or missing userId',
+      });
+    }
 
-// SendOtp: async (req, res) => {
-//       try {
-//           const { phoneNumber, otp } = req.body; 
+    // 3️⃣ Call service to set status to inactive
+    const result = await UserService.updateUserStatus(userId, 0);
 
-//           const result = await UserService.SendOtp(phoneNumber, otp);
-
-//           return res.status(200).json({
-//               status: true,
-//               message: "OTP sent successfully",
-//               data: result
-//           });
-//       } catch (error) {
-//           console.error("Error in SendOtp controller:", error);
-//           return res.status(500).json({
-//               status: false,
-//               message: "Failed to send OTP"
-//           });
-//       }
-//   }
+    // 4️⃣ Send success response
+    return res.status(200).json(result);
+  } catch (error) {
+    // 5️⃣ Handle errors
+    return res.status(error.message.includes('not found') ? 404 : 500).json({
+      success: false,
+      message: error.message,
+    });
   }
+},
+
+
+  // SendOtp: async (req, res) => {
+  //       try {
+  //           const { phoneNumber, otp } = req.body; 
+
+  //           const result = await UserService.SendOtp(phoneNumber, otp);
+
+  //           return res.status(200).json({
+  //               status: true,
+  //               message: "OTP sent successfully",
+  //               data: result
+  //           });
+  //       } catch (error) {
+  //           console.error("Error in SendOtp controller:", error);
+  //           return res.status(500).json({
+  //               status: false,
+  //               message: "Failed to send OTP"
+  //           });
+  //       }
+  //   }
+}
 
