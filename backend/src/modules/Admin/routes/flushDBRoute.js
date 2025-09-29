@@ -5,10 +5,13 @@
 
 // const router = express.Router();
 
+import express from 'express';
+import { FlushDBController } from '../controllers/flushDBController.js';
 
-// // router.post("/Upload_GR",authMiddleware, upload.single("file_upload"),GRController.uploadGrToAzure);
+const router = express.Router();
+router.post('/send-mobile-otp', FlushDBController.sendMobileOtp);
+router.post('/verify-mobile-otp', FlushDBController.verifyMobileOtp);
+router.post('/verify-email-otp', FlushDBController.verifyEmailOtp);
+router.post('/flush-data', FlushDBController.flushTable);
 
-// router.post('/flushDB_Send_Otp', FlushDBController.sendOtp);
-// router.post('/flushDB_Verify_Otp', FlushDBController.verifyOtp);
-
-// export default router;
+export default router;

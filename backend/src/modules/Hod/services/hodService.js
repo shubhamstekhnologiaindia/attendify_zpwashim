@@ -1,6 +1,7 @@
 import { query } from "../../../../utils/database.js";
 import { decrypt, decryptDeterministic } from "../../../../utils/crypto.js"; // Import decryption function
-// import { decrypt, decryptDeterministic } from '../../../../utils/crypto.js';
+import { sendStatusApprovedSMS } from "../../../../utils/smsSender.js";
+
 export const hodService = {
   getEmployeesByHod: async (hod_id) => {
     try {
@@ -50,41 +51,62 @@ export const hodService = {
       return { error: "Database error", details: err.message };
     }
   },
-  updateEmployeeStatus: async (hod_id, employee_id, status) => {
-    try {
-      // Check if the HOD ID is valid by querying the taluka table
-      // const checkHodQuery = `SELECT id FROM taluka WHERE hod_id = ?`;
-      // const checkHod = await query(checkHodQuery, [hod_id]);
+  // updateEmployeeStatus: async (hod_id, employee_id, status) => {
+  //   try {
+     
   
-      // if (!checkHod || checkHod.length === 0) {
-      //   return { message: "This user is not a valid HOD" };
-      // }
-  
-      // Check if employee belongs to the specified HOD (via taluka_id)
-      // const checkEmployeeQuery = `
-      //   SELECT id FROM users WHERE id = ? AND taluka_id IN (SELECT id FROM taluka WHERE hod_id = ?)
-      // `;
-      // const checkEmployee = await query(checkEmployeeQuery, [employee_id, hod_id]);
-  
-      // if (!checkEmployee || checkEmployee.length === 0) {
-      //   return { message: "Employee not found or doesn't belong to the HOD" };
-      // }
-  
-      // Update employee status (1 = approved, 2 = rejected)
-      const updateStatusQuery = `
-        UPDATE users SET status = ${status} WHERE id = ${employee_id};
-      `;
-      console.log("Checking",updateStatusQuery); // Log the HOD ID for debugging
+  //     // Update employee status (1 = approved, 2 = rejected)
+  //     const updateStatusQuery = `
+  //       UPDATE users SET status = ${status} WHERE id = ${employee_id};
+  //     `;
+  //     console.log("Checking",updateStatusQuery); // Log the HOD ID for debugging
 
-      const response = await query(updateStatusQuery);
-      console.log("Response:", response); // Log the response for debugging
+  //     const response = await query(updateStatusQuery);
+  //     console.log("Response:", response); // Log the response for debugging
   
-      return { message: status === 1 ? "Employee status approved successfully" : "Employee status rejected successfully" };
-    } catch (err) {
-      console.error("Database error: ", err.message);
-      return { error: "Database error", details: err.message };
+  //     return { message: status === 1 ? "Employee status approved successfully" : "Employee status rejected successfully" };
+  //   } catch (err) {
+  //     console.error("Database error: ", err.message);
+  //     return { error: "Database error", details: err.message };
+  //   }
+  // },
+  updateEmployeeStatus: async (hod_id, employee_id, status) => {
+
+    try {
+    // Step 1: Get encrypted mobile number
+    const [user] = await query(`SELECT mob_no FROM users WHERE id = ?`, [employee_id]);
+
+    if (!user) {
+      return { message: "Employee not found" };
     }
-  },
+
+    // Step 2: If status = 1, decrypt and send SMS
+    if (status === 1) {
+      const decryptedMobile = decryptDeterministic(user.mob_no);
+      if (!decryptedMobile) {
+        return { message: "Status updated, but failed to decrypt mobile" };
+      }
+
+      const smsSent = await sendStatusApprovedSMS(decryptedMobile);
+      if (!smsSent) {
+        return { message: "Status updated, but SMS sending failed" };
+      }
+    }
+
+    // Step 3: Update status securely
+    const updateQuery = `UPDATE users SET status = ? WHERE id = ?`;
+    const result = await query(updateQuery, [status, employee_id]);
+
+    return {
+      message: status === 1
+        ? "Employee status approved and SMS sent"
+        : "Employee status rejected",
+    };
+  } catch (err) {
+    console.error("Error in updateEmployeeStatus:", err.message);
+    return { error: "Database error", details: err.message };
+  }
+},
 
   getUsersByHodDept: async ({ dept_id }) => {
     try {

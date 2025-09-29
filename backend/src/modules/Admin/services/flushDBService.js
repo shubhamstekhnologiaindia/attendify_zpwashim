@@ -1,71 +1,143 @@
-// import axios from 'axios';
+import dotenv from "dotenv";
+import { query } from "../../../../utils/database.js";
+import { mobileOtpService } from './mobileOtpService.js';
+import { emailOtpService } from './emailOtpService.js';
+import { decryptDeterministic, decrypt} from "../../../../utils/crypto.js";
+dotenv.config();
 
-// const otpStore = new Map(); // module-level OTP store
+export class FlushDBService {
+  constructor() {
+    this.verificationState = new Map();
+  }
+// ✅ Always fetch user with role_id = 101 and decrypt mob_no
+ async getFirstUser() {
+  const rows = await query(`SELECT * FROM users WHERE role_id = 101 ORDER BY id ASC LIMIT 1`);
 
-// export const FlushDBService = {
-//     // Generate 6-digit OTP
-//     generateOtp() {
-//         return Math.floor(100000 + Math.random() * 900000).toString();
-//     },
+  if (!rows || rows.length === 0) {
+    throw new Error("No user found with role_id 101");
+  }
 
-//     // Validate Indian mobile number
-//     validateMobileNumber(mobile) {
-//         const mobileRegex = /^[6-9]\d{9}$/;
-//         return mobileRegex.test(mobile);
-//     },
+  const user = rows[0];
 
-//     // Send OTP via SMS
-//     sendOtp: async (mobile) => {
-//         if (!FlushDBService.validateMobileNumber(mobile)) {
-//             throw new Error('Invalid mobile number');
-//         }
+  if (!user.mob_no) throw new Error("Mobile number not found for selected user");
+  if (!user.email) throw new Error("Email not found for selected user");
 
-//         const otp = FlushDBService.generateOtp();
-//         const encodedMessage = encodeURIComponent(
-//             `आपला ओटीपी क्रमांक आहे: ${otp} कृपया हा ओटीपी पुढील प्रक्रियेसाठी वापरा.`
-//         );
+  try {
+    user.mob_no = decryptDeterministic(user.mob_no);
+    user.email = decrypt(user.email);// ✅ ADD THIS LINE
+  } catch (err) {
+    throw new Error("Error decrypting user data: " + err.message);
+  }
 
-//         const url = `http://bulksms.saakshisoftware.com/api/mt/SendSMS?user=TECHNOLOGIA&password=70837513&senderid=SNILKT&channel=Trans&DCS=8&flashsms=0&number=${mobile}&text=${encodedMessage}&route=04&DLTTemplateId=1707174402543957427&PEID=1701172491385434035`;
+  return user;
+}
 
-//         try {
-//             const response = await axios.get(url);
+async flushTable(tableNames) {
+  const user = await this.getFirstUser();
+  const state = this.verificationState.get(user.id);
 
-//             if (response.data.ErrorCode === "000") {
-//                 // Store OTP with timestamp
-//                 otpStore.set(mobile, {
-//                     otp,
-//                     timestamp: Date.now()
-//                 });
-//                 return true;
-//             }
+  if (!state?.mobileVerified || !state?.emailVerified) {
+    return {
+      status: 403,
+      success: false,
+      message: "Please verify both mobile and email OTPs before proceeding.",
+    };
+  }
 
-//             throw new Error('Failed to send OTP');
-//         } catch (error) {
-//             throw new Error(`SMS API error: ${error.message}`);
-//         }
-//     },
+  const tables = Array.isArray(tableNames) ? tableNames : [tableNames];
 
-//     // Verify OTP
-//     verifyOtp: async (mobile, otp) => {
-//         const storedOtpData = otpStore.get(mobile);
+  const results = [];
 
-//         if (!storedOtpData) {
-//             return { success: false, message: 'OTP not found or expired' };
-//         }
+  try {
+    for (const tableName of tables) {
+      if (tableName === "users") {
+        const [firstUser] = await query(
+          `SELECT id FROM users WHERE role_id = 101 ORDER BY id ASC LIMIT 1`
+        );
+        const firstUserId = firstUser?.id || 0;
 
-//         const timeDiff = (Date.now() - storedOtpData.timestamp) / 1000 / 60; // in minutes
+        await query(
+          `DELETE FROM users WHERE id != ? AND role_id != 101`,
+          [firstUserId]
+        );
 
-//         if (timeDiff > 5) {
-//             otpStore.delete(mobile);
-//             return { success: false, message: 'OTP expired' };
-//         }
+        const [firstLoginPer] = await query(
+          `SELECT login_per_id FROM tbl_user_login_per ORDER BY login_per_id ASC LIMIT 1`
+        );
+        const firstLoginPerId = firstLoginPer?.login_per_id || 0;
 
-//         if (storedOtpData.otp === otp) {
-//             otpStore.delete(mobile);
-//             return { success: true, message: 'OTP verified successfully' };
-//         }
+        await query(
+          `DELETE FROM tbl_user_login_per WHERE login_per_id != ?`,
+          [firstLoginPerId]
+        );
 
-//         return { success: false, message: 'Invalid OTP' };
-//     }
-// };
+        results.push(`users flushed`);
+      } else if (tableName === "tbl_attendance_records") {
+        await query(`DELETE FROM tbl_attendance_records`);
+        results.push(`tbl_attendance_records flushed`);
+      } else {
+        results.push(`Invalid table: ${tableName}`);
+      }
+    }
 
+    this.verificationState.delete(user.id);
+
+    return {
+      status: 200,
+      success: true,
+      message: results.join(", "),
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      success: false,
+      message: `Flush failed: ${error.message}`,
+    };
+  }
+}
+
+
+
+  // Send mobile OTP
+  async sendMobileOtp() {
+    const user = await this.getFirstUser();
+    await mobileOtpService.sendOtp(user.mob_no);
+    this.verificationState.set(user.id, { mobileVerified: false, emailVerified: false });
+    return user;
+  }
+
+  // Verify mobile OTP
+  verifyMobileOtp(mobile, otp) {
+    const result = mobileOtpService.verifyOtp(mobile, otp);
+    if (result.success) {
+      const userId = Array.from(this.verificationState.keys())[0];
+      const state = this.verificationState.get(userId);
+      state.mobileVerified = true;
+      this.verificationState.set(userId, state);
+    }
+    return result;
+  }
+
+  // Send email OTP
+  async sendEmailOtp() {
+    const user = await this.getFirstUser();
+    await emailOtpService.sendOtp(user.email);
+    return user;
+  }
+
+  // Verify email OTP
+  verifyEmailOtp(email, otp) {
+    const result = emailOtpService.verifyOtp(email, otp);
+    if (result.success) {
+      const userId = Array.from(this.verificationState.keys())[0];
+      const state = this.verificationState.get(userId);
+      state.emailVerified = true;
+      this.verificationState.set(userId, state);
+    }
+    return result;
+  }
+
+ 
+}
+
+export const flushDBService = new FlushDBService();

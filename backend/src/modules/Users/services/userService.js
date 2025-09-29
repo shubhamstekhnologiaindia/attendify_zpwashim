@@ -280,36 +280,36 @@ updateUserProfile: async (userId, data) => {
 
 
 
-SendOtp: async (phoneNumber, otp) => {
+// SendOtp: async (phoneNumber, otp) => {
    
-    try {
-        const apiUrl = 'http://bulksms.saakshisoftware.com/api/mt/SendSMS';
+//     try {
+//         const apiUrl = 'http://bulksms.saakshisoftware.com/api/mt/SendSMS';
 
-        const params = {
-            user: 'Tekhnologia',
-            password: 'Tech%40123%23',
-            senderid: 'SNILKT',
-            channel: 'Trans',
-            DCS: '04',
-            flashsms: '0',
-            number: phoneNumber,
-            text: `आपला ओटीपी क्रमांक आहे: ${otp} कृपया हा ओटीपी पुढील प्रक्रियेसाठी वापरा. - झेडपी वाशिम SHRI NILKANTHESHWAR`,
-            route: '04',
-            DLTTemplateId: '1707174402037894471',
-            PEID: '1701172491385434035'
-        };
+//         const params = {
+//             user: 'Tekhnologia',
+//             password: 'Tech%40123%23',
+//             senderid: 'SNILKT',
+//             channel: 'Trans',
+//             DCS: '04',
+//             flashsms: '0',
+//             number: phoneNumber,
+//             text: `आपला ओटीपी क्रमांक आहे: ${otp} कृपया हा ओटीपी पुढील प्रक्रियेसाठी वापरा. - झेडपी वाशिम SHRI NILKANTHESHWAR`,
+//             route: '04',
+//             DLTTemplateId: '1707174402037894471',
+//             PEID: '1701172491385434035'
+//         };
 
-        const response = await axios.get(apiUrl, { params });
+//         const response = await axios.get(apiUrl, { params });
       
 
-        if (response.status === 200) {
-            return response.data; // Return the response data if needed
-        } else {
-            throw new Error("Failed to send OTP");
-        }
-    } catch (error) {
-        console.error("Error in SendOtp service:", error);
-        throw new Error("Failed to send OTP");
-    }
-}
+//         if (response.status === 200) {
+//             return response.data; // Return the response data if needed
+//         } else {
+//             throw new Error("Failed to send OTP");
+//         }
+//     } catch (error) {
+//         console.error("Error in SendOtp service:", error);
+//         throw new Error("Failed to send OTP");
+//     }
+// }
 };

@@ -14,6 +14,8 @@ import fieldvisitRoute from "./src/modules/Users/routes/fieldvisitRoute.js";
 
 import hodRoutes from "./src/modules/Hod/routes/hodRoute.js";
 import GrRoutes from "./src/modules/Admin/routes/grRoute.js";
+import FlushDbRoutes from "./src/modules/Admin/routes/flushDBRoute.js";
+
 
 
 import SendmsgRoute from "./src/modules/Admin/routes/msgRoute.js";
@@ -50,7 +52,8 @@ const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', AuthRoute);
 
-app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserRoute,otpRoute,
+app.use('/api', masterDataRoute, hodRoutes,attendanceRoute,GrRoutes,
+  FlushDbRoutes,SendmsgRoute,HqRoutes,notificationRoutes,holidayRoute, birthdayRoute,UserRoute,otpRoute,
   loginPermissionRoutes,reportsRoute,attendanceCountRoute,forgotPasswordRoute,shiftRoute,sansthaRoute,fieldvisitRoute,orrShiftRoute,salaryRoute);
 
 

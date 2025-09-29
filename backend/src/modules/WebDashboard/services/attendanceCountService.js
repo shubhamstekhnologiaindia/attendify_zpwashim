@@ -232,8 +232,22 @@ getUserAttendanceListDistrictByDepartment: async (departmentId) => {
   }));
 
   return decryptedRows;
-}
+},
 
+getUserSpecificDateAttendanceDepartment: async (department_id, date, cader_id) => {
+
+  const rows = await query("CALL get_user_attendance_report_by_departments(?, ?, ?)", [department_id, date, cader_id]);
+
+  const decryptedRows = rows[0].map(row => ({
+    ...row,
+    first_name: decrypt(row.first_name),
+    middle_name: decrypt(row.middle_name),
+    last_name: decrypt(row.last_name),
+    mob_no: decryptDeterministic(row.mob_no),
+  }));
+
+  return decryptedRows;
+}
 
 };
 
