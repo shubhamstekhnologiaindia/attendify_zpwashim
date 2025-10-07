@@ -277,40 +277,28 @@ export const UserService = {
 
     return { newUrl, isFirstTime };
   },
-  updateUserStatus: async (userId, status) => {
-    try {
-      // 1️⃣ Convert status to database value
-      const validStatus = status === 'active' ? 1 : 2;
+updateUserStatus: async (userId) => {
+  try {
+    // 🔹 Always set status = 2 (Deactivated)
+    const sql = `
+      UPDATE users
+      SET status = 2, updated_at = NOW()
+      WHERE id = ?
+    `;
+    const res = await query(sql, [userId]);
 
-      // 2️⃣ Update status and updated_at in the database
-      const sql = `
-        UPDATE users
-        SET status = ?, updated_at = NOW()
-        WHERE id = ?
-      `;
-      const params = [validStatus, userId];
-      const res = await query(sql, params);
-
-      // 3️⃣ Check if update was successful
-      if (res.affectedRows === 0) {
-        throw new Error('User not found or already in requested status');
-      }
-
-      // 4️⃣ Fetch updated user data for response
-      // const updatedUser = await query(
-      //   'SELECT id, first_name, middle_name, last_name, status FROM users WHERE id = ?',
-      //   [userId]
-      // );
-
-      return {
-        success: true,
-        message: `User Deactivated`,
-        // user: updatedUser[0],
-      };
-    } catch (error) {
-      throw new Error(`Failed to update user status: ${error.message}`);
+    if (res.affectedRows === 0) {
+      throw new Error('User not found');
     }
-  },
+
+    return {
+      success: true,
+      message: 'User Deactivated',
+    };
+  } catch (error) {
+    throw new Error(`Failed to deactivate user: ${error.message}`);
+  }
+},
 
 
   // SendOtp: async (phoneNumber, otp) => {
