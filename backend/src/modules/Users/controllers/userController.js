@@ -126,30 +126,30 @@ export const UserController = {
         .json({ success: false, message: "Upload failed" });
     }
   },
-updateUserStatus: async (req, res) => {
- try {
-    // 1️⃣ Extract userId from request parameters
-    const { userId } = req.query;
-    if (!userId || isNaN(userId)) {
-      return res.status(400).json({
+  updateUserStatus: async (req, res) => {
+    try {
+      // 1️⃣ Extract userId from request parameters
+      const { userId } = req.query;
+      if (!userId || isNaN(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid or missing userId',
+        });
+      }
+
+      // 3️⃣ Call service to set status to inactive
+      const result = await UserService.updateUserStatus(userId, 0);
+
+      // 4️⃣ Send success response
+      return res.status(200).json(result);
+    } catch (error) {
+      // 5️⃣ Handle errors
+      return res.status(error.message.includes('not found') ? 404 : 500).json({
         success: false,
-        message: 'Invalid or missing userId',
+        message: error.message,
       });
     }
-
-    // 3️⃣ Call service to set status to inactive
-    const result = await UserService.updateUserStatus(userId, 0);
-
-    // 4️⃣ Send success response
-    return res.status(200).json(result);
-  } catch (error) {
-    // 5️⃣ Handle errors
-    return res.status(error.message.includes('not found') ? 404 : 500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-},
+  },
 
 
   // SendOtp: async (req, res) => {

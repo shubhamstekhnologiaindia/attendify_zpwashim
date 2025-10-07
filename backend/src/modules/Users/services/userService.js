@@ -277,10 +277,10 @@ export const UserService = {
 
     return { newUrl, isFirstTime };
   },
-updateUserStatus: async (userId, status) => {
-  try {
+  updateUserStatus: async (userId, status) => {
+    try {
       // 1️⃣ Convert status to database value
-      const validStatus = status === 'active' ? 1 : 0;
+      const validStatus = status === 'active' ? 1 : 2;
 
       // 2️⃣ Update status and updated_at in the database
       const sql = `
