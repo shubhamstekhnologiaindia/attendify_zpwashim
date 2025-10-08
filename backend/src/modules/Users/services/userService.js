@@ -78,7 +78,62 @@ export const UserService = {
     }
   },
 
+UpdateUser: async (userData) => {
+  try {
+    const {
+      user_id,
+      first_name,
+      middle_name,
+      last_name,
+      mob_no,
+      email,
+      birth_date,
+      joining_date,
+      department_id,
+      office_location_id,
+      taluka_id,
+      village_id,
+      cader_id,
+      role_id,
+      device_id
+    } = userData;
 
+    // Fetch existing user
+    const existingUser = await query(`SELECT * FROM users WHERE id = ? LIMIT 1`, [user_id]);
+    if (existingUser.length === 0) {
+      return { notFound: true };
+    }
+
+    // Encrypt only provided fields
+    const encryptedMobNo = mob_no ? encryptDeterministic(mob_no) : existingUser[0].mob_no;
+
+    // Call stored procedure
+    const sql = `CALL UpdateUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    const results = await query(sql, [
+      user_id,
+      first_name ? encrypt(first_name) : null,
+      middle_name ? encrypt(middle_name) : null,
+      last_name ? encrypt(last_name) : null,
+      mob_no ? encryptedMobNo : null,
+      email ? encrypt(email) : null,
+      birth_date || null,
+      joining_date || null,
+      department_id || null,
+      office_location_id || null,
+      taluka_id || null,
+      village_id || null,
+      cader_id || null,
+      role_id || null,
+      device_id || null
+    ]);
+
+    return { success: true, data: results };
+  } catch (error) {
+    console.error("Error in UpdateUser service:", error);
+    throw new Error("Failed to update user");
+  }
+},
 
 
   getUserProfileById: async (id) => {
