@@ -13,5 +13,6 @@ router.put("/update-user/:id", authMiddleware, upload.single("user_profile"), Us
 router.put("/Update_Profile_Picture/:id", authMiddleware, upload.single("user_profile"), UserController.uploadProfilePicture);
 
 router.put("/update-user-status", UserController.updateUserStatus);
+router.put("/update-user", UserController.updateUser);
 
 export default router;

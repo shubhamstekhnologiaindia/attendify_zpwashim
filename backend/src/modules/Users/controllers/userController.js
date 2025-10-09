@@ -6,6 +6,8 @@ import { encrypt, encryptDeterministic } from "../../../../utils/crypto.js";
 import fs from "fs";
 import path from "path";
 import multer from "multer";
+import jwt from "jsonwebtoken";
+
 
 
 export const UserController = {
@@ -69,6 +71,62 @@ export const UserController = {
       });
     }
   },
+
+
+
+ updateUser: async (req, res) => {
+  try {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({
+        status: false,
+        message: "Missing mandatory field: user_id",
+      });
+    }
+
+    // ✅ Extract token from header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: false,
+        message: "Authorization token missing or invalid",
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key");
+
+    // ✅ Allow only role_id 101 or 102 to update users
+    if (![101, 102].includes(decoded.role_id)) {
+      return res.status(403).json({
+        status: false,
+        message: "You are not authorized to update users",
+      });
+    }
+
+    // ✅ Proceed with update if authorized
+    const result = await UserService.UpdateUser(req.body);
+
+    if (result.notFound) {
+      return res.status(404).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "User updated successfully",
+    });
+  } catch (error) {
+    console.error("Error in UpdateUser controller:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Failed to update user",
+    });
+  }
+},
 
   getUserProfile: async (req, res) => {
     try {
@@ -137,7 +195,6 @@ export const UserController = {
       });
     }
 
-    // 🔹 Call service (always sets status = 2)
     const result = await UserService.updateUserStatus(userId);
 
     return res.status(200).json(result);
@@ -149,6 +206,7 @@ export const UserController = {
     });
   }
 },
+
 
 
   // SendOtp: async (req, res) => {

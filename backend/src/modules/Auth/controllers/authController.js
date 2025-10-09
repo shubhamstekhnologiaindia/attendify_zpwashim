@@ -55,6 +55,11 @@ export const AuthController = {
         });
       }
 
+       if (userData.status === 2) {
+      return res.status(403).json({
+        message: "तुमचे खाते निष्क्रिय केले गेले आहे. कृपया प्रशासकाशी संपर्क साधा.",
+      });
+    }
       // Validate status
       if (userData.status !== 1) {
         return res.status(403).json({
