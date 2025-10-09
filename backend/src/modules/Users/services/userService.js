@@ -333,27 +333,27 @@ UpdateUser: async (userData) => {
     return { newUrl, isFirstTime };
   },
   updateUserStatus: async (userId) => {
-    try {
-      // 🔹 Always set status = 2 (Deactivated)
-      const sql = `
-        UPDATE users
-        SET status = 2, updated_at = NOW()
-        WHERE id = ?
-      `;
-      const res = await query(sql, [userId]);
+  try {
+    // 🔹 Set status = 2 (Deactivated) and clear FCM token
+    const sql = `
+      UPDATE users
+      SET status = 2, fcm_token = NULL, updated_at = NOW()
+      WHERE id = ?
+    `;
+    const res = await query(sql, [userId]);
 
-      if (res.affectedRows === 0) {
-        throw new Error('User not found');
-      }
-
-      return {
-        success: true,
-        message: 'User Deactivated',
-      };
-    } catch (error) {
-      throw new Error(`Failed to deactivate user: ${error.message}`);
+    if (res.affectedRows === 0) {
+      throw new Error('User not found');
     }
-  },
+
+    return {
+      success: true,
+      message: 'User Deactivated ',
+    };
+  } catch (error) {
+    throw new Error(`Failed to deactivate user: ${error.message}`);
+  }
+},
 
 
   // SendOtp: async (phoneNumber, otp) => {

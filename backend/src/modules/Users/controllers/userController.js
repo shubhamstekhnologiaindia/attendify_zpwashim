@@ -184,29 +184,29 @@ export const UserController = {
         .json({ success: false, message: "Upload failed" });
     }
   },
-  updateUserStatus: async (req, res) => {
-    try {
-      const { userId } = req.body;
+ updateUserStatus: async (req, res) => {
+  try {
+    const { userId } = req.body;
 
-      if (!userId || isNaN(userId)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid or missing userId',
-        });
-      }
-
-      // 🔹 Call service (always sets status = 2)
-      const result = await UserService.updateUserStatus(userId);
-
-      return res.status(200).json(result);
-    } catch (error) {
-      console.error('Error in updateUserStatus:', error);
-      return res.status(500).json({
+    if (!userId || isNaN(userId)) {
+      return res.status(400).json({
         success: false,
-        message: error.message,
+        message: 'Invalid or missing userId',
       });
     }
-  },
+
+    const result = await UserService.updateUserStatus(userId);
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error('Error in updateUserStatus:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+},
+
 
 
   // SendOtp: async (req, res) => {
