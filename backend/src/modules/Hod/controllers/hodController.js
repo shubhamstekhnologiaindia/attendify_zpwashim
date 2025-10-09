@@ -42,31 +42,46 @@ export const hodController = {
     },
 
 
-    getUsersByHodDept: async (req, res) => {
-      try {
-          const { dept_id } = req.query;
+getUsersByHodDept: async (req, res) => {
+  try {
+    const { dept_id } = req.query;
+    const { role_id } = req.user; // from token
 
-          // Validate dept_id
-          if (!dept_id || isNaN(dept_id)) {
-              return res.status(400).json({
-                  status: false,
-                  message: 'Valid dept_id is required'
-              });
-          }
+    // Validate role_id
+    if (!role_id) {
+      return res.status(400).json({
+        status: false,
+        message: "User role_id missing from token"
+      });
+    }
 
-          const users = await hodService.getUsersByHodDept({ dept_id: parseInt(dept_id) });
-          res.status(200).json({
-              status: true,
-              message: 'Users retrieved successfully',
-              data: users
-          });
-      } catch (error) {
-          res.status(500).json({
-              status: false,
-              message: error.message
-          });
-      }
-  },
+    // For non-admins, dept_id must be provided and valid
+    if (role_id !== 101 && (!dept_id || isNaN(dept_id))) {
+      return res.status(400).json({
+        status: false,
+        message: "Valid dept_id is required for non-admin users"
+      });
+    }
+
+    const users = await hodService.getUsersByHodDept({
+      dept_id: dept_id ? parseInt(dept_id) : null,
+      role_id: parseInt(role_id)
+    });
+
+    res.status(200).json({
+      status: true,
+      message: "Users retrieved successfully",
+      data: users
+    });
+  } catch (error) {
+    console.error("Error in getUsersByHodDept:", error);
+    res.status(500).json({
+      status: false,
+      message: error.message
+    });
+  }
+},
+
 
 
   updateFieldStatus: async (req, res) => {
