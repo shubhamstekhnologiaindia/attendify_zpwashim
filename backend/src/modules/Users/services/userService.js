@@ -360,7 +360,7 @@ export const UserService = {
 
 getAllUserTypes: async () => {
   try {
-    const fetchTypesQuery = `SELECT id, type_name FROM tbl_user_type`;
+    const fetchTypesQuery = `SELECT id, type_name, type_name_eng FROM tbl_user_type`;
     const results = await query(fetchTypesQuery);
 
     console.log("Raw results:", results);
@@ -374,7 +374,9 @@ getAllUserTypes: async () => {
 
     return rows.map(type => ({
       id: type.id,
-      type_name: type.type_name
+      type_name: type.type_name,
+      type_name_eng: type.type_name_eng
+
     }));
   } catch (error) {
     console.error("Error in getAllUserTypes:", error);
