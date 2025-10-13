@@ -29,7 +29,7 @@ export const UserService = {
     try {
       const {
         first_name, middle_name, last_name,
-        mob_no, email, birth_date, joining_date, department_id,
+        mob_no, email, birth_date, joining_date, department_id, user_type,
         office_location_id, taluka_id, village_id,
         cader_id, password, role_id, device_id
       } = userData;
@@ -50,7 +50,7 @@ export const UserService = {
       }
 
       // Continue registration
-      const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const results = await query(sql, [
@@ -62,6 +62,7 @@ export const UserService = {
         birth_date,
         joining_date,
         department_id,
+        user_type,
         office_location_id,
         taluka_id,
         village_id,
@@ -90,6 +91,7 @@ export const UserService = {
         birth_date,
         joining_date,
         department_id,
+        user_type,
         office_location_id,
         taluka_id,
         village_id,
@@ -108,7 +110,7 @@ export const UserService = {
       const encryptedMobNo = mob_no ? encryptDeterministic(mob_no) : existingUser[0].mob_no;
 
       // Call stored procedure
-      const sql = `CALL UpdateUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      const sql = `CALL UpdateUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
       const results = await query(sql, [
         user_id,
@@ -120,6 +122,7 @@ export const UserService = {
         birth_date || null,
         joining_date || null,
         department_id || null,
+        user_type || null,
         office_location_id || null,
         taluka_id || null,
         village_id || null,

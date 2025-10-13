@@ -16,7 +16,7 @@ export const UserController = {
     try {
       const {
         first_name, middle_name, last_name,
-        mob_no, email, birth_date, joining_date, department_id,
+        mob_no, email, birth_date, joining_date, department_id,user_type,
         office_location_id, taluka_id, village_id,
         cader_id, password
       } = req.body;
@@ -30,6 +30,7 @@ export const UserController = {
         email,
         birth_date,
         department_id,
+        user_type,
         office_location_id,
         taluka_id,
         village_id,
