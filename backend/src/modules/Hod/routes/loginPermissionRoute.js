@@ -10,5 +10,8 @@ router.get("/getUserForLoginPermissions/:permitter_id",authMiddleware, loginPerm
 
 router.get("/getAllUsers/:department_id?", authMiddleware, loginPermissionController.getAllUsersByDepartment);
 
+// router.get("/getUsersByLocationAndDepartment", loginPermissionController.getUsersByLocationAndDepartmentController);
+router.get( "/getUsersByLocationAndDepartment",loginPermissionController.getUsersByLocationAndDepartmentController
+);
 
 export default router;

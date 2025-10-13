@@ -41,4 +41,39 @@ export const loginPermissionController = {
         }
     },
 
+
+     getUsersByLocationAndDepartmentController: async (req, res) => {
+    try {
+      const { location_id, department_id } = req.query;
+
+      if (!location_id) {
+        return res.status(400).json({
+          status: false,
+          message: "location_id is required",
+        });
+      }
+
+      // ✅ FIX: Call service method correctly
+      const users = await loginPermission.getUsersByLocationAndDepartment(location_id, department_id);
+
+      if (!users || users.length === 0) {
+        return res.status(404).json({
+          status: false,
+          message: "No users found for given filters",
+        });
+      }
+
+      return res.status(200).json({
+        status: true,
+        message: "Users fetched successfully",
+        data: users,
+      });
+    } catch (error) {
+      console.error("Error in getUsersByLocationAndDepartmentController:", error);
+      return res.status(500).json({
+        status: false,
+        message: "Internal server error",
+      });
+    }
+  },
 };
