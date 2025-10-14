@@ -98,7 +98,8 @@ export const loginPermission = {
             // village_name: user.village_name,
             location_name: user.location_name,
             cader_name: user.cader_name,
-            department_name: user.department_name
+            password:decrypt(user.password),
+            department_name: user.department_name,
         }));
     } catch (error) {
         console.error("Error in getAllUsersByDepartment:", error);

@@ -15,4 +15,7 @@ router.put("/Update_Profile_Picture/:id", authMiddleware, upload.single("user_pr
 router.put("/update-user-status", UserController.updateUserStatus);
 router.put("/update-user", UserController.updateUser);
 
+router.get("/user-types", UserController.getUserTypes);
+
+
 export default router;

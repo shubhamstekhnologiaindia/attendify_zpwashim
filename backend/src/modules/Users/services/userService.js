@@ -29,7 +29,7 @@ export const UserService = {
     try {
       const {
         first_name, middle_name, last_name,
-        mob_no, email, birth_date, joining_date, department_id,
+        mob_no, email, birth_date, joining_date, department_id, user_type,
         office_location_id, taluka_id, village_id,
         cader_id, password, role_id, device_id
       } = userData;
@@ -50,7 +50,7 @@ export const UserService = {
       }
 
       // Continue registration
-      const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      const sql = `CALL RegisterUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const results = await query(sql, [
@@ -62,6 +62,7 @@ export const UserService = {
         birth_date,
         joining_date,
         department_id,
+        user_type,
         office_location_id,
         taluka_id,
         village_id,
@@ -78,62 +79,64 @@ export const UserService = {
     }
   },
 
-UpdateUser: async (userData) => {
-  try {
-    const {
-      user_id,
-      first_name,
-      middle_name,
-      last_name,
-      mob_no,
-      email,
-      birth_date,
-      joining_date,
-      department_id,
-      office_location_id,
-      taluka_id,
-      village_id,
-      cader_id,
-      role_id,
-      device_id
-    } = userData;
+  UpdateUser: async (userData) => {
+    try {
+      const {
+        user_id,
+        first_name,
+        middle_name,
+        last_name,
+        mob_no,
+        email,
+        birth_date,
+        joining_date,
+        department_id,
+        user_type,
+        office_location_id,
+        taluka_id,
+        village_id,
+        cader_id,
+        role_id,
+        device_id
+      } = userData;
 
-    // Fetch existing user
-    const existingUser = await query(`SELECT * FROM users WHERE id = ? LIMIT 1`, [user_id]);
-    if (existingUser.length === 0) {
-      return { notFound: true };
+      // Fetch existing user
+      const existingUser = await query(`SELECT * FROM users WHERE id = ? LIMIT 1`, [user_id]);
+      if (existingUser.length === 0) {
+        return { notFound: true };
+      }
+
+      // Encrypt only provided fields
+      const encryptedMobNo = mob_no ? encryptDeterministic(mob_no) : existingUser[0].mob_no;
+
+      // Call stored procedure
+      const sql = `CALL UpdateUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+      const results = await query(sql, [
+        user_id,
+        first_name ? encrypt(first_name) : null,
+        middle_name ? encrypt(middle_name) : null,
+        last_name ? encrypt(last_name) : null,
+        mob_no ? encryptedMobNo : null,
+        email ? encrypt(email) : null,
+        birth_date || null,
+        joining_date || null,
+        department_id || null,
+        user_type || null,
+        office_location_id || null,
+        taluka_id || null,
+        village_id || null,
+        cader_id || null,
+        role_id || null,
+        device_id || null
+      ]);
+
+      return { success: true, data: results };
+    } catch (error) {
+      console.error("Error in UpdateUser service:", error);
+      throw new Error("Failed to update user");
     }
-
-    // Encrypt only provided fields
-    const encryptedMobNo = mob_no ? encryptDeterministic(mob_no) : existingUser[0].mob_no;
-
-    // Call stored procedure
-    const sql = `CALL UpdateUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-    const results = await query(sql, [
-      user_id,
-      first_name ? encrypt(first_name) : null,
-      middle_name ? encrypt(middle_name) : null,
-      last_name ? encrypt(last_name) : null,
-      mob_no ? encryptedMobNo : null,
-      email ? encrypt(email) : null,
-      birth_date || null,
-      joining_date || null,
-      department_id || null,
-      office_location_id || null,
-      taluka_id || null,
-      village_id || null,
-      cader_id || null,
-      role_id || null,
-      device_id || null
-    ]);
-
-    return { success: true, data: results };
-  } catch (error) {
-    console.error("Error in UpdateUser service:", error);
-    throw new Error("Failed to update user");
-  }
-},
+  },
 
 
   getUserProfileById: async (id) => {
@@ -333,27 +336,55 @@ UpdateUser: async (userData) => {
     return { newUrl, isFirstTime };
   },
   updateUserStatus: async (userId) => {
-  try {
-    // 🔹 Set status = 2 (Deactivated) and clear FCM token
-    const sql = `
+    try {
+      // 🔹 Set status = 2 (Deactivated) and clear FCM token
+      const sql = `
       UPDATE users
       SET status = 2, fcm_token = NULL, updated_at = NOW()
       WHERE id = ?
     `;
-    const res = await query(sql, [userId]);
+      const res = await query(sql, [userId]);
 
-    if (res.affectedRows === 0) {
-      throw new Error('User not found');
+      if (res.affectedRows === 0) {
+        throw new Error('User not found');
+      }
+
+      return {
+        success: true,
+        message: 'User Deactivated ',
+      };
+    } catch (error) {
+      throw new Error(`Failed to deactivate user: ${error.message}`);
+    }
+  },
+
+getAllUserTypes: async () => {
+  try {
+    const fetchTypesQuery = `SELECT id, type_name, type_name_eng FROM tbl_user_type`;
+    const results = await query(fetchTypesQuery);
+
+    console.log("Raw results:", results);
+
+    // Ensure results is an array
+    const rows = Array.isArray(results) ? results : [results];
+
+    if (!rows || rows.length === 0) {
+      return null;
     }
 
-    return {
-      success: true,
-      message: 'User Deactivated ',
-    };
+    return rows.map(type => ({
+      id: type.id,
+      type_name: type.type_name,
+      type_name_eng: type.type_name_eng
+
+    }));
   } catch (error) {
-    throw new Error(`Failed to deactivate user: ${error.message}`);
+    console.error("Error in getAllUserTypes:", error);
+    throw { status: false, message: "Database error" };
   }
 },
+
+
 
 
   // SendOtp: async (phoneNumber, otp) => {

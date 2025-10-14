@@ -16,7 +16,7 @@ export const UserController = {
     try {
       const {
         first_name, middle_name, last_name,
-        mob_no, email, birth_date, joining_date, department_id,
+        mob_no, email, birth_date, joining_date, department_id,user_type,
         office_location_id, taluka_id, village_id,
         cader_id, password
       } = req.body;
@@ -30,6 +30,7 @@ export const UserController = {
         email,
         birth_date,
         department_id,
+        user_type,
         office_location_id,
         taluka_id,
         village_id,
@@ -74,59 +75,59 @@ export const UserController = {
 
 
 
- updateUser: async (req, res) => {
-  try {
-    const { user_id } = req.body;
+  updateUser: async (req, res) => {
+    try {
+      const { user_id } = req.body;
 
-    if (!user_id) {
-      return res.status(400).json({
+      if (!user_id) {
+        return res.status(400).json({
+          status: false,
+          message: "Missing mandatory field: user_id",
+        });
+      }
+
+      // ✅ Extract token from header
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({
+          status: false,
+          message: "Authorization token missing or invalid",
+        });
+      }
+
+      const token = authHeader.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key");
+
+      // ✅ Allow only role_id 101 or 102 to update users
+      if (![101, 102].includes(decoded.role_id)) {
+        return res.status(403).json({
+          status: false,
+          message: "You are not authorized to update users",
+        });
+      }
+
+      // ✅ Proceed with update if authorized
+      const result = await UserService.UpdateUser(req.body);
+
+      if (result.notFound) {
+        return res.status(404).json({
+          status: false,
+          message: "User not found",
+        });
+      }
+
+      return res.status(200).json({
+        status: true,
+        message: "User updated successfully",
+      });
+    } catch (error) {
+      console.error("Error in UpdateUser controller:", error);
+      return res.status(500).json({
         status: false,
-        message: "Missing mandatory field: user_id",
+        message: "Failed to update user",
       });
     }
-
-    // ✅ Extract token from header
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        status: false,
-        message: "Authorization token missing or invalid",
-      });
-    }
-
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key");
-
-    // ✅ Allow only role_id 101 or 102 to update users
-    if (![101, 102].includes(decoded.role_id)) {
-      return res.status(403).json({
-        status: false,
-        message: "You are not authorized to update users",
-      });
-    }
-
-    // ✅ Proceed with update if authorized
-    const result = await UserService.UpdateUser(req.body);
-
-    if (result.notFound) {
-      return res.status(404).json({
-        status: false,
-        message: "User not found",
-      });
-    }
-
-    return res.status(200).json({
-      status: true,
-      message: "User updated successfully",
-    });
-  } catch (error) {
-    console.error("Error in UpdateUser controller:", error);
-    return res.status(500).json({
-      status: false,
-      message: "Failed to update user",
-    });
-  }
-},
+  },
 
   getUserProfile: async (req, res) => {
     try {
@@ -184,28 +185,52 @@ export const UserController = {
         .json({ success: false, message: "Upload failed" });
     }
   },
- updateUserStatus: async (req, res) => {
-  try {
-    const { userId } = req.body;
+  updateUserStatus: async (req, res) => {
+    try {
+      const { userId } = req.body;
 
-    if (!userId || isNaN(userId)) {
-      return res.status(400).json({
+      if (!userId || isNaN(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid or missing userId',
+        });
+      }
+
+      const result = await UserService.updateUserStatus(userId);
+
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error('Error in updateUserStatus:', error);
+      return res.status(500).json({
         success: false,
-        message: 'Invalid or missing userId',
+        message: error.message,
       });
     }
+  },
 
-    const result = await UserService.updateUserStatus(userId);
+   getUserTypes: async (req, res) => {
+    try {
+      const types = await UserService.getAllUserTypes();
 
-    return res.status(200).json(result);
-  } catch (error) {
-    console.error('Error in updateUserStatus:', error);
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-},
+      if (!types) {
+        return res.status(404).json({
+          success: false,
+          message: "No user types found",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: types,
+      });
+    } catch (error) {
+      console.error("Error in getUserTypes:", error);
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Internal server error",
+      });
+    }
+  },
 
 
 
