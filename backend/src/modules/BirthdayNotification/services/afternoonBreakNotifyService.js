@@ -180,7 +180,7 @@ export const scheduleNotificationsForUser = async (user) => {
       await sendNotificationForUser(user, repeatJobName);
     });
 
-    console.log(`✅ Scheduled notifications for user ${id} at ${notificationStart.format("HH:mm:ss")}`);
+    // console.log(`✅ Scheduled notifications for user ${id} at ${notificationStart.format("HH:mm:ss")}`);
   } catch (error) {
     console.error(`❌ Error scheduling user ${user.id}:`, error.message);
   }
