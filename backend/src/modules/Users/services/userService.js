@@ -358,31 +358,31 @@ export const UserService = {
     }
   },
 
-getAllUserTypes: async () => {
-  try {
-    const fetchTypesQuery = `SELECT id, type_name, type_name_eng FROM tbl_user_type`;
-    const results = await query(fetchTypesQuery);
+  getAllUserTypes: async () => {
+    try {
+      const fetchTypesQuery = `SELECT id, type_name, type_name_eng FROM tbl_user_type`;
+      const results = await query(fetchTypesQuery);
 
-    console.log("Raw results:", results);
+      console.log("Raw results:", results);
 
-    // Ensure results is an array
-    const rows = Array.isArray(results) ? results : [results];
+      // Ensure results is an array
+      const rows = Array.isArray(results) ? results : [results];
 
-    if (!rows || rows.length === 0) {
-      return null;
+      if (!rows || rows.length === 0) {
+        return null;
+      }
+
+      return rows.map(type => ({
+        id: type.id,
+        type_name: type.type_name,
+        type_name_eng: type.type_name_eng
+
+      }));
+    } catch (error) {
+      console.error("Error in getAllUserTypes:", error);
+      throw { status: false, message: "Database error" };
     }
-
-    return rows.map(type => ({
-      id: type.id,
-      type_name: type.type_name,
-      type_name_eng: type.type_name_eng
-
-    }));
-  } catch (error) {
-    console.error("Error in getAllUserTypes:", error);
-    throw { status: false, message: "Database error" };
-  }
-},
+  },
 
 
 
