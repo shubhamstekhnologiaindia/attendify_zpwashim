@@ -23,7 +23,7 @@ export const AttendanceCountService = {
       {
         title: "Headquarter Attendance",
         headquarter_count: hqResult.count,
-        total: 400,
+        total:  hqAttendance.total_users,
         working: hqAttendance.total_users,
         late_count: hqAttendance.morning_late_count,
         morning_present: hqAttendance.morning_present_count,
@@ -83,6 +83,7 @@ getUserCountsForDistrict: async () => {
   // Default to empty objects if rows not found
   const panchayatData = panchayatRow || {
     total_users: 0,
+    working:0,
     morning_present_count: 0,
     morning_absent_count: 0,
     morning_late_count: 0,
@@ -94,6 +95,7 @@ getUserCountsForDistrict: async () => {
 
   const gramData = gramRow || {
     total_users: 0,
+    working:0,
     morning_present_count: 0,
     morning_absent_count: 0,
     morning_late_count: 0,
@@ -106,7 +108,8 @@ getUserCountsForDistrict: async () => {
   const data = [
     {
       title: "District Attendance",
-      district_count: panchayatData.total_users,
+      total: panchayatData.total_users,
+      working_count:panchayatData.total_users,
       morning_present: panchayatData.morning_present_count,
       morning_absent: panchayatData.morning_absent_count,
       late_count: panchayatData.morning_late_count,
@@ -118,6 +121,7 @@ getUserCountsForDistrict: async () => {
     {
       title: "Gram Panchayat Attendance",
       grampanchayat_count: gramData.total_users,
+      working_count:gramData.total_users,
       morning_present: gramData.morning_present_count,
       morning_absent: gramData.morning_absent_count,
       late_count: gramData.morning_late_count,
