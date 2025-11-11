@@ -131,7 +131,7 @@ const sendNotificationForUser = async (user, repeatJobName) => {
         const runningJob = schedule.scheduledJobs[repeatJobName];
         if (runningJob) {
           runningJob.cancel();
-          console.log(`🛑 Stopped repeat notifications for user ${id} after attendance marked`);
+          // console.log(`🛑 Stopped repeat notifications for user ${id} after attendance marked`);
         }
       }
     }

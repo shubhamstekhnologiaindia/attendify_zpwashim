@@ -253,6 +253,8 @@ getUserCountsForDistrict: async () => {
 
     return decryptedRows;
   },
+
+
   // getUserAttendanceListDepartmentHQ: async (departmentId) => {
   //   const locationId = 1; // HQ
   //   const rows = await query("CALL get_today_user_attendance_list_By_Department(?, ?)", [locationId, departmentId]);
@@ -311,7 +313,23 @@ getUserCountsForDistrict: async () => {
     }));
 
     return decryptedRows;
-  }
+  },
+  getUserAttendanceListGP: async () => {
+  // Grampanchayat does not require locationId param — SP handles filter internally
+  const rows = await query("CALL get_today_user_attendance_list_grampanchayat()");
+
+  // Decrypt sensitive fields
+  const decryptedRows = rows[0].map(row => ({
+    ...row,
+    first_name: decrypt(row.first_name),
+    middle_name: decrypt(row.middle_name),
+    last_name: decrypt(row.last_name),
+    mob_no: decryptDeterministic(row.mob_no),
+  }));
+
+  return decryptedRows;
+},
+
 
 };
 

@@ -142,21 +142,21 @@ export const AttendanceCountController = {
     //     return res.status(500).json({ success: false, message: error.message });
     //   }
     // },
-getUserListHQByDepartment: async (req, res) => {
-  const { department_id } = req.query;
+    getUserListHQByDepartment: async (req, res) => {
+      const { department_id } = req.query;
 
-  if (!department_id) {
-    return res.status(400).json({ success: false, message: "department_id is required" });
-  }
+      if (!department_id) {
+        return res.status(400).json({ success: false, message: "department_id is required" });
+      }
 
-  try {
-    const data = await AttendanceCountService.getUserAttendanceListHQDepartment(parseInt(department_id));
-    return res.status(200).json({ success: true, data });
-  } catch (error) {
-    console.error("Error:", error);
-    return res.status(500).json({ success: false, message: error.message });
-  }
-},
+      try {
+        const data = await AttendanceCountService.getUserAttendanceListHQDepartment(parseInt(department_id));
+        return res.status(200).json({ success: true, data });
+      } catch (error) {
+        console.error("Error:", error);
+        return res.status(500).json({ success: false, message: error.message });
+      }
+    },
   getUserListDistrictByDepartment: async (req, res) => {
   const { department_id } = req.query;
   if (!department_id) {
@@ -188,6 +188,25 @@ getUserAttendanceByDepartment: async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 },
+
+getUserAttendanceListGP: async (req, res) => {
+  try {
+    const data = await AttendanceCountService.getUserAttendanceListGP();
+    return res.status(200).json({
+      success: true,
+      message: "Grampanchayat user attendance list fetched successfully",
+      data: data,
+    });
+  } catch (error) {
+    console.error("Error in getUserAttendanceListGrampanchayat:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch Grampanchayat attendance list",
+      error: error.message,
+    });
+  }
+},
+
 
 
 

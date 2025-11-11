@@ -13,6 +13,7 @@ router.get("/total-ps-user-counts-by-department", authMiddleware, AttendanceCoun
 
 router.get("/Get_User_List_HQ",authMiddleware,AttendanceCountController.getUserAttendanceListHQ)
 router.get("/Get_User_List_PS",authMiddleware,AttendanceCountController.getUserAttendanceListDistrict)
+router.get("/Get_User_List_Grampanchayat",AttendanceCountController.getUserAttendanceListGP)
 
 
 router.get("/Get_User_List_HQ_By_Department",authMiddleware,AttendanceCountController.getUserListHQByDepartment)
